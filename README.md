@@ -4,7 +4,7 @@
 
 Step 1: Install Wordpress plugin
 
-Install the Wordpress plugin as usual. More information about installing plugins in Wordpress - https://codex.wordpress.org/Managing_Plugins#Installing_Plugins
+Install this Wordpress plugin as usual. More information about installing plugins in Wordpress - https://codex.wordpress.org/Managing_Plugins#Installing_Plugins
 
 Step 2: Install CiviCRM extension
 

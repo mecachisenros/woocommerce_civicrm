@@ -1,6 +1,6 @@
 # WooCommerce CiviCRM Integration
 
-Installation
+## Installation
 
 Step 1: Install Wordpress plugin
 
@@ -11,11 +11,11 @@ Step 2: Install CiviCRM extension
 Install https://github.com/veda-consulting/uk.co.vedaconsulting.module.woocommercecivicrm as CiviCRM extension to view WooCommerce orders in a CiviCRM tab. More information about manually installing extensions in CiviCRM - http://wiki.civicrm.org/confluence/display/CRMDOC/Extensions#Extensions-Installinganewextension
 NOTE: The tab displays orders only for contacts having a related Wordpress user record.
 
-Configuration
+## Configuration
 
 Configure the integration settings in WP Menu >> WooCommerce CiviCRM Settings
 
-Functionality
+## Functionality
 
 1. Woocommerce orders are created as contributions in CiviCRM. Line items are not created in the contribution, but the product name x quantity are included in the 'source' field of the contribution
 2. Salex tax (VAT) & Shipping cost are saved as custom data against contribution

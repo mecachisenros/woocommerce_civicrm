@@ -250,7 +250,7 @@ function _woocommerce_civicrm_add_update_contact($cid, $order) {
     //if ($contact_status == 'new' && !$contact_info['values'][$cid]['first_name'] && !$contact_info['values'][$cid]['last_name']) {
       try {
         $result = civicrm_api3('contact', 'create', $contact);
-        $cid = reset(array_keys($result['values']));
+        $cid = $result['id'];
         $name = trim($contact['display_name']);
         $name = !empty($name) ? $contact['display_name'] : $cid;
         $admin_url = get_admin_url();

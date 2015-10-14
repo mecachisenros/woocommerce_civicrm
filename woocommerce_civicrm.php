@@ -425,7 +425,7 @@ function _woocommerce_civicrm_add_contribution($cid, &$order) {
     "$sales_tax_field_id" => $sales_tax,
     "$shipping_cost_field_id" => $shipping_cost,
   );
-  } esle{
+  } else{
 	$params = array(
     'contact_id' => $cid,
     'total_amount' => $rounded_total,

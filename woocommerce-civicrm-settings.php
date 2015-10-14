@@ -20,6 +20,7 @@ Below are the values used when creating contribution/address in CiviCRM. <br /><
     </tr>
     <!-- Add extra Financial Type to handle purchases with VAT (TAX) -->
     <tr>
+    <td><label for="awesome_text">Contribution type VAT (Tax)</label></td>	
     <td>
     	<select name="woocommerce_civicrm_financial_type_vat_id" id="woocommerce_civicrm_financial_type_vat_id" class ="required">
         <?php                        

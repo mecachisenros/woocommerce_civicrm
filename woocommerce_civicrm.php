@@ -52,6 +52,15 @@ function woocommerce_civicrm_settings_page_display() {
   foreach($financialTypesResult['values'] as $key => $value) {
     $financialTypes[$value['id']] = $value['name'];
   }
+  
+  // Get Financial types for VAT handeling
+  $financialTypesVat = array();
+  $financialTypesVatResult = civicrm_api3('FinancialType', 'get', array(
+    'sequential' => 1,
+  ));
+  foreach($financialTypesVatResult['values'] as $key => $value) {
+    $financialTypesVat[$value['id']] = $value['name'];
+  }
 
   // Get address types
   $addressTypes = array();
@@ -60,6 +69,7 @@ function woocommerce_civicrm_settings_page_display() {
 
   $fields = array(
     'woocommerce_civicrm_financial_type_id',
+    'woocommerce_civicrm_financial_type_vat_id', // Contribution type VAT
     'woocommerce_civicrm_billing_location_type_id',
     'woocommerce_civicrm_shipping_location_type_id',
     );

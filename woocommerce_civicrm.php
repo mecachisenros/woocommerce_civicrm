@@ -12,14 +12,12 @@ add_action('admin_init', 'woocommerce_civicrm_check_parent_plugin');
 add_action('woocommerce_checkout_order_processed', 'woocommerce_civicrm_action_order', 10, 1);
 add_action('admin_menu', 'woocommerce_civicrm_settings_page');
 
-// Order status update
-//add_action('woocommerce_order_status_completed', 'woocommerce_civicrm_update_order');
-//add_action('woocommerce_order_status_pending', 'woocommerce_civicrm_update_order');
-//add_action('woocommerce_order_status_failed', 'woocommerce_civicrm_update_order');
-//add_action('woocommerce_order_status_on-hold', 'woocommerce_civicrm_update_order');
-//add_action('woocommerce_order_status_processing', 'woocommerce_civicrm_update_order');
-//add_action('woocommerce_order_status_refunded', 'woocommerce_civicrm_update_order');
-//add_action('woocommerce_order_status_cancelled', 'woocommerce_civicrm_update_order');
+//action to fire on order status change hook
+add_action( 'woocommerce_order_status_changed', 'woocommerce_civicrm_change_order', 99, 3 );
+
+function woocommerce_civicrm_change_order( $order_id, $old_status, $new_status ) {
+    woocommerce_civicrm_update_order($order_id); 
+}
 
 function woocommerce_civicrm_settings_page() {
     $page_title = 'WooCommerce CiviCRM Settings';

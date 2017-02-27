@@ -164,6 +164,18 @@ function woocommerce_civicrm_update_order($order_id) {
   }
   catch (Exception $e) {
     CRM_Core_Error::debug_log_message('Not able to find contribution');
+    $cid = _woocommerce_civicrm_get_cid($order);
+    if ($cid === FALSE) {
+  	CRM_Core_Error::debug_log_message('Not able to find contact, giving up');
+    	return;
+    }
+    // Add the contribution record.
+    if (_woocommerce_civicrm_add_contribution($cid, $order)) {
+  	CRM_Core_Error::debug_log_message('Contribution added');
+    } else {
+  	CRM_Core_Error::debug_log_message("Adding contribution failed for $cid and {$order->id}");
+    }
+    // we're done here
     return;
   }
 
@@ -326,6 +338,9 @@ function _woocommerce_civicrm_add_update_contact($cid, $order) {
           
           // Get country id
           $country_id = _woocommerce_civicrm_get_country_id($order->{$address_type . '_country'});
+          
+          // Get state_province_id
+          $state_province_id = _woocommerce_civicrm_get_state_province_id($order->{$address_type . '_state' },$country_id);
 
           $address = array(
             'location_type_id'       => ${'civicrm_' . $address_type},
@@ -335,6 +350,7 @@ function _woocommerce_civicrm_add_update_contact($cid, $order) {
             'street_address'         => $order->{$address_type . '_address_1'},
             'supplemental_address_1' => $order->{$address_type . '_address_2'},
             'country'                => $country_id,
+            'state_province_id'	     => $state_province_id,
             'contact_id'             => $cid,
           );
           
@@ -384,16 +400,17 @@ function _woocommerce_civicrm_add_contribution($cid, &$order) {
 
   $sales_tax_field_id = 'custom_' . get_option('woocommerce_civicrm_sales_tax_field_id', '');
   $shipping_cost_field_id = 'custom_' . get_option('woocommerce_civicrm_shipping_cost_field_id', '');
-
+  
+  // @FIXME Landmine. CiviCRM doesn't seem to accept financial values
+  // with precision greater than 2 digits after the decimal.
+  // Need to call calculate_totals() here otherwise the order_total may be zero
+  $rounded_total = round($order->calculate_totals() * 100) / 100;
+	
   $sales_tax = $order->get_total_tax();
   $sales_tax = number_format($sales_tax, 2);
 
   $shipping_cost = $order->order_shipping;
   $shipping_cost = number_format($shipping_cost, 2);
-
-	// @FIXME Landmine. CiviCRM doesn't seem to accept financial values
-  // with precision greater than 2 digits after the decimal.
-  $rounded_total = round($order->order_total * 100) / 100;
   
   // Couldn't figure where Woocommerce stores the subtotal (ie no TAX price)
   // So for now...
@@ -655,6 +672,35 @@ function _woocommerce_civicrm_get_country_id($woocommerce_country) {
     // Default to GB, if empty
     return 1226;
   }
+}
+
+/*
+ * Function to get CiviCRM state_province ID for Woocommerce state string
+ */
+function _woocommerce_civicrm_get_state_province_id($woocommerce_state,$country_id) {
+	$state_province_id = '';	// null hypothesis
+	if (version_compare('>=', CRM_Utils_System::version(), '4.7.15')) {
+		// if CiviCRM is >= 4.7.15 use the API
+		if ( strlen( $woocommerce_state ) < 5 ) {
+			// if a short string treat it as an abbreviation
+			$query = array( 'sequential' => 1, 'abbreviation' => $woocommerce_state, 'country_id' => $country_id );
+		} else {
+			// if not treat it as a name
+			$query = array( 'sequential' => 1, 'name' => $woocommerce_state, 'country_id' => $country_id );
+		}
+		$result = civicrm_api3( 'StateProvince', 'get', $query );
+		if ($result['is_error'] == 0) {
+			$state_province_id = $result['id'];
+		}
+	} else {
+		// FIXME unfinished code for earlier versions
+		if ( strlen( $woocommerce_state ) < 5 ) {
+			// SELECT id FROM civicrm_state_province WHERE abbreviation='$woocommerce_state' AND country_id='$country_id'
+		} else {
+			// SELECT id FROM civicrm_state_province WHERE name='$woocommerce_state' AND country_id='$country_id'
+		}
+	}
+	return $state_province_id;
 }
 
 /*

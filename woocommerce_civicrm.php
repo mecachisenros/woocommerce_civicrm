@@ -50,6 +50,15 @@ function woocommerce_civicrm_settings_page_display() {
   foreach($financialTypesResult['values'] as $key => $value) {
     $financialTypes[$value['id']] = $value['name'];
   }
+  
+  // Get Financial types for VAT handeling
+  $financialTypesVat = array();
+  $financialTypesVatResult = civicrm_api3('FinancialType', 'get', array(
+    'sequential' => 1,
+  ));
+  foreach($financialTypesVatResult['values'] as $key => $value) {
+    $financialTypesVat[$value['id']] = $value['name'];
+  }
 
   // Get address types
   $addressTypes = array();
@@ -58,6 +67,7 @@ function woocommerce_civicrm_settings_page_display() {
 
   $fields = array(
     'woocommerce_civicrm_financial_type_id',
+    'woocommerce_civicrm_financial_type_vat_id', // Contribution type VAT
     'woocommerce_civicrm_billing_location_type_id',
     'woocommerce_civicrm_shipping_location_type_id',
     );
@@ -384,9 +394,36 @@ function _woocommerce_civicrm_add_contribution($cid, &$order) {
 	// @FIXME Landmine. CiviCRM doesn't seem to accept financial values
   // with precision greater than 2 digits after the decimal.
   $rounded_total = round($order->order_total * 100) / 100;
+  
+  // Couldn't figure where Woocommerce stores the subtotal (ie no TAX price)
+  // So for now...
+  $rounded_subtotal = $rounded_total - $sales_tax;
 
   $contribution_type_id = get_option('woocommerce_civicrm_financial_type_id', 1);
-
+  $contribution_type_vat_id = get_option('woocommerce_civicrm_financial_type_vat_id', 1); // Get the VAT Financial type
+  
+  // If the order has VAT (Tax) use VAT Fnancial type
+  if($sales_tax != 0)){
+  		$params = array(
+    'contact_id' => $cid,
+    'total_amount' => $rounded_subtotal,
+    // Need to be set in admin page
+    'contribution_type_id' => $contribution_type_vat_id,
+    'payment_instrument_id' => _woocommerce_civicrm_map_payment_instrument($order->payment_method),
+    'non_deductible_amount' => 00.00,
+    'fee_amount' => 00.00,
+    'total_amount' => $rounded_subtotal,
+    //'net_amount' => $order->get_subtotal(),
+    'trxn_id' => $txn_id,
+    'invoice_id' => $invoice_id,
+    'source' => _woocommerce_civicrm_create_detail_string($order),
+    'receive_date' => 'now',
+    'contribution_status_id' => _woocommerce_civicrm_map_contribution_status($order->post_status),
+    'note' => _woocommerce_civicrm_create_detail_string($order),
+    "$sales_tax_field_id" => $sales_tax,
+    "$shipping_cost_field_id" => $shipping_cost,
+  );
+  } else{
 	$params = array(
     'contact_id' => $cid,
     'total_amount' => $rounded_total,
@@ -406,6 +443,7 @@ function _woocommerce_civicrm_add_contribution($cid, &$order) {
     "$sales_tax_field_id" => $sales_tax,
     "$shipping_cost_field_id" => $shipping_cost,
   );
+  }
   try {
     $contribution = civicrm_api3('Contribution', 'create', $params);
 

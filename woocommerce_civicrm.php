@@ -420,7 +420,7 @@ function _woocommerce_civicrm_add_contribution($cid, &$order) {
   $contribution_type_vat_id = get_option('woocommerce_civicrm_financial_type_vat_id', 1); // Get the VAT Financial type
   
   // If the order has VAT (Tax) use VAT Fnancial type
-  if($sales_tax != 0)){
+  if($sales_tax != 0){
   		$params = array(
     'contact_id' => $cid,
     'total_amount' => $rounded_subtotal,

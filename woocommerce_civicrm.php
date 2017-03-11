@@ -361,10 +361,13 @@ function _woocommerce_civicrm_add_update_contact($cid, $order) {
             // @TODO Don't create if exact match of another - should
             // we make 'exact match' configurable.
             elseif (
-              $existing['street_address'] == $address['street_address']
-              && CRM_Utils_Array::value('supplemental_address_1', $existing) == CRM_Utils_Array::value('supplemental_address_1', $address)
-              && $existing['city'] == $address['city']
-              && $existing['postal_code'] == $address['postal_code']
+              // Don't use '==' comparison.  
+              // See http://stackoverflow.com/questions/3333353/string-comparison-using-vs-strcmp
+	      // Using case-insensitive compare
+              strcasecmp($existing['street_address'],$address['street_address']) === 0
+              && strcasecmp(CRM_Utils_Array::value('supplemental_address_1', $existing),CRM_Utils_Array::value('supplemental_address_1', $address)) === 0
+              && strcasecmp($existing['city'],$address['city']) === 0
+              && strcasecmp($existing['postal_code'],$address['postal_code']) === 0
             ) {
               $address_exists = TRUE;
             }
@@ -389,7 +392,7 @@ function _woocommerce_civicrm_add_update_contact($cid, $order) {
 }
 
 /**
- * Fuction to add a contribution record.
+ * Function to add a contribution record.
  */
 function _woocommerce_civicrm_add_contribution($cid, &$order) {
 
@@ -678,29 +681,31 @@ function _woocommerce_civicrm_get_country_id($woocommerce_country) {
  * Function to get CiviCRM state_province ID for Woocommerce state string
  */
 function _woocommerce_civicrm_get_state_province_id($woocommerce_state,$country_id) {
-	$state_province_id = '';	// null hypothesis
-	if (version_compare('>=', CRM_Utils_System::version(), '4.7.15')) {
+	// if it is a long string, assume it is a valid name, civicrm will handle it
+	if ( strlen( $woocommerce_state ) > 3 ) {
+		// a 4-character string could be a valid state name: Utah
+		// CRM_Core_Error::debug_log_message("Using state province = $woocommerce_state");
+		return $woocommerce_state;
+	}
+	// otherwise assume it is an abbreviation
+	$id = '';	// null hypothesis
+	if (version_compare(CRM_Utils_System::version(),'4.7.15','>=')) {
 		// if CiviCRM is >= 4.7.15 use the API
-		if ( strlen( $woocommerce_state ) < 5 ) {
-			// if a short string treat it as an abbreviation
-			$query = array( 'sequential' => 1, 'abbreviation' => $woocommerce_state, 'country_id' => $country_id );
-		} else {
-			// if not treat it as a name
-			$query = array( 'sequential' => 1, 'name' => $woocommerce_state, 'country_id' => $country_id );
-		}
-		$result = civicrm_api3( 'StateProvince', 'get', $query );
+		$query = array( 'sequential' => 1, 'abbreviation' => $woocommerce_state, 'country_id' => $country_id );
+		$result = civicrm_api3( 'StateProvince', 'getsingle', $query );
 		if ($result['is_error'] == 0) {
-			$state_province_id = $result['id'];
+			// CRM_Core_Error::debug_log_message("state province id found from API = {$result['id']}");
+			return $result['id'];
 		}
 	} else {
-		// FIXME unfinished code for earlier versions
-		if ( strlen( $woocommerce_state ) < 5 ) {
-			// SELECT id FROM civicrm_state_province WHERE abbreviation='$woocommerce_state' AND country_id='$country_id'
-		} else {
-			// SELECT id FROM civicrm_state_province WHERE name='$woocommerce_state' AND country_id='$country_id'
-		}
+		// query DB for earlier versions
+		$sql = "SELECT id FROM civicrm_state_province WHERE abbreviation='$woocommerce_state' AND country_id='$country_id'";
+		$id = CRM_Core_Dao::singleValueQuery($sql);
+		// CRM_Core_Error::debug_log_message("state province id found from query = $id");
+		return $id;
 	}
-	return $state_province_id;
+	CRM_Core_Error::debug_log_message("state province not found");
+	return $id;
 }
 
 /*

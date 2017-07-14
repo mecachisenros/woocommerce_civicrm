@@ -162,6 +162,6 @@
      * @param int $contact_id The CiviCRM contact_id
      * @param string $address The CiviCRM adress edited
      */
-    do_action( 'woocommerce_civicrm_wc_address_updated', $civi_contact['contact_id'], $create_address );
+    do_action( 'woocommerce_civicrm_civi_address_updated', $civi_contact['contact_id'], $create_address );
   }
 }

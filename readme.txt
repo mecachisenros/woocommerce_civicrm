@@ -58,7 +58,7 @@ Install https://github.com/veda-consulting/uk.co.vedaconsulting.module.woocommer
 * Added 'woocommerce_civicrm_address_map' filter
 * Added 'woocommerce_civicrm_mapped_location_types' filter
 * Added 'woocommerce_civicrm_wc_address_updated' action
-* Added 'woocommerce_civicrm_wc_address_updated' action
+* Added 'woocommerce_civicrm_civi_address_updated' action
 
 
 = 1.0 =

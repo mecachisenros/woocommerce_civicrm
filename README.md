@@ -37,4 +37,4 @@ There are a few hooks available
 * `woocommerce_civicrm_address_map` filter
 * `woocommerce_civicrm_mapped_location_types` filter
 * `woocommerce_civicrm_wc_address_update` action
-* `woocommerce_civicrm_wc_address_updated` action
+* `woocommerce_civicrm_civi_address_updated` action

@@ -41,7 +41,7 @@
 
  		$order = new WC_Order( $order_id );
 
-		$cid = $this->civicrm_get_cid ( $order );
+		$cid = Woocommerce_CiviCRM_Helper::$instance->civicrm_get_cid( $order );
   	if ( $cid === FALSE ) {
     	return;
   	}
@@ -103,56 +103,6 @@
 	  }
 
 	}
-
- 	/**
- 	 * Get CiviCRM contact_id.
- 	 *
- 	 * @since 2.0
- 	 * @param object $order The order object
- 	 * @return int $cid The contact_id
- 	 */
- 	public function civicrm_get_cid( $order ){
-
-		if ( is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-				$current_user,
-				$current_user->ID,
-				$current_user->user_email,
-				'WordPress', FALSE, 'Individual'
-			);
-
-			if ( ! is_object( $match ) ) {
-      	return FALSE;
-    	}
-
-    	return $match->contact_id;
-		}
-
-	  // The customer is anonymous.  Look in the CiviCRM contacts table for a
-	  // contact that matches the billing email.
-	  $params = array(
-	    'email' => $order->get_billing_email(),
-	    'return.contact_id' => TRUE,
-	    'sequential' => 1,
-	  );
-
-	  try{
-	    $contact = civicrm_api3( 'Contact', 'get', $params );
-	  }
-	  catch ( Exception $e ) {
-	    return FALSE;
-	  }
-
-	  // No matches found, so we will need to create a contact.
-	  if ( count( $contact ) == 0 ) {
-	    return 0;
-	  }
-	  $cid = $contact['values'][0]['id'];
-
-	  return $cid;
-
- 	}
 
  	/**
  	 * Create or update contact.
@@ -246,15 +196,14 @@
         return FALSE;
     }
 
-    $civicrm_billing = get_option( 'woocommerce_civicrm_billing_location_type_id', 5 );
-    $civicrm_shipping = get_option( 'woocommerce_civicrm_shipping_location_type_id', 1 );
+    $civicrm_billing = get_option( 'woocommerce_civicrm_billing_location_type_id' );
+    $civicrm_shipping = get_option( 'woocommerce_civicrm_shipping_location_type_id' );
 
     try {
       $existing_addresses = civicrm_api3( 'Address', 'get', array( 'contact_id' => $cid ) );
       $existing_addresses = $existing_addresses['values'];
       $existing_phones = civicrm_api3( 'Phone', 'get', array( 'contact_id' => $cid ) );
       $existing_phones = $existing_phones['values'];
-      $shipping_address = $billing_address = array( 'contact_id' => $cid );
       $address_types = array( 'billing', 'shipping' );
 
       foreach( $address_types as $address_type ){
@@ -290,9 +239,6 @@
         if( ! empty( $order->{'get_' . $address_type . '_address_1'}() )
         	&& ! empty( $order->{'get_' . $address_type . '_postcode'}() ) ){
 
-          // Get country id
-          $country_id = $this->get_country_id( $order->{'get_' . $address_type . '_country'}() );
-
           $address = array(
             'location_type_id'       => ${'civicrm_' . $address_type},
             'city'                   => $order->{'get_' . $address_type . '_city'}(),
@@ -300,7 +246,8 @@
             'name'                   => $order->{'get_' . $address_type . '_company'}(),
             'street_address'         => $order->{'get_' . $address_type . '_address_1'}(),
             'supplemental_address_1' => $order->{'get_' . $address_type . '_address_2'}(),
-            'country'                => $country_id,
+            'country'                => Woocommerce_CiviCRM_Helper::$instance->get_civi_country_id( $order->{'get_' . $address_type . '_country'}() ),
+            'state_province_id'      => Woocommerce_CiviCRM_Helper::$instance->get_civi_state_province_id( $order->{'get_' . $address_type . '_state'}() ),
             'contact_id'             => $cid,
           );
 
@@ -349,8 +296,8 @@
 
 	  $this->create_custom_contribution_fields();
 
-	  $sales_tax_field_id = 'custom_' . get_option( 'woocommerce_civicrm_sales_tax_field_id', '' );
-	  $shipping_cost_field_id = 'custom_' . get_option( 'woocommerce_civicrm_shipping_cost_field_id', '' );
+	  $sales_tax_field_id = 'custom_' . get_option( 'woocommerce_civicrm_sales_tax_field_id' );
+	  $shipping_cost_field_id = 'custom_' . get_option( 'woocommerce_civicrm_shipping_cost_field_id' );
 
 	  $sales_tax = $order->get_total_tax();
 	  $sales_tax = number_format( $sales_tax, 2 );
@@ -366,8 +313,8 @@
 	  // So for now...
 	  $rounded_subtotal = $rounded_total - $sales_tax;
 
-	  $contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id', 1 );
-	  $contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id', 1 ); // Get the VAT Financial type
+	  $contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
+	  $contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type
 
 	  // If the order has VAT (Tax) use VAT Fnancial type
 	  if( $sales_tax != 0 ){
@@ -429,6 +376,7 @@
  	/**
 	 * Maps Woocommerce payment method to CiviCRM payment instrument.
 	 *
+   * @since 2.0
 	 * @param string $payment_method Woocommerce payment method
 	 * @return int $id CiviCRM payment processor ID
 	 */
@@ -506,32 +454,6 @@
 	}
 
 	/**
-	 * Function to get CiviCRM country ID for Woocommerce country ISO Code.
-	 *
-	 * @since 2.0
-	 * @param string $woocommerce_country WooCommerce contry ISO code
-	 * @return int $id CiviCRM Country id
-	 */
-	public function get_country_id( $woocommerce_country ){
-
-  	if( empty( $woocommerce_country ) ){
-    	return;
-  	}
-
-  	$result = civicrm_api3( 'Country', 'getsingle', array(
-    	'sequential' => 1,
-    	'iso_code' => $woocommerce_country,
-  	));
-
-  	if( $result['id'] ){
-    	return $result['id'];
-  	} else {
-    	// Default to GB, if empty
-    	return 1226;
-  	}
-	}
-
-	/**
 	 * Function to create sales tax and shipping cost custom fields for contribution.
 	 *
 	 * @since 2.0
@@ -586,5 +508,4 @@
   	$shipping_field = civicrm_api3( 'Custom_field', 'create', $params );
   	add_option( 'woocommerce_civicrm_shipping_cost_field_id', $shipping_field['id'] );
 	}
-
- }
+}

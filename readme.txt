@@ -18,6 +18,7 @@ Integrates CiviCRM with Woocommerce.
 4. If not logged in, the plugin tries to find the contact record in CiviCRM using Dedupe rules and the contribution is created against the found contact record.
 5. If the contact does not exist, a new contact record is created in CiviCRM and the contribution is created against the newly created contact record.
 6. Related contact record link is added to the Woocommerce order as notes.
+7. Option to sync CiviCRM and Woocommerce address, if a user edits his/hers address (only address, not billing phone/email) through the Woocommerce Account >> Edit Address page, CiviCRM profile, or through CiviCRM backoffice, the addresses will be updated in both CiviCRM and Woocommerce.
 
 ### Requirements
 
@@ -54,6 +55,11 @@ Install https://github.com/veda-consulting/uk.co.vedaconsulting.module.woocommer
 * Added 'woocommerce_civicrm_contribution_update_params' filter
 * Added 'woocommerce_civicrm_financial_types_params' filter
 * Added 'woocommerce_civicrm_admin_settings_fields' filter
+* Added 'woocommerce_civicrm_address_map' filter
+* Added 'woocommerce_civicrm_mapped_location_types' filter
+* Added 'woocommerce_civicrm_wc_address_updated' action
+* Added 'woocommerce_civicrm_wc_address_updated' action
+
 
 = 1.0 =
 

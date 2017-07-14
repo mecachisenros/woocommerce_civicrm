@@ -35,7 +35,7 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.0
 	 * @access private
-	 * @var object $settings_page The Settings Tab management object
+	 * @var object $settings_tab The Settings Tab management object
 	 */
 	private static $settings_tab;
 
@@ -48,6 +48,26 @@ class Woocommerce_CiviCRM {
 	 * @var object $manager The plugin functionality management object
 	 */
 	private static $manager;
+
+    /**
+	 * The Sync management object.
+	 *
+	 * Encapsulates the Woocommerce and CiviCRM address synchrinzation.
+	 * @since 2.0
+	 * @access private
+	 * @var object $sync The Sync management object
+	 */
+	private static $sync;
+
+	/**
+	 * The Helper management object.
+	 *
+	 * Encapsulates the Helper management object.
+	 * @since 2.0
+	 * @access private
+	 * @var object $helper The Helper management object
+	 */
+	public static $helper;
 
   /**
 	 * Returns a single instance of this object when called.
@@ -121,22 +141,30 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function include_files() {
+        // Include Woocommerce CiviCRM Helper class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-helper.php';
 		// Include Woocommerce settings tab class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-settings-tab.php';
 		// Include Woocommerce functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-manager.php';
+        // Include Sync functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-address.php';
 	}
 
 	/**
 	 * Set up plugin objects.
 	 *
-	 * @since 20
+	 * @since 2.0
 	 */
 	private function setup_objects() {
+        // init helper instance
+		self::$helper = Woocommerce_CiviCRM_Helper::instance();
 		// init settings page
 		self::$settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
 		// init manager
 		self::$manager = new Woocommerce_CiviCRM_Manager;
+        // init address sync
+		self::$sync = new Woocommerce_CiviCRM_Sync_Address;
 	}
 
 	/**
@@ -174,7 +202,7 @@ class Woocommerce_CiviCRM {
 	public function display_woocommerce_required_notice(){
 		$class = 'notice notice-error';
 		$message = __( 'Woocommerce v3.+ must be installed and activated.', 'woocommerce-civicrm' );
-		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
 
 	/**
@@ -185,7 +213,7 @@ class Woocommerce_CiviCRM {
 	public function display_civicrm_required_notice(){
 		$class = 'notice notice-error';
 		$message = __( 'CiviCRM must be installed and activated.', 'woocommerce-civicrm' );
-		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
 
 	/**
@@ -196,7 +224,7 @@ class Woocommerce_CiviCRM {
 	public function display_civicrm_initialised_notice(){
 		$class = 'notice notice-error';
 		$message = __( 'Error - CiviCRM could not be initilised.', 'woocommerce-civicrm' );
-		printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 	}
 
 }

@@ -9,26 +9,6 @@
  class Woocommerce_CiviCRM_Settings_Tab {
 
   /**
-   * The active Financial Types.
-   *
-   * Array of key/value pairs holding the active financial types.
-   * @since 2.0
-   * @access private
-   * @var array $financial_types The financial types
-   */
-  private $financial_types;
-
-  /**
-   * The Address Location Type.
-   *
-   * Array of key/value pairs holding the address location types.
-   * @since 2.0
-   * @access private
-   * @var array $location_types The location types
-   */
-  private $location_types;
-
-  /**
 	 * Initialises this object.
    *
 	 * @since 2.0
@@ -102,26 +82,32 @@
       'woocommerce_civicrm_financial_type_id' => array(
         'name' => __( 'Contribution Type', 'woocommerce-civicrm' ),
         'type' => 'select',
-        'options' => $this->financial_types,
+        'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
         'id'   => 'woocommerce_civicrm_financial_type_id'
       ),
       'woocommerce_civicrm_financial_type_vat_id' => array(
         'name' => __( 'Contribution Type VAT (Tax)', 'woocommerce-civicrm' ),
         'type' => 'select',
-        'options' => $this->financial_types,
+        'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
         'id'   => 'woocommerce_civicrm_financial_type_vat_id'
       ),
       'woocommerce_civicrm_billing_location_type_id' => array(
         'name' => __( 'Billing Location Type', 'woocommerce-civicrm' ),
         'type' => 'select',
-        'options' => $this->location_types,
+        'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
         'id'   => 'woocommerce_civicrm_billing_location_type_id'
       ),
       'woocommerce_civicrm_shipping_location_type_id' => array(
         'name' => __( 'Shipping Location Type', 'woocommerce-civicrm' ),
         'type' => 'select',
-        'options' => $this->location_types,
+        'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
         'id'   => 'woocommerce_civicrm_shipping_location_type_id'
+      ),
+      'woocommerce_civicrm_sync_contact_address' => array(
+        'name' => __( 'Sync Contact address', 'woocommerce-civicrm' ),
+        'type' => 'checkbox',
+        'desc' => __( 'If enabled, this option will synchronize Woocommerce user address with CiviCRM\'s contact address and viceversa.', 'woocommerce-civicrm' ),
+        'id'   => 'woocommerce_civicrm_sync_contact_address'
       ),
       'section_end' => array(
         'type' => 'sectionend',
@@ -136,37 +122,6 @@
      * @param array $options The fields configuration
      */
     return apply_filters( 'woocommerce_civicrm_admin_settings_fields', $options );
-
-  }
-
-  private function get_financial_types(){
-
-    $params = array(
-      'sequential' => 1,
-      'is_active' => 1,
-    );
-
-    /**
-     * Filter Financial type params before calling the Civi's API.
-     *
-     * @since 2.0
-     * @param array $params The params to be passsed to the API
-     */
-    $financialTypesResult = civicrm_api3( 'FinancialType', 'get', apply_filters( 'woocommerce_civicrm_financial_types_params', $params ) );
-
-    $financialTypes = array();
-    foreach( $financialTypesResult['values'] as $key => $value ) {
-      $financialTypes[$value['id']] = $value['name'];
-    }
-
-    return $financialTypes;
-
-  }
-
-  private function get_address_location_types(){
-
-    $addressTypesResult = civicrm_api3( 'Address', 'getoptions', array( 'field' => 'location_type_id' ) );
-    return $addressTypesResult['values'];
 
   }
 }

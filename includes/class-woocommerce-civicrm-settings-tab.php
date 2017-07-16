@@ -14,8 +14,6 @@
 	 * @since 2.0
 	 */
   public function __construct() {
-    $this->financial_types = $this->get_financial_types();
-    $this->location_types = $this->get_address_location_types();
     $this->register_hooks();
   }
 
@@ -108,6 +106,18 @@
         'type' => 'checkbox',
         'desc' => __( 'If enabled, this option will synchronize Woocommerce user address with CiviCRM\'s contact address and viceversa.', 'woocommerce-civicrm' ),
         'id'   => 'woocommerce_civicrm_sync_contact_address'
+      ),
+      'woocommerce_civicrm_sync_contact_phone' => array(
+        'name' => __( 'Sync Contact billing phone', 'woocommerce-civicrm' ),
+        'type' => 'checkbox',
+        'desc' => __( 'If enabled, this option will synchronize Woocommerce user\'s billing phone with CiviCRM\'s contact billing phone and viceversa.', 'woocommerce-civicrm' ),
+        'id'   => 'woocommerce_civicrm_sync_contact_phone'
+      ),
+      'woocommerce_civicrm_sync_contact_email' => array(
+        'name' => __( 'Sync Contact billing email', 'woocommerce-civicrm' ),
+        'type' => 'checkbox',
+        'desc' => __( 'If enabled, this option will synchronize Woocommerce user\'s billing email with CiviCRM\'s contact billing email and viceversa.', 'woocommerce-civicrm' ),
+        'id'   => 'woocommerce_civicrm_sync_contact_email'
       ),
       'section_end' => array(
         'type' => 'sectionend',

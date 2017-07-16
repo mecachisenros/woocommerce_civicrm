@@ -52,7 +52,7 @@ class Woocommerce_CiviCRM {
     /**
 	 * The Sync management object.
 	 *
-	 * Encapsulates the Woocommerce and CiviCRM address synchrinzation.
+	 * Encapsulates the Woocommerce and CiviCRM synchrinzation objects.
 	 * @since 2.0
 	 * @access private
 	 * @var object $sync The Sync management object
@@ -141,14 +141,18 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function include_files() {
-        // Include Woocommerce CiviCRM Helper class
+    // Include Woocommerce CiviCRM Helper class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-helper.php';
 		// Include Woocommerce settings tab class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-settings-tab.php';
 		// Include Woocommerce functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-manager.php';
-        // Include Sync functionality class
+    // Include Address Sync functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-address.php';
+    // Include Phone Sync functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-phone.php';
+		// Include Email Sync functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-email.php';
 	}
 
 	/**
@@ -157,14 +161,18 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function setup_objects() {
-        // init helper instance
+    // init helper instance
 		self::$helper = Woocommerce_CiviCRM_Helper::instance();
 		// init settings page
 		self::$settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
 		// init manager
 		self::$manager = new Woocommerce_CiviCRM_Manager;
-        // init address sync
-		self::$sync = new Woocommerce_CiviCRM_Sync_Address;
+    // init address sync
+		self::$sync['address'] = new Woocommerce_CiviCRM_Sync_Address;
+    // init phone sync
+		self::$sync['phone'] = new Woocommerce_CiviCRM_Sync_Phone;
+		// init email sync
+		self::$sync['email'] = new Woocommerce_CiviCRM_Sync_Email;
 	}
 
 	/**
@@ -238,5 +246,5 @@ class Woocommerce_CiviCRM {
 function woocommerce_civicrm() {
 	return Woocommerce_CiviCRM::instance();
 }
-// init Woocommerce Civicrm
+// init Woocommerce CiviCRM
 add_action( 'init', 'woocommerce_civicrm' );

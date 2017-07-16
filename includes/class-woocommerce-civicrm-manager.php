@@ -239,6 +239,7 @@
         if( ! empty( $order->{'get_' . $address_type . '_address_1'}() )
         	&& ! empty( $order->{'get_' . $address_type . '_postcode'}() ) ){
 
+          $country_id = Woocommerce_CiviCRM_Helper::$instance->get_civi_country_id( $order->{'get_' . $address_type . '_country'}() );
           $address = array(
             'location_type_id'       => ${'civicrm_' . $address_type},
             'city'                   => $order->{'get_' . $address_type . '_city'}(),
@@ -246,8 +247,8 @@
             'name'                   => $order->{'get_' . $address_type . '_company'}(),
             'street_address'         => $order->{'get_' . $address_type . '_address_1'}(),
             'supplemental_address_1' => $order->{'get_' . $address_type . '_address_2'}(),
-            'country'                => Woocommerce_CiviCRM_Helper::$instance->get_civi_country_id( $order->{'get_' . $address_type . '_country'}() ),
-            'state_province_id'      => Woocommerce_CiviCRM_Helper::$instance->get_civi_state_province_id( $order->{'get_' . $address_type . '_state'}() ),
+            'country'                => $country_id,
+            'state_province_id'      => Woocommerce_CiviCRM_Helper::$instance->get_civi_state_province_id( $order->{'get_' . $address_type . '_state'}(), $country_id ),
             'contact_id'             => $cid,
           );
 

@@ -139,6 +139,29 @@
 
  	}
 
+  /**
+ 	 * Get CiviCRM UFMatch.
+ 	 *
+ 	 * Get UFMatch for contact_id or WP user_id.
+ 	 * @since 2.0
+ 	 * @param int $id The CiviCRM contact_id or WP user_id
+ 	 * @param string $property 'contact_id' | 'uf_id'
+ 	 * @return array $uf_match The UFMatch
+ 	 */
+ 	public function get_civicrm_ufmatch( $id, $property ){
+
+    if( ! in_array( $property, array( 'contact_id', 'uf_id' ) ) ) return FALSE;
+
+ 	  $uf_match = civicrm_api3( 'UFMatch', 'getsingle', array(
+      'sequential' => 1,
+      $property => $id,
+    ));
+
+    if( is_array( $uf_match ) && ! $uf_match['is_error'] ) return $uf_match;
+
+    return FALSE;
+  }
+
  	/**
 	 * Function to get CiviCRM country ID for Woocommerce country ISO Code.
 	 *
@@ -188,20 +211,19 @@
 	 *
 	 * @since 2.0
 	 * @param string $woocommerce_state Woocommerce state
+   * @param int $country_id CiviCRM country_id
 	 * @return int $id CiviCRM state_province_id
 	 */
-	public function get_civi_state_province_id( $woocommerce_state ){
+	public function get_civi_state_province_id( $woocommerce_state, $country_id ){
 
   	if( empty( $woocommerce_state ) ) return;
 
   	if( empty( $this->civicrm_states ) ) $this->set_civicrm_states();
 
     foreach ( $this->civicrm_states as $state_id => $state ) {
-      if( $state['abbreviation'] == $woocommerce_state ) return $state['id'];
+      if( $state['country_id'] == $country_id && $state['abbreviation'] == $woocommerce_state ) return $state['id'];
 
-      if( $state['name'] == $woocommerce_state ) return $state['id'];
-
-      return;
+      if( $state['country_id'] == $country_id && $state['name'] == $woocommerce_state ) return $state['id'];
     }
 	}
 
@@ -223,12 +245,13 @@
     $woocommerce_countries = new WC_Countries();
 
     foreach ( $woocommerce_countries->get_states() as $country => $states ) {
-      if( ! empty( $states ) && array_key_exists( $civi_state['abbreviation'], $states ) ) return $civi_state['abbreviation'];
-
-      return $civicrm_state['name'];
+      $found = array_search( $civi_state['name'], $states );
+      if( ! empty( $states ) && $found ) return $found;
     }
+    
+    return $civi_state['name'];
 	}
-	
+
   /**
    * Function to get Woocommerece CiviCRM address map.
    *

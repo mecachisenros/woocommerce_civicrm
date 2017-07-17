@@ -47,6 +47,9 @@
     if ( $op != 'edit' ) return;
 
     if ( $objectName != 'Address' ) return;
+    
+    // Abort if the address being edited is not one of the mapped ones
+    if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
     // abort if we don't have a contact_id
     if ( ! isset( $objectRef->contact_id ) ) return;
@@ -55,9 +58,6 @@
 
     // abort if we don't have a WordPress user_id
     if ( ! $cms_user ) return;
-
-    // Abort if the address being edited is not one of the mapped ones
-    if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
     // Proceed
     $address_type = array_search( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types );
@@ -112,9 +112,6 @@
 
     // abbort if sync is not enabled
     if( ! get_option( 'woocommerce_civicrm_sync_contact_address' ) ) return;
-
-    // abort if we don't have a user_id
-    if( ! $user_id ) return;
 
     $customer = new WC_Customer( $user_id );
 

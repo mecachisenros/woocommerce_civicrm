@@ -47,6 +47,9 @@
     if ( $op != 'edit' ) return;
 
     if ( $objectName != 'Phone' ) return;
+    
+    // Abort if the phone being edited is not one of the mapped ones
+    if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
     // abort if we don't have a contact_id
     if ( ! isset( $objectRef->contact_id ) ) return;
@@ -55,9 +58,6 @@
 
     // abort if we don't have a WordPress user
     if ( ! $cms_user ) return;
-
-    // Abort if the phone being edited is not one of the mapped ones
-    if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
     // Proceed
     $phone_type = array_search( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types );

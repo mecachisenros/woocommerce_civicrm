@@ -183,6 +183,8 @@ class Woocommerce_CiviCRM {
 	private function register_hooks() {
 		// use translation files
 		add_action( 'plugins_loaded', array( $this, 'enable_translation' ) );
+    // add settings link to plugin lisitng page
+		add_filter( 'plugin_action_links', array( $this, 'add_action_links' ), 10, 2 );
 	}
 
 	/**
@@ -200,6 +202,21 @@ class Woocommerce_CiviCRM {
 			false, // deprecated argument
 			dirname( plugin_basename( __FILE__ ) ) . '/languages/' // relative path to translation files
 		);
+	}
+
+  /**
+	 * Add Settings link to plugin listing page.
+	 *
+	 * @since 2.0
+	 * @param array $links The list of plugin links
+	 * @param $file The plugin file
+	 * @return $links
+	 */
+	public function add_action_links( $links, $file ) {
+		if( $file == plugin_basename( __FILE__ ) ){
+	 		$links[] = '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=woocommerce_civicrm' ) . '">' . __( 'Settings', 'woocommerce-civicrm') . '</a>';
+		}
+		return $links;
 	}
 
 	/**

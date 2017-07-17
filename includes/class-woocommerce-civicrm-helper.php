@@ -150,16 +150,18 @@
  	 */
  	public function get_civicrm_ufmatch( $id, $property ){
 
-    if( ! in_array( $property, array( 'contact_id', 'uf_id' ) ) ) return FALSE;
+    if( ! in_array( $property, array( 'contact_id', 'uf_id' ) ) ) return;
+    
+    try {
+      $uf_match = civicrm_api3( 'UFMatch', 'getsingle', array(
+        'sequential' => 1,
+        $property => $id,
+      )); 
+    } catch ( Exception $e ) {
+      CRM_Core_Error::debug_log_message( $e->getMessage() );
+    }
 
- 	  $uf_match = civicrm_api3( 'UFMatch', 'getsingle', array(
-      'sequential' => 1,
-      $property => $id,
-    ));
-
-    if( is_array( $uf_match ) && ! $uf_match['is_error'] ) return $uf_match;
-
-    return FALSE;
+    if( isset( $uf_match ) && is_array( $uf_match ) && ! $uf_match['is_error'] ) return $uf_match;
   }
 
  	/**

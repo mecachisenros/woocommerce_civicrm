@@ -21,7 +21,7 @@ if ( ! defined( 'WPINC' ) ) die;
  */
 class Woocommerce_CiviCRM {
 
-  /**
+	/**
 	 * The class instance.
 	 *
 	 * @since 2.0
@@ -69,7 +69,7 @@ class Woocommerce_CiviCRM {
 	 */
 	public static $helper;
 
-  /**
+	/**
 	 * Returns a single instance of this object when called.
 	 *
 	 * @since 2.0
@@ -109,7 +109,7 @@ class Woocommerce_CiviCRM {
 		define( 'WOOCOMMERCE_CIVICRM_PATH', plugin_dir_path( __FILE__ ) );
 	}
 
-  /**
+	/**
 	 * Check plugin dependencies.
 	 * @since 2.0
 	 * @return bool True if dependencies exist, false otherwise
@@ -135,7 +135,7 @@ class Woocommerce_CiviCRM {
 
 	}
 
-  /**
+	/**
 	 * Include plugin files.
 	 *
 	 * @since 2.0
@@ -204,7 +204,7 @@ class Woocommerce_CiviCRM {
 		);
 	}
 
-  /**
+	/**
 	 * Add Settings link to plugin listing page.
 	 *
 	 * @since 2.0
@@ -214,7 +214,7 @@ class Woocommerce_CiviCRM {
 	 */
 	public function add_action_links( $links, $file ) {
 		if( $file == plugin_basename( __FILE__ ) ){
-	 		$links[] = '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=woocommerce_civicrm' ) . '">' . __( 'Settings', 'woocommerce-civicrm') . '</a>';
+			$links[] = '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=woocommerce_civicrm' ) . '">' . __( 'Settings', 'woocommerce-civicrm') . '</a>';
 		}
 		return $links;
 	}

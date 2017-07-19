@@ -70,6 +70,16 @@ class Woocommerce_CiviCRM {
 	public static $helper;
 
 	/**
+	 * CiviCRM States/Provinces management object.
+	 *
+	 * @since 2.0
+	 * @access private
+	 * @var object $states_replacement The States replacement management object
+	 */
+	private static $states_replacement;
+
+
+	/**
 	 * Returns a single instance of this object when called.
 	 *
 	 * @since 2.0
@@ -141,18 +151,20 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function include_files() {
-    // Include Woocommerce CiviCRM Helper class
+		// Include Woocommerce CiviCRM Helper class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-helper.php';
 		// Include Woocommerce settings tab class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-settings-tab.php';
 		// Include Woocommerce functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-manager.php';
-    // Include Address Sync functionality class
+		// Include Address Sync functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-address.php';
-    // Include Phone Sync functionality class
+		// Include Phone Sync functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-phone.php';
 		// Include Email Sync functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync-email.php';
+		// Include States replacement functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-states.php';
 	}
 
 	/**
@@ -161,15 +173,17 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function setup_objects() {
-    // init helper instance
+		// init helper instance
 		self::$helper = Woocommerce_CiviCRM_Helper::instance();
 		// init settings page
 		self::$settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
 		// init manager
 		self::$manager = new Woocommerce_CiviCRM_Manager;
-    // init address sync
+		// init states replacement
+		self::$states_replacement = new Woocommerce_CiviCRM_States;
+		// init address sync
 		self::$sync['address'] = new Woocommerce_CiviCRM_Sync_Address;
-    // init phone sync
+		// init phone sync
 		self::$sync['phone'] = new Woocommerce_CiviCRM_Sync_Phone;
 		// init email sync
 		self::$sync['email'] = new Woocommerce_CiviCRM_Sync_Email;

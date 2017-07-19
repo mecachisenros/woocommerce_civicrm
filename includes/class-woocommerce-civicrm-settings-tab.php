@@ -119,6 +119,12 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'desc' => __( 'If enabled, this option will synchronize Woocommerce user\'s billing email with CiviCRM\'s contact billing email and viceversa.', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_sync_contact_email'
 			),
+			'woocommerce_civicrm_replace_woocommerce_states' => array(
+				'name' => __( 'Replace Woocommerce States', 'woocommerce-civicrm' ),
+				'type' => 'checkbox',
+				'desc' => __( 'WARNING, possible data loss!! If enabled, this option will replace Woocommerce\'s States/Counties with CiviCRM\'s States/Provinces, you might lose any existing State/County data for existing Customers.', 'woocommerce-civicrm' ),
+				'id'   => 'woocommerce_civicrm_replace_woocommerce_states'
+      ),
 			'section_end' => array(
 				'type' => 'sectionend',
 				'id' => 'woocommerce_civicrm_section_end'

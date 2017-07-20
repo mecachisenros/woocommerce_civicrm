@@ -122,7 +122,7 @@ class Woocommerce_CiviCRM_Settings_Tab {
 			'woocommerce_civicrm_replace_woocommerce_states' => array(
 				'name' => __( 'Replace Woocommerce States', 'woocommerce-civicrm' ),
 				'type' => 'checkbox',
-				'desc' => __( 'WARNING, possible data loss!! If enabled, this option will replace Woocommerce\'s States/Counties with CiviCRM\'s States/Provinces, you might lose any existing State/County data for existing Customers.', 'woocommerce-civicrm' ),
+				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Counties with CiviCRM\'s States/Provinces, you WILL lose any existing State/County data for existing Customers. Any Woocommerce Settings that relay on State/County will have te be reconfigured.', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_replace_woocommerce_states'
       ),
 			'section_end' => array(

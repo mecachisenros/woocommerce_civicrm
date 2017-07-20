@@ -18,8 +18,8 @@ NOTE: The tab displays orders only for contacts having a related Wordpress user 
 Configure the integration settings in Woocommerce Menu >> Settings >> CiviCRM (Tab)
 Direct URL: https://example.com/wp-admin/admin.php?page=wc-settings&tab=woocommerce_civicrm
 
-![Woocommerce Civicrm Settings](./screenshots/settings.jpg)
-
+![Woocommerce CiviCRM Settings](./screenshots/settings.jpg)
+![Woocommerce CiviCRM Settings 2](./screenshots/settings2.jpg)
 ## Functionality
 
 1. Woocommerce orders are created as contributions in CiviCRM. Line items are not created in the contribution, but the product name x quantity are included in the 'source' field of the contribution
@@ -29,6 +29,7 @@ Direct URL: https://example.com/wp-admin/admin.php?page=wc-settings&tab=woocomme
 5. If the contact does not exist, a new contact record is created in CiviCRM and the contribution is created against the newly created contact record.
 6. Related contact record link is added to the Woocommerce order as notes.
 7. Option to sync CiviCRM and Woocommerce address, billing phone, and billing email. If a user edits his/hers address, billing phone, or billing email through the Woocommerce Account >> Edit Address page, CiviCRM profile, or through CiviCRM's backoffice, the data will be updated in both CiviCRM and Woocommerce.
+8. Option to replace Woocommerce's States/Counties list with CiviCRM's State/Province list. (**WARNING!!!** Enabling this option in an exiting Woocommerce instance will cause **State/County data loss** for **exiting Customers** and **Woocommerce settings** that relay on those.)
 
 ## Developers
 There are a few hooks available

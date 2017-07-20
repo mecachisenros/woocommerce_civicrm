@@ -19,6 +19,7 @@ Integrates CiviCRM with Woocommerce.
 5. If the contact does not exist, a new contact record is created in CiviCRM and the contribution is created against the newly created contact record.
 6. Related contact record link is added to the Woocommerce order as notes.
 7. Option to sync CiviCRM and Woocommerce address, billing phone, and billing email. If a user edits his/hers address, billing phone, or billing email through the Woocommerce Account >> Edit Address page, CiviCRM profile, or through CiviCRM's backoffice, the data will be updated in both CiviCRM and Woocommerce.
+8. Option to replace Woocommerce's States/Counties list with CiviCRM's State/Province list. (WARNING!!! Enabling this option in an exiting Woocommerce instance will cause State/Couny data loss for exiting Customers and Woocommerce settings that relay on those.)
 
 ### Requirements
 
@@ -51,6 +52,10 @@ Install https://github.com/veda-consulting/uk.co.vedaconsulting.module.woocommer
 * Plugin refactored
 * Moved Settings page to Woocommerce -> Settings -> CiviCRM (Tab)
 * Added translation support
+* Added option to sync Customer/Contact address
+* Added option to sync Customer/Contact billing phone
+* Added option to sync Customer/Contact billing email
+* Added option to replace Woocommerce State/County list with CiviCRM State/Province list
 * Added 'woocommerce_civicrm_contribution_create_params' filter
 * Added 'woocommerce_civicrm_contribution_update_params' filter
 * Added 'woocommerce_civicrm_financial_types_params' filter

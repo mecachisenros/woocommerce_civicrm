@@ -18,12 +18,24 @@ class Woocommerce_CiviCRM_States {
 	public $replace = false;
 
 	/**
+	 * CiviCRM Countries.
+	 *
+	 * Array holding CiviCRM country list in the form of array( 'country_id' => 'is_code' )
+	 * @since 2.0
+	 * @access public
+	 * @var array $countries The CiviCRM countries
+	 */
+	public $civicrm_countries = array();
+
+
+	/**
 	 * Initialises this object.
 	 *
 	 * @since 2.0
 	 */
 	public function __construct() {
 		$this->replace = Woocommerce_CiviCRM_Helper::$instance->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
+		$this->civicrm_countries = $this->get_civicrm_countries();
 		$this->register_hooks();
 	}
 
@@ -51,9 +63,31 @@ class Woocommerce_CiviCRM_States {
     
 		$new_states = array();
 		foreach ( Woocommerce_CiviCRM_Helper::$instance->civicrm_states as $state_id => $state ) {
-			$new_states[ Woocommerce_CiviCRM_Helper::$instance->get_civi_country_iso_code( $state['country_id'] ) ][ $state['abbreviation'] ] = $state['name'];
+			$new_states[ $this->civicrm_countries[ $state['country_id'] ] ][ $state['abbreviation'] ] = $state['name'];
 		}
     
 		return $new_states;
+	}
+	
+	/**
+	 * Function to get CiviCRM countries.
+	 *
+	 * @since 2.0
+	 * @return array $civicrm_countries The CiviCRM country list
+	 */
+	public function get_civicrm_countries(){
+		if( ! empty( $this->civicrm_countries ) ) return $this->civicrm_countries;
+		
+			$countries = civicrm_api3( 'Country', 'get', array(
+				'sequential' => 1,
+				'options' => array( 'limit' => 0 ),
+			));
+
+			$civicrm_countries = array();
+			foreach( $countries['values'] as $key => $country ){
+				$civicrm_countries[$country['id']] = $country['iso_code']; 
+			}
+		
+			return $civicrm_countries;
 	}
 }

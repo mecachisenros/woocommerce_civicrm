@@ -22,6 +22,15 @@ if ( ! defined( 'WPINC' ) ) die;
 class Woocommerce_CiviCRM {
 
 	/**
+	 * Plugin.
+	 *
+	 * @since 2.0
+	 * @access protected
+	 * @var $plugin
+	 */
+	protected static $plugin;
+
+	/**
 	 * The class instance.
 	 *
 	 * @since 2.0
@@ -125,8 +134,9 @@ class Woocommerce_CiviCRM {
 	 * @return bool True if dependencies exist, false otherwise
 	 */
 	private function check_dependencies() {
+		self::$plugin = plugin_basename( __FILE__ );
 		// Bail if Woocommerce is not available
-		if ( ! defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3', '>=' ) ){
+		if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
 			add_action( 'admin_notices', array( $this, 'display_woocommerce_required_notice' ) );
 			return false;
 		}
@@ -239,9 +249,8 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	public function display_woocommerce_required_notice(){
-		$class = 'notice notice-error';
-		$message = __( 'Woocommerce v3.+ must be installed and activated.', 'woocommerce-civicrm' );
-		sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		deactivate_plugins( self::$plugin );
+		wp_die( '<h1>Ooops</h1><p><strong>Woocommerce CiviCRM integration</strong> requires <strong>Woocommerce</strong> plugin installed and activated.<br/> This plugin has been deactivated! Please activate <strong>Woocommerce</strong> and try again.<br/><br/>Back to the WordPress <a href="' . get_admin_url( null, 'plugins.php' ) . '">plugins page</a>.</p>' );
 	}
 
 	/**
@@ -250,9 +259,8 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	public function display_civicrm_required_notice(){
-		$class = 'notice notice-error';
-		$message = __( 'CiviCRM must be installed and activated.', 'woocommerce-civicrm' );
-		sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		deactivate_plugins( self::$plugin );
+		wp_die( '<h1>Ooops</h1><p><strong>Woocommerce CiviCRM Integration</strong> requires <strong>CiviCRM</strong> plugin installed and activated.<br/> This plugin has been deactivated! Please activate <strong>CiviCRM</strong> and try again.<br/><br/>Back to the WordPress <a href="' . get_admin_url( null, 'plugins.php' ) . '">plugins page</a>.</p>' );
 	}
 
 	/**
@@ -261,9 +269,8 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	public function display_civicrm_initialised_notice(){
-		$class = 'notice notice-error';
-		$message = __( 'Error - CiviCRM could not be initilised.', 'woocommerce-civicrm' );
-		sprintf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+		deactivate_plugins( self::$plugin );
+		wp_die( '<h1>Ooops</h1><p><strong>CiviCRM</strong> could not be initialized.<br/> <strong>Woocommerce CiviCRM</strong> integration has been deactivated!<br/><br/>Back to the WordPress <a href="' . get_admin_url( null, 'plugins.php' ) . '">plugins page</a>.</p>' );
 	}
 
 }

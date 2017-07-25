@@ -47,7 +47,7 @@ class Woocommerce_CiviCRM_Sync_Address {
 		if ( $op != 'edit' ) return;
 
 		if ( $objectName != 'Address' ) return;
-    
+
 		// Abort if the address being edited is not one of the mapped ones
 		if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
@@ -139,13 +139,15 @@ class Woocommerce_CiviCRM_Sync_Address {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
-		if ( isset( $civi_address ) && ! $civi_address['is_error'] ) {
-			$new_params = array_merge( $civi_address, $edited_address );
-			try {
-				$create_address = civicrm_api3( 'Address', 'create', $new_params );
-			} catch ( CiviCRM_Exception $e ) {
-				CRM_Core_Error::debug_log_message( $e->getMessage() );
+		try {
+			if ( isset( $civi_address ) && ! $civi_address['is_error'] ) {
+				$new_params = array_merge( $civi_address, $edited_address );
+			} else {
+				$new_params = array_merge( $params, $edited_address );
 			}
+			$create_address = civicrm_api3( 'Address', 'create', $new_params );
+		} catch ( CiviCRM_Exception $e ) {
+			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
 		/**

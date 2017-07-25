@@ -47,7 +47,7 @@ class Woocommerce_CiviCRM_Sync_Phone {
 		if ( $op != 'edit' ) return;
 
 		if ( $objectName != 'Phone' ) return;
-    
+
 		// Abort if the phone being edited is not one of the mapped ones
 		if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
@@ -88,7 +88,7 @@ class Woocommerce_CiviCRM_Sync_Phone {
 	public function sync_wp_user_woocommerce_phone( $user_id, $load_address ){
 
 		// abbort if sync is not enabled
-		if( ! get_option( 'woocommerce_civicrm_sync_contact_phone' ) ) return;
+		if( ! Woocommerce_CiviCRM_Helper::$instance->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_phone' ) ) ) return;
 
 		// abort if phone is not of type 'billing'
 		if( $load_address != 'billing' ) return;
@@ -118,13 +118,15 @@ class Woocommerce_CiviCRM_Sync_Phone {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
-		if ( isset( $civi_phone ) && ! $civi_phone['is_error'] ) {
-			$new_params = array_merge( $civi_phone, $edited_phone );
-			try {
-				$create_phone = civicrm_api3( 'Phone', 'create', $new_params );
-			} catch ( CiviCRM_Exception $e ) {
-				CRM_Core_Error::debug_log_message( $e->getMessage() );
+		try {
+			if ( isset( $civi_phone ) && ! $civi_phone['is_error'] ) {
+				$new_params = array_merge( $civi_phone, $edited_phone );
+			} else {
+				$new_params = array_merge( $params, $edited_phone );
 			}
+			$create_phone = civicrm_api3( 'Phone', 'create', $new_params );
+		} catch ( CiviCRM_Exception $e ) {
+			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
 		/**

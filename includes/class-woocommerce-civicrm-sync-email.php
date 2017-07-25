@@ -47,7 +47,7 @@ class Woocommerce_CiviCRM_Sync_Email {
 		if ( $op != 'edit' ) return;
 
 		if ( $objectName != 'Email' ) return;
-    
+
 		// Abort if the email being edited is not one of the mapped ones
 		if( ! in_array( $objectRef->location_type_id, Woocommerce_CiviCRM_Helper::$instance->mapped_location_types ) ) return;
 
@@ -118,13 +118,15 @@ class Woocommerce_CiviCRM_Sync_Email {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
-		if ( isset( $civi_email ) && ! $civi_email['is_error'] ) {
-			$new_params = array_merge( $civi_email, $edited_email );
-			try {
-				$create_email = civicrm_api3( 'Email', 'create', $new_params );
-			} catch ( CiviCRM_Exception $e ) {
-				CRM_Core_Error::debug_log_message( $e->getMessage() );
+		try {
+			if ( isset( $civi_email ) && ! $civi_email['is_error'] ) {
+				$new_params = array_merge( $civi_email, $edited_email );
+			} else {
+				$new_params = array_merge( $params, $edited_email );
 			}
+			$create_email = civicrm_api3( 'Email', 'create', $new_params );
+		} catch ( CiviCRM_Exception $e ) {
+			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
 		/**

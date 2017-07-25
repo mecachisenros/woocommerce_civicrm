@@ -19,7 +19,7 @@ Configure the integration settings in Woocommerce Menu >> Settings >> CiviCRM (T
 Direct URL: https://example.com/wp-admin/admin.php?page=wc-settings&tab=woocommerce_civicrm
 
 ![Woocommerce CiviCRM Settings](./screenshots/settings.jpg)
-![Woocommerce CiviCRM Settings 2](./screenshots/settings2.jpg)
+
 ## Functionality
 
 1. Woocommerce orders are created as contributions in CiviCRM. Line items are not created in the contribution, but the product name x quantity are included in the 'source' field of the contribution

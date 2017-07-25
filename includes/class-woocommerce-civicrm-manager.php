@@ -132,22 +132,10 @@ class Woocommerce_CiviCRM_Manager {
 
 		// Create contact
 		// Prepare array to update contact via civi API.
-		$email = '';
-		$fname = '';
-		$lname = '';
 		$cid = '';
-
-		// FIXME
-		// there's no 'shipping_email' field nor 'get_shipping_email()' method
-		if( ! empty( $order->shipping_email ) ){ // therefore this will always evaluate to false
-			$email = $order->shipping_email;
-			$fname = $order->get_shipping_first_name();
-			$lname = $order->get_shipping_last_name();
-		} else {
-			$email = $order->get_billing_email();
-			$fname = $order->get_billing_first_name();
-			$lname = $order->get_billing_last_name();
-		}
+		$email = $order->get_billing_email();
+		$fname = $order->get_billing_first_name();
+		$lname = $order->get_billing_last_name();
 
 		// Try to get contact Id using dedupe
 		$contact['first_name'] = $fname;
@@ -162,7 +150,6 @@ class Woocommerce_CiviCRM_Manager {
 			$action = 'update';
 		}
 
-		$contact['sort_name'] = "{$lname}, {$fname}";
 		$contact['display_name'] = "{$fname} {$lname}";
 		if( ! $cid ){
 			$contact['contact_type'] = 'Individual';
@@ -181,8 +168,7 @@ class Woocommerce_CiviCRM_Manager {
 			$cid = $result['id'];
 			$name = trim( $contact['display_name'] );
 			$name = ! empty( $name ) ? $contact['display_name'] : $cid;
-			$admin_url = get_admin_url();
-			$contact_url = "<a href='" . $admin_url . "admin.php?page=CiviCRM&q=civicrm/contact/view&reset=1&cid=" . $cid . "'>" . __( 'View', 'woocommerce-civicrm' ) . "</a>";
+			$contact_url = "<a href='" . get_admin_url() . "admin.php?page=CiviCRM&q=civicrm/contact/view&reset=1&cid=" . $cid . "'>" . __( 'View', 'woocommerce-civicrm' ) . "</a>";
 
 			// Add order note
 			if( $action == 'update' ){
@@ -196,17 +182,16 @@ class Woocommerce_CiviCRM_Manager {
 			return FALSE;
 		}
 
-		$civicrm_billing = get_option( 'woocommerce_civicrm_billing_location_type_id' );
-		$civicrm_shipping = get_option( 'woocommerce_civicrm_shipping_location_type_id' );
-
 		try {
 			$existing_addresses = civicrm_api3( 'Address', 'get', array( 'contact_id' => $cid ) );
 			$existing_addresses = $existing_addresses['values'];
 			$existing_phones = civicrm_api3( 'Phone', 'get', array( 'contact_id' => $cid ) );
 			$existing_phones = $existing_phones['values'];
-			$address_types = array( 'billing', 'shipping' );
+			$existing_emails = civicrm_api3( 'Email', 'get', array( 'contact_id' => $cid ) );
+			$existing_email = $existing_emails['values'];
+			$address_types = Woocommerce_CiviCRM_Helper::$instance->mapped_location_types;
 
-			foreach( $address_types as $address_type ){
+			foreach( $address_types as $address_type => $location_type_id ){
 
 				// Process Phone
 				$phone_exists = FALSE;
@@ -214,12 +199,12 @@ class Woocommerce_CiviCRM_Manager {
 				if( $address_type != 'shipping' && ! empty( $order->{'get_' . $address_type . '_phone'}() ) ){
 					$phone = array(
 						'phone_type_id' => 1,
-						'location_type_id' => ${'civicrm_' . $address_type},
+						'location_type_id' => $location_type_id,
 						'phone' => $order->{'get_' . $address_type . '_phone'}(),
 						'contact_id' => $cid,
 					);
 					foreach( $existing_phones as $existing_phone ){
-						if( $existing_phone['location_type_id'] == ${'civicrm_' . $address_type} ){
+						if( $existing_phone['location_type_id'] == $location_type_id ){
 							$phone['id'] = $existing_phone['id'];
 						}
 						if( $existing_phone['phone'] == $phone['phone'] ){
@@ -234,13 +219,37 @@ class Woocommerce_CiviCRM_Manager {
 					}
 				}
 
+				// Process Email
+				$email_exists = FALSE;
+				// 'shipping_email' does not exist as a Woocommerce field
+				if( $address_type != 'shipping' && ! empty( $order->{'get_' . $address_type . '_email'}() ) ){
+					$email = array(
+						'location_type_id' => $location_type_id,
+						'email' => $order->{'get_' . $address_type . '_email'}(),
+						'contact_id' => $cid,
+					);
+					foreach( $existing_emails as $existing_email ){
+						if( $existing_email['location_type_id'] == $location_type_id ){
+							$email['id'] = $existing_email['id'];
+						}
+						if( $existing_email['email'] == $email['email'] ){
+							$email_exists = TRUE;
+						}
+					}
+					if( ! $email_exists ){
+					civicrm_api3( 'Email', 'create', $email );
+						$note = __( "Created new CiviCRM Email of type {$address_type}: {$email['email']}", 'woocommerce-civicrm' );
+						$order->add_order_note( $note );
+					}
+				}
+
 				// Process Address
 				$address_exists = FALSE;
 				if( ! empty( $order->{'get_' . $address_type . '_address_1'}() ) && ! empty( $order->{'get_' . $address_type . '_postcode'}() ) ){
 
 					$country_id = Woocommerce_CiviCRM_Helper::$instance->get_civi_country_id( $order->{'get_' . $address_type . '_country'}() );
 					$address = array(
-						'location_type_id'       => ${'civicrm_' . $address_type},
+						'location_type_id'       => $location_type_id,
 						'city'                   => $order->{'get_' . $address_type . '_city'}(),
 						'postal_code'            => $order->{'get_' . $address_type . '_postcode'}(),
 						'name'                   => $order->{'get_' . $address_type . '_company'}(),
@@ -252,14 +261,14 @@ class Woocommerce_CiviCRM_Manager {
 					);
 
 					foreach( $existing_addresses as $existing ){
-						if( $existing['location_type_id'] == ${'civicrm_' . $address_type} ){
+						if( $existing['location_type_id'] == $location_type_id ){
 							$address['id'] = $existing['id'];
 						}
 						// @TODO Don't create if exact match of another - should
 						// we make 'exact match' configurable.
 						elseif (
-							$existing['street_address'] == $address['street_address'] 
-							&& CRM_Utils_Array::value( 'supplemental_address_1', $existing ) == CRM_Utils_Array::value( 'supplemental_address_1', $address ) 
+							$existing['street_address'] == $address['street_address']
+							&& CRM_Utils_Array::value( 'supplemental_address_1', $existing ) == CRM_Utils_Array::value( 'supplemental_address_1', $address )
 							&& $existing['city'] == $address['city']
 							&& $existing['postal_code'] == $address['postal_code']
 						){
@@ -476,7 +485,7 @@ class Woocommerce_CiviCRM_Manager {
 		);
 
 		try {
-			$custom_group = civicrm_api3( 'Custom_group', 'create', $params );
+			$custom_group = civicrm_api3( 'CustomGroup', 'create', $params );
 		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to create custom group', 'woocommerce-civicrm' ) );
 		}

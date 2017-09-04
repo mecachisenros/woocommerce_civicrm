@@ -68,7 +68,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param array $files The array for files used to build the menu
 	 */
   public function register_callback( &$files ){
-		$files[] = dirname(__FILE__) . '/xml/menu.xml';
+		$files[] = WOOCOMMERCE_CIVICRM_PATH . 'xml/menu.xml';
 	}
 
 	/**

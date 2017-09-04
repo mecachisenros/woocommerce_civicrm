@@ -49,6 +49,15 @@ class Woocommerce_CiviCRM {
 	private static $settings_tab;
 
 	/**
+	 * The Orders Contact Tab management object.
+	 *
+	 * @since 2.0
+	 * @access private
+	 * @var object $orders_tab The Orders Tab management object
+	 */
+	private static $orders_tab;
+
+	/**
 	 * The Manager management object.
 	 *
 	 * Encapsulates the Woocommerce CiviCRM functionality
@@ -165,6 +174,8 @@ class Woocommerce_CiviCRM {
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-helper.php';
 		// Include Woocommerce settings tab class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-settings-tab.php';
+		// Include CiviCRM orders tab class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-orders-contact-tab.php';
 		// Include Woocommerce functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-manager.php';
 		// Include Address Sync functionality class
@@ -187,6 +198,8 @@ class Woocommerce_CiviCRM {
 		self::$helper = Woocommerce_CiviCRM_Helper::instance();
 		// init settings page
 		self::$settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
+		// init orders tab
+		self::$orders_tab = new Woocommerce_CiviCRM_Orders_Contact_Tab;
 		// init manager
 		self::$manager = new Woocommerce_CiviCRM_Manager;
 		// init states replacement

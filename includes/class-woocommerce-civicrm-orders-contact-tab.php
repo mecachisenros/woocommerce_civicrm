@@ -110,7 +110,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	    $orders[$customer_order->ID]['order_link'] = $site_url."/wp-admin/post.php?action=edit&post=".$order->get_order_number();
 	  }
 
-		$url = CRM_Utils_System::url( 'civicrm/woocommerce/view/purchases', "reset=1&uid=$uid&snippet=1&force=1");
+		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid");
 		$tabs[] = array( 'id'    => 'woocommerce-orders-test',
 			'url'   => $url,
 			'title' => 'Orders test',

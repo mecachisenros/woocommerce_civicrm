@@ -1,6 +1,6 @@
 <?php
 
-class CRM_Contact_Page_Purchases extends CRM_Core_Page {
+class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 
 	function run() {
 		// Example: Set the page-title dynamically; alternatively, declare a static title in xml/Menu/*.xml
@@ -16,7 +16,7 @@ class CRM_Contact_Page_Purchases extends CRM_Core_Page {
 			'post_type'   => 'shop_order',
 			'post_status' => array_keys( wc_get_order_statuses() )
 		) ) );
-    
+
 		$site_url = get_site_url();
 		$orders = array();
 		foreach ( $customer_orders as $customer_order ) {

@@ -89,7 +89,7 @@
 	 *
 	 * @since 2.0
 	 */
-	public static function inited() {
+	public function inited() {
 
 		$this->financial_types = $this->get_financial_types();
 		$this->location_types = $this->get_address_location_types();

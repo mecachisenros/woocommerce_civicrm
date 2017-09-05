@@ -53,7 +53,7 @@ class Woocommerce_CiviCRM_States {
 	 *
 	 * @since 2.0
 	 */
-	public static function inited() {
+	public function inited() {
 		$this->replace = Woocommerce_CiviCRM_Helper::$instance->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
 		$this->civicrm_countries = $this->get_civicrm_countries();
 	}

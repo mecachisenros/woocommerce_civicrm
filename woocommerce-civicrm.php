@@ -144,6 +144,7 @@ class Woocommerce_CiviCRM {
 	 */
 	private function check_dependencies() {
 		self::$plugin = plugin_basename( __FILE__ );
+		return true;
 		// Bail if Woocommerce is not available
 		if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
 			add_action( 'admin_notices', array( $this, 'display_woocommerce_required_notice' ) );
@@ -298,4 +299,4 @@ function woocommerce_civicrm() {
 	return Woocommerce_CiviCRM::instance();
 }
 // init Woocommerce CiviCRM
-add_action( 'init', 'woocommerce_civicrm' );
+add_action( 'plugins_loaded', 'woocommerce_civicrm' );

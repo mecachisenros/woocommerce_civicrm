@@ -62,12 +62,7 @@
 	 * @since 2.0
 	 */
 	public function __construct(){
-
-		$this->financial_types = $this->get_financial_types();
-		$this->location_types = $this->get_address_location_types();
-		$this->civicrm_states = $this->get_civicrm_states();
-		$this->mapped_location_types = $this->set_mapped_location_types();
-
+		add_action( 'civicrm_initialized', array( $this, 'inited' ) );
 	}
 
 	/**
@@ -87,6 +82,20 @@
 		}
 		// always return instance
 		return self::$instance;
+	}
+
+	/**
+	 * CiviCRM inited.
+	 *
+	 * @since 2.0
+	 */
+	public static function inited() {
+
+		$this->financial_types = $this->get_financial_types();
+		$this->location_types = $this->get_address_location_types();
+		$this->civicrm_states = $this->get_civicrm_states();
+		$this->mapped_location_types = $this->set_mapped_location_types();
+
 	}
 
  	/**
@@ -151,12 +160,12 @@
 	public function get_civicrm_ufmatch( $id, $property ){
 
 	if( ! in_array( $property, array( 'contact_id', 'uf_id' ) ) ) return;
-    
+
 		try {
 			$uf_match = civicrm_api3( 'UFMatch', 'getsingle', array(
 				'sequential' => 1,
 				$property => $id,
-			)); 
+			));
 		} catch ( Exception $e ) {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
@@ -250,7 +259,7 @@
 			$found = array_search( $civi_state['name'], $states );
 			if( ! empty( $states ) && $found ) return $found;
 		}
-    
+
 		return $civi_state['name'];
 	}
 
@@ -302,7 +311,7 @@
 				'country_id' => $dao->country_id
 			);
 		}
-    
+
 		return $civicrm_states;
 	}
 
@@ -328,7 +337,7 @@
 
 	/**
 	 * Get CiviCRM Financial Types.
-	 * 
+	 *
 	 * @since 2.0
 	 * @return array $financialTypes The financial types
 	 */
@@ -357,10 +366,10 @@
 		return $financialTypes;
 
 	}
-  
+
 	/**
 	 * Get CiviCRM Address Location Types.
-	 * 
+	 *
 	 * @since 2.0
 	 * @return array $addressTypes The address location types
 	 */
@@ -372,10 +381,10 @@
 		return $addressTypesResult['values'];
 
 	}
-  
+
 	/**
 	 * Function to check whether a value is (string) 'yes'.
-	 * 
+	 *
 	 * @param  string $value
 	 * @return bool true | false
 	 */

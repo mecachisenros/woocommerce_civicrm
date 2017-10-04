@@ -49,6 +49,15 @@ class Woocommerce_CiviCRM {
 	private static $settings_tab;
 
 	/**
+	 * The Orders Contact Tab management object.
+	 *
+	 * @since 2.0
+	 * @access private
+	 * @var object $orders_tab The Orders Tab management object
+	 */
+	private static $orders_tab;
+
+	/**
 	 * The Manager management object.
 	 *
 	 * Encapsulates the Woocommerce CiviCRM functionality
@@ -135,6 +144,7 @@ class Woocommerce_CiviCRM {
 	 */
 	private function check_dependencies() {
 		self::$plugin = plugin_basename( __FILE__ );
+		return true;
 		// Bail if Woocommerce is not available
 		if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
 			add_action( 'admin_notices', array( $this, 'display_woocommerce_required_notice' ) );
@@ -165,6 +175,8 @@ class Woocommerce_CiviCRM {
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-helper.php';
 		// Include Woocommerce settings tab class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-settings-tab.php';
+		// Include CiviCRM orders tab class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-orders-contact-tab.php';
 		// Include Woocommerce functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-manager.php';
 		// Include Address Sync functionality class
@@ -187,6 +199,8 @@ class Woocommerce_CiviCRM {
 		self::$helper = Woocommerce_CiviCRM_Helper::instance();
 		// init settings page
 		self::$settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
+		// init orders tab
+		self::$orders_tab = new Woocommerce_CiviCRM_Orders_Contact_Tab;
 		// init manager
 		self::$manager = new Woocommerce_CiviCRM_Manager;
 		// init states replacement
@@ -285,4 +299,4 @@ function woocommerce_civicrm() {
 	return Woocommerce_CiviCRM::instance();
 }
 // init Woocommerce CiviCRM
-add_action( 'init', 'woocommerce_civicrm' );
+add_action( 'plugins_loaded', 'woocommerce_civicrm' );

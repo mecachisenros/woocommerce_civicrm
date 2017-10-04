@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<menu>
+  <item>
+     <path>civicrm/contact/view/purchases</path>
+     <page_callback>CRM_Contact_Page_View_Purchases</page_callback>
+     <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>

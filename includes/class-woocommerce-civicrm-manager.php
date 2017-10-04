@@ -472,7 +472,7 @@ class Woocommerce_CiviCRM_Manager {
 		if( $group_id != FALSE ){
 			return;
 		}
-
+return;
 		// First we need to check if the VAT and Shipping custom fields have
 		// already been created.
 		$params = array(
@@ -483,12 +483,16 @@ class Woocommerce_CiviCRM_Manager {
 			'collapse_display' => 0,
 			'is_active'        => 1,
 		);
-
+//print_r($params);
+//echo'<hr>';
+//print_r(civicrm_api3( 'CustomGroup', 'create', $params ));
+//echo'<hr>';
 		try {
 			$custom_group = civicrm_api3( 'CustomGroup', 'create', $params );
 		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to create custom group', 'woocommerce-civicrm' ) );
 		}
+//print_r($custom_group);
 		add_option( 'woocommerce_civicrm_contribution_group_id', $custom_group['id'] );
 
 		$params = array(

@@ -20,13 +20,13 @@ class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 		$site_url = get_site_url();
 		$orders = array();
 		foreach ( $customer_orders as $customer_order ) {
-			$order = new WC_Order();
-			$order->populate( $customer_order );
-			$status = get_term_by( 'slug', $order->status, 'shop_order_status' );
+			$order = new WC_Order($customer_order);
+			//$order->populate( $customer_order );
+			$status = get_term_by( 'slug', $order->get_status(), 'shop_order_status' );
 			$item_count = $order->get_item_count();
 			$total = $order->get_total();
 			$orders[$customer_order->ID]['order_number'] = $order->get_order_number();
-			$orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->order_date ));
+			$orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->get_date_created() ));
 			$orders[$customer_order->ID]['order_billing_name'] = $order->get_formatted_billing_full_name();
 			$orders[$customer_order->ID]['order_shipping_name'] = $order->get_formatted_shipping_full_name();
 			$orders[$customer_order->ID]['item_count'] = $item_count;

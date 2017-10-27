@@ -9,15 +9,6 @@
  class Woocommerce_CiviCRM_Helper {
 
 	/**
-	 * The class instance.
-	 *
-	 * @since 2.0
-	 * @access private
-	 * @var object $instance The class instance
-	 */
-	public static $instance;
-
-	/**
 	 * The active Financial Types.
 	 *
 	 * Array of key/value pairs holding the active financial types.
@@ -62,26 +53,7 @@
 	 * @since 2.0
 	 */
 	public function __construct(){
-		add_action( 'civicrm_initialized', array( $this, 'inited' ) );
-	}
-
-	/**
-	 * Returns a single instance of this object when called.
-	 *
-	 * @since 2.0
-	 * @return object $instance Woocommerce_CiviCRM_Helper instance
-	 */
-	public static function instance() {
-
-		if ( ! isset( self::$instance ) ) {
-			// instantiate
-			self::$instance = new Woocommerce_CiviCRM_Helper;
-			if ( is_null( self::$instance ) ) {
-				self::$instance = new self();
-			}
-		}
-		// always return instance
-		return self::$instance;
+		$this->inited();
 	}
 
 	/**
@@ -91,6 +63,7 @@
 	 */
 	public function inited() {
 
+		WCI()->boot_civi();
 		$this->financial_types = $this->get_financial_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();

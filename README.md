@@ -6,13 +6,6 @@ Step 1: Install Wordpress plugin
 
 Install this Wordpress plugin as usual. More information about installing plugins in Wordpress - https://codex.wordpress.org/Managing_Plugins#Installing_Plugins
 
-Step 2: Install CiviCRM extension
-
-Extension is compatible with CiviCRM v. 4.6+.
-
-Install https://github.com/veda-consulting/uk.co.vedaconsulting.module.woocommercecivicrm as CiviCRM extension to view WooCommerce orders in a CiviCRM tab. More information about manually installing extensions in CiviCRM - http://wiki.civicrm.org/confluence/display/CRMDOC/Extensions#Extensions-Installinganewextension
-NOTE: The tab displays orders only for contacts having a related Wordpress user record.
-
 ## Configuration
 
 Configure the integration settings in Woocommerce Menu >> Settings >> CiviCRM (Tab)

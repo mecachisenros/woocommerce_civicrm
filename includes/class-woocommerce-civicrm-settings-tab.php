@@ -80,25 +80,25 @@ class Woocommerce_CiviCRM_Settings_Tab {
 			'woocommerce_civicrm_financial_type_id' => array(
 				'name' => __( 'Contribution Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
+				'options' => WCI()->helper->financial_types,
 				'id'   => 'woocommerce_civicrm_financial_type_id'
 				),
 			'woocommerce_civicrm_financial_type_vat_id' => array(
 				'name' => __( 'Contribution Type VAT (Tax)', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
+				'options' => WCI()->helper->financial_types,
 				'id'   => 'woocommerce_civicrm_financial_type_vat_id'
 			),
 			'woocommerce_civicrm_billing_location_type_id' => array(
 				'name' => __( 'Billing Location Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
+				'options' => WCI()->helper->location_types,
 				'id'   => 'woocommerce_civicrm_billing_location_type_id'
 			),
 			'woocommerce_civicrm_shipping_location_type_id' => array(
 				'name' => __( 'Shipping Location Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
+				'options' => WCI()->helper->location_types,
 				'id'   => 'woocommerce_civicrm_shipping_location_type_id'
 			),
 			'woocommerce_civicrm_sync_contact_address' => array(

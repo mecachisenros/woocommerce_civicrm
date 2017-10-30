@@ -109,6 +109,8 @@ class Woocommerce_CiviCRM {
 		$this->plugin = plugin_basename( __FILE__ );
 		// init plugin
 		add_action( 'plugins_loaded', array( $this, 'init' ), 10 );
+		// clear cache on activation
+		add_action( 'woocommerce_civicrm_activated', array( $this, 'clear_civi_cache' ) );
 	}
 
 
@@ -260,6 +262,26 @@ class Woocommerce_CiviCRM {
 	}
 
 	/**
+	 * Plugin activation.
+	 *
+	 * @since 2.1
+	 */
+	public function activate() {
+		do_action( 'woocommerce_civicrm_activated' );
+	}
+
+	/**
+	 * Clear CiviCRM cache after plugin activation.
+	 *
+	 * @since 2.1
+	 */
+	public function clear_civi_cache() {
+		CRM_Core_Config::singleton()->cleanup( 1, FALSE);
+		CRM_Core_Config::clearDBCache();
+		CRM_Utils_System::flushCache();
+	}
+
+	/**
 	 * Add Settings link to plugin listing page.
 	 *
 	 * @since 2.0
@@ -318,3 +340,4 @@ function WCI() {
 
 WCI();
 
+register_activation_hook( __FILE__, array( WCI(), 'activate' ) );

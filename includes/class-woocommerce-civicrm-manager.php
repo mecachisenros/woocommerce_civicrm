@@ -41,7 +41,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		$order = new WC_Order( $order_id );
 
-		$cid = Woocommerce_CiviCRM_Helper::$instance->civicrm_get_cid( $order );
+		$cid = WCI()->helper->civicrm_get_cid( $order );
   	if ( $cid === FALSE ) {
 			return;
   	}
@@ -124,7 +124,7 @@ class Woocommerce_CiviCRM_Manager {
 					'return' => array( 'id', 'source', 'first_name', 'last_name' ),
 				);
 				$contact = civicrm_api3( 'contact', 'getsingle', $params );
-			} catch ( CiviCRM_Exception $e ){
+			} catch ( CiviCRM_API3_Exception $e ){
 				CRM_Core_Error::debug_log_message( __( 'Not able to find contact', 'woocommerce-civicrm' ) );
 				return FALSE;
 			}
@@ -177,7 +177,7 @@ class Woocommerce_CiviCRM_Manager {
 				$note = __( 'Created new CiviCRM Contact - ', 'woocommerce-civicrm' ) . $contact_url;
 			}
 			$order->add_order_note( $note );
-		} catch ( Exception $e ){
+		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to create/update contact', 'woocommerce-civicrm' ) );
 			return FALSE;
 		}
@@ -188,8 +188,8 @@ class Woocommerce_CiviCRM_Manager {
 			$existing_phones = civicrm_api3( 'Phone', 'get', array( 'contact_id' => $cid ) );
 			$existing_phones = $existing_phones['values'];
 			$existing_emails = civicrm_api3( 'Email', 'get', array( 'contact_id' => $cid ) );
-			$existing_email = $existing_emails['values'];
-			$address_types = Woocommerce_CiviCRM_Helper::$instance->mapped_location_types;
+			$existing_emails = $existing_emails['values'];
+			$address_types = WCI()->helper->mapped_location_types;
 
 			foreach( $address_types as $address_type => $location_type_id ){
 
@@ -212,7 +212,7 @@ class Woocommerce_CiviCRM_Manager {
 						}
 					}
 					if( ! $phone_exists ){
-					civicrm_api3( 'Phone', 'create', $phone );
+						civicrm_api3( 'Phone', 'create', $phone );
 
 						$note = __( "Created new CiviCRM Phone of type {$address_type}: {$phone['phone']}", 'woocommerce-civicrm' );
 						$order->add_order_note( $note );
@@ -247,7 +247,7 @@ class Woocommerce_CiviCRM_Manager {
 				$address_exists = FALSE;
 				if( ! empty( $order->{'get_' . $address_type . '_address_1'}() ) && ! empty( $order->{'get_' . $address_type . '_postcode'}() ) ){
 
-					$country_id = Woocommerce_CiviCRM_Helper::$instance->get_civi_country_id( $order->{'get_' . $address_type . '_country'}() );
+					$country_id = WCI()->helper->get_civi_country_id( $order->{'get_' . $address_type . '_country'}() );
 					$address = array(
 						'location_type_id'       => $location_type_id,
 						'city'                   => $order->{'get_' . $address_type . '_city'}(),
@@ -256,7 +256,7 @@ class Woocommerce_CiviCRM_Manager {
 						'street_address'         => $order->{'get_' . $address_type . '_address_1'}(),
 						'supplemental_address_1' => $order->{'get_' . $address_type . '_address_2'}(),
 						'country'                => $country_id,
-						'state_province_id'      => Woocommerce_CiviCRM_Helper::$instance->get_civi_state_province_id( $order->{'get_' . $address_type . '_state'}(), $country_id ),
+						'state_province_id'      => WCI()->helper->get_civi_state_province_id( $order->{'get_' . $address_type . '_state'}(), $country_id ),
 						'contact_id'             => $cid,
 					);
 
@@ -283,7 +283,7 @@ class Woocommerce_CiviCRM_Manager {
 					}
 				}
 			}
-		} catch ( CiviCRM_Exception $e ){
+		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to add/update address or phone', 'woocommerce-civicrm' ) );
 		}
 
@@ -374,7 +374,7 @@ class Woocommerce_CiviCRM_Manager {
 		 * @param array $params The params to be passsed to the API
 		 */
 			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
-		} catch ( Exception $e ) {
+		} catch ( CiviCRM_API3_Exception $e ) {
 			// Log the error, but continue.
 			return FALSE;
 		}

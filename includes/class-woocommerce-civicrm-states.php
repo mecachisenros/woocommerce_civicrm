@@ -45,7 +45,7 @@ class Woocommerce_CiviCRM_States {
 	public function register_hooks() {
 		// Add Civicrm settings tab
 		add_filter( 'woocommerce_states', array( $this, 'replace_woocommerce_states' ), 10, 1 );
-		add_action( 'civicrm_initialized', array( $this, 'inited' ) );
+		$this->inited();
 	}
 
 	/**
@@ -54,7 +54,8 @@ class Woocommerce_CiviCRM_States {
 	 * @since 2.0
 	 */
 	public function inited() {
-		$this->replace = Woocommerce_CiviCRM_Helper::$instance->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
+		$this->replace = WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
+		WCI()->boot_civi();
 		$this->civicrm_countries = $this->get_civicrm_countries();
 	}
 
@@ -71,7 +72,7 @@ class Woocommerce_CiviCRM_States {
 		if( ! $this->replace ) return $states;
 
 		$new_states = array();
-		foreach ( Woocommerce_CiviCRM_Helper::$instance->civicrm_states as $state_id => $state ) {
+		foreach ( WCI()->helper->civicrm_states as $state_id => $state ) {
 			$new_states[ $this->civicrm_countries[ $state['country_id'] ] ][ $state['abbreviation'] ] = $state['name'];
 		}
 

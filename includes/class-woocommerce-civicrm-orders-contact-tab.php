@@ -26,7 +26,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 		add_action( 'civicrm_config', array( $this, 'register_custom_php_directory' ), 10, 1 );
 		// register custom template directory
 		add_action( 'civicrm_config', array( $this, 'register_custom_template_directory' ), 10, 1 );
-    // register menu callback
+    	// register menu callback
 		add_filter( 'civicrm_xmlMenu', array( $this, 'register_callback' ), 10, 1 );
 		// Add Civicrm settings tab
 		add_filter( 'civicrm_tabset', array( $this, 'add_orders_contact_tab' ), 10, 3 );
@@ -61,13 +61,13 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 
 	}
 
-  /**
+  	/**
 	 * Register XML file.
 	 *
 	 * @since 2.0
 	 * @param array $files The array for files used to build the menu
 	 */
-  public function register_callback( &$files ){
+  	public function register_callback( &$files ){
 		$files[] = WOOCOMMERCE_CIVICRM_PATH . 'xml/menu.xml';
 	}
 
@@ -85,37 +85,53 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			return;
 		}
 
-		$customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
-	    'numberposts' => -1,
-	    'meta_key'    => '_customer_user',
-	    'meta_value'  => $uid,
-	    'post_type'   => 'shop_order',
-	    'post_status' => array_keys( wc_get_order_statuses() )
-	  ) ) );
-
-	  $site_url = get_site_url();
-	  $orders = array();
-	  foreach ( $customer_orders as $customer_order ) {
-	    $order = new WC_Order($customer_order);
-	    //$order->populate( $customer_order );
-	    $status = get_term_by( 'slug', $order->get_status(), 'shop_order_status' );
-	    $item_count = $order->get_item_count();
-	    $total = $order->get_total();
-	    $orders[$customer_order->ID]['order_number'] = $order->get_order_number();
-	    $orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->get_date_created() ));
-	    $orders[$customer_order->ID]['order_billing_name'] = $order->get_formatted_billing_full_name();
-	    $orders[$customer_order->ID]['order_shipping_name'] = $order->get_formatted_shipping_full_name();
-	    $orders[$customer_order->ID]['item_count'] = $item_count;
-	    $orders[$customer_order->ID]['order_total'] = $total;
-	    $orders[$customer_order->ID]['order_link'] = $site_url."/wp-admin/post.php?action=edit&post=".$order->get_order_number();
-	  }
+		$orders = $this->get_orders( $uid );
 
 		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid");
-		$tabs[] = array( 'id'    => 'woocommerce-orders-test',
+		$tabs[] = array( 'id'    => 'woocommerce-orders',
 			'url'   => $url,
-			'title' => 'Orders test',
+			'title' => 'Woocommerce Orders',
 			'count' => count($orders), //$order_count,
 			'weight' => 99
 		);
+	}
+
+	/**
+	 * Get Customer orders.
+	 *
+	 * @since 2.1
+	 * @param int $uid The User id for a contact (UFMatch)
+	 * @return array $orders The orders
+	 */
+	public function get_orders( $uid ) {
+
+		$customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
+			'numberposts' => -1,
+			'meta_key'    => '_customer_user',
+			'meta_value'  => $uid,
+			'post_type'   => 'shop_order',
+			'post_status' => array_keys( wc_get_order_statuses() )
+		) ) );
+
+		$site_url = get_site_url();
+		$orders = array();
+		foreach ( $customer_orders as $customer_order ) {
+			$order = new WC_Order($customer_order);
+			//$order->populate( $customer_order );
+			$status = get_term_by( 'slug', $order->get_status(), 'shop_order_status' );
+			$item_count = $order->get_item_count();
+			$total = $order->get_total();
+			$orders[$customer_order->ID]['order_number'] = $order->get_order_number();
+			$orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->get_date_created() ));
+			$orders[$customer_order->ID]['order_billing_name'] = $order->get_formatted_billing_full_name();
+			$orders[$customer_order->ID]['order_shipping_name'] = $order->get_formatted_shipping_full_name();
+			$orders[$customer_order->ID]['item_count'] = $item_count;
+			$orders[$customer_order->ID]['order_total'] = $total;
+			$orders[$customer_order->ID]['order_link'] = $site_url."/wp-admin/post.php?action=edit&post=".$order->get_order_number();
+		}
+
+		if( ! empty( $orders ) ) return $orders;
+
+		return false;
 	}
 }

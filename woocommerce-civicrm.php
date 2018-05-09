@@ -145,6 +145,7 @@ class Woocommerce_CiviCRM {
 
 		$this->setup_objects();
 		$this->register_hooks();
+		$this->enable_translation();
 
 	}
 
@@ -238,8 +239,6 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function register_hooks() {
-		// use translation files
-		add_action( 'plugins_loaded', array( $this, 'enable_translation' ) );
     	// add settings link to plugin lisitng page
 		add_filter( 'plugin_action_links', array( $this, 'add_action_links' ), 10, 2 );
 	}

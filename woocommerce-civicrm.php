@@ -5,7 +5,7 @@
  * Plugin URI: http://www.vedaconsulting.co.uk
  * Description: Plugin for intergrating Woocommerce with CiviCRM
  * Author: Veda NFP Consulting Ltd
- * Version: 2.1
+ * Version: 2.1.1
  * Author URI: http://www.vedaconsulting.co.uk
  * Text Domain: woocommerce-civicrm
  * Domain path: /languages
@@ -110,7 +110,7 @@ class Woocommerce_CiviCRM {
 		// init plugin
 		add_action( 'plugins_loaded', array( $this, 'init' ), 10 );
 		// clear cache on activation
-		add_action( 'woocommerce_civicrm_activated', array( $this, 'clear_civi_cache' ) );
+		add_action( 'woocommerce_civicrm_activated', array( $this, 'schedule_clear_civi_cache' ) );
 	}
 
 
@@ -142,7 +142,7 @@ class Woocommerce_CiviCRM {
 	 * @since 2.1
 	 */
 	public function init() {
-		
+
 		$this->setup_objects();
 		$this->register_hooks();
 
@@ -174,7 +174,7 @@ class Woocommerce_CiviCRM {
 	 * @return bool True if dependencies exist, false otherwise
 	 */
 	private function check_dependencies() {
-		
+
 		// Bail if Woocommerce is not available
 		if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
 			$this->display_woocommerce_required_notice();
@@ -270,6 +270,14 @@ class Woocommerce_CiviCRM {
 		do_action( 'woocommerce_civicrm_activated' );
 	}
 
+	/**
+	 * Ensure every plugin is loaded before clearing CiviCRM cache
+	 *
+	 * @since 2.1.1
+	 */
+	public function schedule_clear_civi_cache(){
+		add_action( 'plugins_loaded', array( $this, 'clear_civi_cache' ), 10 );
+	}
 	/**
 	 * Clear CiviCRM cache after plugin activation.
 	 *

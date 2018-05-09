@@ -1,1 +1,140 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Woocommerce CiviCRM\n"
+"POT-Creation-Date: 2018-05-09 17:07+0200\n"
+"PO-Revision-Date: 2015-10-23 18:44+0100\n"
+"Last-Translator: Bastien Ho <bastien@avecnous.eu>\n"
+"Language-Team: Bastien Ho <bastien@avecnous.eu>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
+"esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: .\n"
 
+#: includes/class-woocommerce-civicrm-manager.php:101
+msgid "Not able to update contribution"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:128
+msgid "Not able to find contact"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:162
+msgid "Woocommerce purchase"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:171
+msgid "View"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:175
+msgid "CiviCRM Contact Updated - "
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:177
+msgid "Created new CiviCRM Contact - "
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:181
+msgid "Not able to create/update contact"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:287
+msgid "Not able to add/update address or phone"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:303
+msgid "Woocommerce Order - "
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:490
+msgid "Not able to create custom group"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:43
+msgid "CiviCRM"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:75
+msgid "CiviCRM Settings"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:77
+msgid ""
+"Below are the values used when creating contribution/address in "
+"CiviCRM."
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:81
+msgid "Contribution Type"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:87
+msgid "Default campaign"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:93
+msgid "Contribution Type VAT (Tax)"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:99
+msgid "Billing Location Type"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:105
+msgid "Shipping Location Type"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:111
+msgid "Sync Contact address"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:113
+msgid ""
+"If enabled, this option will synchronize Woocommerce user address with "
+"CiviCRM's contact address and viceversa."
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:117
+msgid "Sync Contact billing phone"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:119
+msgid ""
+"If enabled, this option will synchronize Woocommerce user's billing "
+"phone with CiviCRM's contact billing phone and viceversa."
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:123
+msgid "Sync Contact billing email"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:125
+msgid ""
+"If enabled, this option will synchronize Woocommerce user's billing "
+"email with CiviCRM's contact billing email and viceversa."
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:129
+msgid "Replace Woocommerce States"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-settings-tab.php:131
+msgid ""
+"WARNING, DATA LOSS!! If enabled, this option will replace "
+"Woocommerce's States/Counties with CiviCRM's States/Provinces, you "
+"WILL lose any existing State/County data for existing Customers. Any "
+"Woocommerce Settings that relay on State/County will have te be "
+"reconfigured."
+msgstr ""
+
+#: woocommerce-civicrm.php:302
+msgid "Settings"
+msgstr ""

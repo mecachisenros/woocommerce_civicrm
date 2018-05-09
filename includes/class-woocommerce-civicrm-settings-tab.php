@@ -83,6 +83,12 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'options' => WCI()->helper->financial_types,
 				'id'   => 'woocommerce_civicrm_financial_type_id'
 				),
+			'woocommerce_civicrm_campaign_id' => array(
+				'name' => __( 'Default campaign', 'woocommerce-civicrm' ),
+				'type' => 'select',
+				'options' => WCI()->helper->campaigns,
+				'id'   => 'woocommerce_civicrm_campaign_id'
+				),
 			'woocommerce_civicrm_financial_type_vat_id' => array(
 				'name' => __( 'Contribution Type VAT (Tax)', 'woocommerce-civicrm' ),
 				'type' => 'select',

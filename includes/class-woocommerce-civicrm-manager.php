@@ -325,6 +325,23 @@ class Woocommerce_CiviCRM_Manager {
 		$contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
 		$contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type
 
+		$campaign_name = '';
+		$woocommerce_civicrm_campaign_id = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
+		if(false !== $local_campaign_id = get_post_meta('woocommerce_civicrm_campaign_id', $order->ID, true)){
+			$woocommerce_civicrm_campaign_id = $local_campaign_id; // Use the local CiviCRM campaign ID if possible
+		}
+		if($woocommerce_civicrm_campaign_id){
+			$params = array(
+				'sequential' => 1,
+				'return' => array("name"),
+				'id' => $woocommerce_civicrm_campaign_id,
+				'options' => array('limit' => 1),
+			);
+			$campaignsResult = civicrm_api3( 'Campaign', 'get', $params );
+			$campaign_name = $campaignsResult['values'][0]['name'];
+		}
+
+
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){
 			$params = array(
@@ -344,6 +361,7 @@ class Woocommerce_CiviCRM_Manager {
 				'note' => $this->create_detail_string( $order ),
 				"$sales_tax_field_id" => $sales_tax,
 				"$shipping_cost_field_id" => $shipping_cost,
+				'campaign_id' => $campaign_name,
 			);
 		} else {
 			$params = array(
@@ -363,6 +381,7 @@ class Woocommerce_CiviCRM_Manager {
 				'note' => $this->create_detail_string( $order ),
 				"$sales_tax_field_id" => $sales_tax,
 				"$shipping_cost_field_id" => $shipping_cost,
+				'campaign_id' => $campaign_name,
 			);
 		}
 

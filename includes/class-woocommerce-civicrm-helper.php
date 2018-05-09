@@ -47,6 +47,16 @@
 	 */
 	public $civicrm_states = array();
 
+
+	/**
+	 * CiviCRM campaigns.
+	 *
+	 * @since 2.2
+	 * @access public
+	 * @var array $campaigns The CiviCRM campaigns
+	 */
+	public $campaigns = array();
+
 	/**
 	 * Initialises this object.
 	 *
@@ -67,6 +77,7 @@
 		$this->financial_types = $this->get_financial_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();
+        $this->campaigns = $this->get_campaigns();
 		$this->mapped_location_types = $this->set_mapped_location_types();
 
 	}
@@ -286,6 +297,41 @@
 		}
 
 		return $civicrm_states;
+	}
+
+	/**
+	 * Get CiviCRM campaigns.
+	 *
+	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) )
+	 * @since 2.2
+	 */
+	private function get_campaigns(){
+
+		if( ! empty( $this->civicrm_campaigns ) ) return $this->civicrm_campaigns;
+
+		$params = array(
+			'sequential' => 1,
+			'return' => array("id", "name"),
+			'is_active' => 1,
+			'status_id' => array('NOT IN' => array("Completed", "Cancelled")),
+			'options' => array('sort' => "name"),
+		);
+
+		/**
+		 * Filter Campaigns params before calling the Civi's API.
+		 *
+		 * @since 2.2
+		 * @param array $params The params to be passsed to the API
+		 */
+		$campaignsResult = civicrm_api3( 'Campaign', 'get', apply_filters( 'woocommerce_civicrm_campaigns_params', $params ) );
+
+		$civicrm_campaigns = array(
+			__('None', 'woocommerce-civicrm')
+		);
+		foreach( $campaignsResult['values'] as $key => $value ) {
+			$civicrm_campaigns[$value['id']] = $value['name'];
+		}
+		return $civicrm_campaigns;
 	}
 
 	/**

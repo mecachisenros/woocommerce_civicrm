@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CiviCRM\n"
-"POT-Creation-Date: 2018-05-09 17:07+0200\n"
+"POT-Creation-Date: 2018-05-14 17:29+0200\n"
 "PO-Revision-Date: 2015-10-23 18:44+0100\n"
 "Last-Translator: Bastien Ho <bastien@avecnous.eu>\n"
 "Language-Team: Bastien Ho <bastien@avecnous.eu>\n"
@@ -17,6 +17,10 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
+
+#: includes/class-woocommerce-civicrm-helper.php:329
+msgid "None"
+msgstr ""
 
 #: includes/class-woocommerce-civicrm-manager.php:101
 msgid "Not able to update contribution"
@@ -46,6 +50,19 @@ msgstr ""
 msgid "Not able to create/update contact"
 msgstr ""
 
+#: includes/class-woocommerce-civicrm-manager.php:217
+msgid "Created new CiviCRM Phone of type %$1s: %2$s"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:241
+msgid "Created new CiviCRM Email of type %$1s: %2$s"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:281
+#, php-format
+msgid "Created new CiviCRM Address of type %1$s: %2$s"
+msgstr ""
+
 #: includes/class-woocommerce-civicrm-manager.php:287
 msgid "Not able to add/update address or phone"
 msgstr ""
@@ -54,7 +71,12 @@ msgstr ""
 msgid "Woocommerce Order - "
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:490
+#: includes/class-woocommerce-civicrm-manager.php:401
+#, php-format
+msgid "Contribution %s has been created in CiviCRM"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:525
 msgid "Not able to create custom group"
 msgstr ""
 
@@ -135,6 +157,6 @@ msgid ""
 "reconfigured."
 msgstr ""
 
-#: woocommerce-civicrm.php:302
+#: woocommerce-civicrm.php:301
 msgid "Settings"
 msgstr ""

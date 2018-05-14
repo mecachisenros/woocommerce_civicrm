@@ -214,7 +214,7 @@ class Woocommerce_CiviCRM_Manager {
 					if( ! $phone_exists ){
 						civicrm_api3( 'Phone', 'create', $phone );
 
-						$note = __( "Created new CiviCRM Phone of type {$address_type}: {$phone['phone']}", 'woocommerce-civicrm' );
+						$note = sprintf(__( 'Created new CiviCRM Phone of type %$1s: %2$s', 'woocommerce-civicrm' ), $address_type, $phone['phone']);
 						$order->add_order_note( $note );
 					}
 				}
@@ -238,7 +238,7 @@ class Woocommerce_CiviCRM_Manager {
 					}
 					if( ! $email_exists ){
 					civicrm_api3( 'Email', 'create', $email );
-						$note = __( "Created new CiviCRM Email of type {$address_type}: {$email['email']}", 'woocommerce-civicrm' );
+						$note = sprintf(__( 'Created new CiviCRM Email of type %$1s: %2$s', 'woocommerce-civicrm' ), $address_type, $email['email']);
 						$order->add_order_note( $note );
 					}
 				}
@@ -278,7 +278,7 @@ class Woocommerce_CiviCRM_Manager {
 					if( ! $address_exists ){
 						civicrm_api3( 'Address', 'create', $address );
 
-						$note = __( "Created new CiviCRM Address of type {$address_type}: {$address['street_address']}", 'woocommerce-civicrm' );
+						$note = sprintf(__( 'Created new CiviCRM Address of type %1$s: %2$s', 'woocommerce-civicrm' ), $address_type, $address['street_address']);
 						$order->add_order_note( $note );
 					}
 				}

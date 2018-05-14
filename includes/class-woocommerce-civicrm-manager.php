@@ -397,6 +397,22 @@ class Woocommerce_CiviCRM_Manager {
 			// Log the error, but continue.
 			return FALSE;
 		}
+		// Adds order note in reference to the created contribution
+		$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'eelv_base'),
+			'<a href="' .add_query_arg(
+				array(
+					'page' => 'CiviCRM',
+					'q' => 'civicrm/contact/view/contribution',
+					'reset' => '1',
+					'id' => $contribution['id'],
+					'cid' => $cid,
+					'action' => 'view',
+					'context' => 'dashboard',
+					'selectedChild' => 'contribute'
+				),
+				admin_url('admin.php')
+			). '">' . $contribution['id'] . '</a>')
+		);
 
 		return TRUE;
 	}

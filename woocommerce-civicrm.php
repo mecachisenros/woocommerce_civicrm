@@ -186,7 +186,7 @@ class Woocommerce_CiviCRM {
 	private function check_dependencies() {
 
 		// Bail if Woocommerce is not available
-		if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
+		if ( !is_multisite() && ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
 			$this->display_woocommerce_required_notice();
 		}
 		// Bail if CiviCRM is not available

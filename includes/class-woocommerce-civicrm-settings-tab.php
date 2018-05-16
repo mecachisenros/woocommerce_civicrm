@@ -77,7 +77,7 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'desc' => __( 'Below are the values used when creating contribution/address in CiviCRM.', 'woocommerce-civicrm' ),
 				'id' => 'woocommerce_civicrm_section_title'
 			),
-			'woocommerce_civicrm_blog_id' => is_multisite() ? array(
+			'woocommerce_civicrm_blog_id' => !is_multisite() ? array(
 				'name' => __( 'Blog ID', 'woocommerce-civicrm' ),
 				'type' => 'hidden',
 				'id' => 'woocommerce_civicrm_blog_id'

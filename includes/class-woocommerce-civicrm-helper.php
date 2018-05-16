@@ -411,4 +411,22 @@
 		if( $value == 'yes' ) return true;
 		return false;
 	}
+
+	/**
+	 * Get WordPress sites on a multisite Installation
+	 *
+	 * @return array $sites [$site_id: $site_name]
+	 */
+	public function get_sites(){
+		$sites = array();
+		if(is_multisite()){
+			$wp_sites = get_sites(array(
+				'orderby' => 'domain',
+			));
+			foreach ($wp_sites as $site) {
+				$sites[$site->blog_id] = $site->domain;
+			}
+		}
+		return $sites;
+	}
 }

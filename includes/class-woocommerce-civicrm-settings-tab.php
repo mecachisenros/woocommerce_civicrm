@@ -31,6 +31,48 @@ class Woocommerce_CiviCRM_Settings_Tab {
 		add_action( 'woocommerce_update_options_woocommerce_civicrm', array( $this, 'update_settings_fields' ) );
 	}
 
+	public function register_settings(){
+		register_setting( 'woocommerce-civicrm-setting', 'woocommerce-civicrm-setting' );
+
+        add_settings_section(
+        'woocommerce-civicrm-setting-main',
+            __('Woocommerce civiCRM', 'woocommerce-civicrm'),
+            array(&$this, 'settings_section_callback'),
+            'woocommerce-civicrm-setting'
+        );
+
+        add_settings_field(
+                'woocommerce_civicrm_shop_blog_id',
+                __('Main Woocommerce blog ID', 'woocommerce-civicrm'),
+                array(&$this, 'settings_field_default_callback'),
+                'woocommerce-civicrm-setting',
+                'woocommerce-civicrm-setting-main',
+                array( 'name' => 'blog_id', 'network'=>true, 'description'=>__('', 'woocommerce-civicrm') )
+        );
+	}
+
+	function settings_section_callback( $arg ) {
+        // Nothing to do here
+    }
+
+    function settings_field_default_callback($args){
+        $options = $this->Options();
+        $option = 'wpsyn';
+        if(isset($args['network']) && $args['network']){
+            $option =  'wpsynmu';
+        }
+        elseif(isset($options['network'][$args['name']])){
+            echo '<code>'.$options['network'][$args['name']].'</code>';
+            return;
+        }
+        ?>
+        <input name="<?php echo $option; ?>[<?php echo $args['name']; ?>]" id="<?php echo $args['name']; ?>" value="<?php echo ($options[$args['name']] ? : ''); ?>" class="regular-text"/>
+        <?php if(isset($args['description']) && $args['description']): ?>
+        <div class="description"><?php echo $args['description']; ?></div>
+        <?php endif; ?>
+        <?php
+    }
+
 	/**
 	 * Add CiviCRM tab to the settings page.
 	 *
@@ -156,4 +198,21 @@ class Woocommerce_CiviCRM_Settings_Tab {
 		return apply_filters( 'woocommerce_civicrm_admin_settings_fields', $options );
 
 	}
+
+
+	function network_settings(){
+        ?>
+    <div class="wrap">
+        <h2><?php _e('Woocommerce CiviCRM settings', 'woocommerce-civicrm' ); ?></h2>
+        <?php settings_errors(); ?>
+        <form action="edit.php?action=woocommerce_civicrm_network_settings" method="post">
+        <?php wp_nonce_field('woocommerce-civicrm-settings', 'woocommerce-civicrm-settings'); ?>
+        <?php settings_fields( 'woocommerce-civicrm-settings' ); ?>
+        <?php do_settings_sections('woocommerce-civicrm-settingss'); ?>
+        <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+
+    }
 }

@@ -147,7 +147,16 @@ class Woocommerce_CiviCRM {
 		$this->register_hooks();
 		$this->enable_translation();
 
+		$plugin_name = basename(__DIR__).'/'.basename(__FILE__);
+        $is_network_installed = (function_exists('is_plugin_active_for_network') && is_plugin_active_for_network( $plugin_name ));
+        if ($is_network_installed) {
+            add_action('network_admin_menu', array( $this, 'network_admin_menu'));
+        }
 	}
+
+	function network_admin_menu(){
+        add_submenu_page('settings.php', __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), 'manage_network_options', 'woocommerce-civicrm-settings', array( $this->settings_tab, 'network_settings'));
+    }
 
 	/**
 	 * Define constants.

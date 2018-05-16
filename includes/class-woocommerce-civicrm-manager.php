@@ -626,7 +626,6 @@ class Woocommerce_CiviCRM_Manager {
 		}
 		$order_campaign = get_post_meta($order->get_id(), '_woocommerce_civicrm_campaign_id', true);
 		?>
-		<p class="form-field form-field-wide wc-civicrmcampaign"><?php var_dump($order_campaign); ?>
 			<label for="order_civicrmcampaign"><?php _e('CiviCRM Campaign', 'woocommerce-civicrm'); ?></label>
 			<select id="order_civicrmcampaign" name="order_civicrmcampaign" data-placeholder="<?php esc_attr(__('CiviCRM Campaign', 'woocommerce-civicrm')); ?>">
 				<option value=""></option>

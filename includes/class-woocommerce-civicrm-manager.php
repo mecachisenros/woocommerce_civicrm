@@ -28,6 +28,33 @@ class Woocommerce_CiviCRM_Manager {
 
 		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
+		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
+		add_action('save_post', array( $this, 'save_post'), 10);
+
+	}
+
+	/**
+	 * Action called when a post is saved
+	 *
+	 * @param int $post_id
+	 * @since 2.2
+	 */
+	public function save_post( $post_id ){
+		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+			return;
+
+		if (get_post_type( $post_id ) !== 'shop_order' )
+			return;
+
+		// Add the campaign ID to order
+		if(false !== $campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)){
+			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $campaign_id ));
+		}
+
+		// In dashbord context, woocommerce_checkout_order_processed is not called after a creation
+		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new')) {
+			$this->action_order( $post_id );
+		}
 
 	}
 
@@ -327,7 +354,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		$campaign_name = '';
 		$woocommerce_civicrm_campaign_id = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
-		if(false !== $local_campaign_id = get_post_meta('woocommerce_civicrm_campaign_id', $order->ID, true)){
+		if(false !== $local_campaign_id = get_post_meta($order->ID, '_woocommerce_civicrm_campaign_id', true)){
 			$woocommerce_civicrm_campaign_id = $local_campaign_id; // Use the local CiviCRM campaign ID if possible
 		}
 		if($woocommerce_civicrm_campaign_id){
@@ -551,5 +578,32 @@ class Woocommerce_CiviCRM_Manager {
 		);
 		$shipping_field = civicrm_api3( 'Custom_field', 'create', $params );
 		add_option( 'woocommerce_civicrm_shipping_cost_field_id', $shipping_field['id'] );
+	}
+
+	/**
+	 * Adds a custom field to set a campaign
+	 *
+	 * @param  object $order Woocommerce order
+	 * @since 2.2
+	 */
+	public function order_data_after_order_details($order){
+		if($order->get_status() === 'auto-draft'){
+			wp_nonce_field('woocommerce_civicrm_order_new', 'woocommerce_civicrm_order_new');
+		}
+		else{
+			wp_nonce_field('woocommerce_civicrm_order_edit', 'woocommerce_civicrm_order_edit');
+		}
+		$order_campaign = get_post_meta($order->get_id(), '_woocommerce_civicrm_campaign_id', true);
+		?>
+		<p class="form-field form-field-wide wc-civicrmcampaign"><?php var_dump($order_campaign); ?>
+			<label for="order_civicrmcampaign"><?php _e('CiviCRM Campaign', 'woocommerce-civicrm'); ?></label>
+			<select id="order_civicrmcampaign" name="order_civicrmcampaign" data-placeholder="<?php esc_attr(__('CiviCRM Campaign', 'woocommerce-civicrm')); ?>">
+				<option value=""></option>
+				<?php foreach (WCI()->helper->campaigns as $campaign_id => $campaign_name): ?>
+				<option value="<?php esc_attr_e($campaign_id); ?>" <?php selected($campaign_id, $order_campaign, true); ?>><?php echo $campaign_name; ?></option>
+				<?php endforeach; ?>
+			</select>
+		</p>
+		<?php
 	}
 }

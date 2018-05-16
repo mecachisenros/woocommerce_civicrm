@@ -17,6 +17,34 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	}
 
 	/**
+	 * Moves to main woocommerce site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function fix_site(){
+		if(!is_multisite())
+			return;
+
+		$wc_site_id = get_option( 'woocommerce_civicrm_blog_id' );
+		if($wc_site_id == get_current_blog_id())
+			return;
+
+		switch_to_blog($wc_site_id);
+	}
+
+	/**
+	 * Moves to current site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function unfix_site(){
+		if(!is_multisite())
+			return;
+
+		restore_current_blog();
+	}
+
+	/**
 	 * Register hooks
 	 *
 	 * @since 0.2
@@ -39,11 +67,11 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param object $config The CiviCRM config object
 	 */
 	public function register_custom_php_directory( &$config ){
-
+		$this->fix_site();
 		$custom_path = WOOCOMMERCE_CIVICRM_PATH . 'custom_php';
 		$include_path = $custom_path . PATH_SEPARATOR . get_include_path();
 		set_include_path( $include_path );
-
+		$this->unfix_site();
 	}
 
 	/**
@@ -53,12 +81,12 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param object $config The CiviCRM config object
 	 */
 	public function register_custom_template_directory( &$config ){
-
+		$this->fix_site();
 		$custom_path = WOOCOMMERCE_CIVICRM_PATH . 'custom_tpl';
 		$template = CRM_Core_Smarty::singleton()->addTemplateDir( $custom_path );
 		$include_template_path = $custom_path . PATH_SEPARATOR . get_include_path();
 		set_include_path( $include_template_path );
-
+		$this->unfix_site();
 	}
 
   	/**
@@ -68,7 +96,9 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param array $files The array for files used to build the menu
 	 */
   	public function register_callback( &$files ){
+		$this->fix_site();
 		$files[] = WOOCOMMERCE_CIVICRM_PATH . 'xml/menu.xml';
+		$this->unfix_site();
 	}
 
 	/**
@@ -85,7 +115,9 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			return;
 		}
 
+		$this->fix_site();
 		$orders = $this->get_orders( $uid );
+		$this->unfix_site();
 
 		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid");
 		$tabs[] = array( 'id'    => 'woocommerce-orders',
@@ -104,7 +136,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @return array $orders The orders
 	 */
 	public function get_orders( $uid ) {
-
+		$this->fix_site();
 		$customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
 			'numberposts' => -1,
 			'meta_key'    => '_customer_user',
@@ -129,7 +161,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			$orders[$customer_order->ID]['order_total'] = $total;
 			$orders[$customer_order->ID]['order_link'] = $site_url."/wp-admin/post.php?action=edit&post=".$order->get_order_number();
 		}
-
+		$this->unfix_site();
 		if( ! empty( $orders ) ) return $orders;
 
 		return false;

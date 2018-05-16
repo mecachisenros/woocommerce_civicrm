@@ -78,11 +78,11 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'id' => 'woocommerce_civicrm_section_title'
 			),
 			'woocommerce_civicrm_blog_id' => !is_multisite() ? array(
-				'name' => __( 'Blog ID', 'woocommerce-civicrm' ),
+				'name' => __( 'Woocommerce Blog ID', 'woocommerce-civicrm' ),
 				'type' => 'hidden',
 				'id' => 'woocommerce_civicrm_blog_id'
 			) : array(
-				'name' => __( 'Blog ID', 'woocommerce-civicrm' ),
+				'name' => __( 'Woocommerce Blog ID', 'woocommerce-civicrm' ),
 				'type' => 'select',
 				'options' => WCI()->helper->get_sites(),
 				'id'   => 'woocommerce_civicrm_blog_id'

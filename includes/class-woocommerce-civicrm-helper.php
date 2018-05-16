@@ -418,7 +418,7 @@
 	 * @return array $sites [$site_id: $site_name]
 	 */
 	public function get_sites(){
-		$sites = array();
+		$sites = array('');
 		if(is_multisite()){
 			$wp_sites = get_sites(array(
 				'orderby' => 'domain',

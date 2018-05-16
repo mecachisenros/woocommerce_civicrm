@@ -364,8 +364,13 @@ class Woocommerce_CiviCRM_Manager {
 				'id' => $woocommerce_civicrm_campaign_id,
 				'options' => array('limit' => 1),
 			);
-			$campaignsResult = civicrm_api3( 'Campaign', 'get', $params );
-			$campaign_name = $campaignsResult['values'][0]['name'];
+			try{
+				$campaignsResult = civicrm_api3( 'Campaign', 'get', $params );
+				$campaign_name = isset($campaignsResult['values'][0]['name']) ? $campaignsResult['values'][0]['name'] : '';
+			} catch ( CiviCRM_API3_Exception $e ){
+				CRM_Core_Error::debug_log_message( __( 'Not able to fetch campaign', 'woocommerce-civicrm' ) );
+				return FALSE;
+			}
 		}
 
 

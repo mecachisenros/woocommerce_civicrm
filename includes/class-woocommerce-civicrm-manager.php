@@ -48,7 +48,7 @@ class Woocommerce_CiviCRM_Manager {
 			return;
 
 		// Add the campaign ID to order
-		if(false !== $campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)){
+		if((false !== $campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $campaign_id){
 			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $campaign_id ));
 		}
 
@@ -698,6 +698,7 @@ class Woocommerce_CiviCRM_Manager {
 	private function utm_to_order( $order_id ){
 		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) {
 			update_post_meta($order_id, '_woocommerce_civicrm_campaign_id', esc_attr( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ));
+			setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 		}
 	}
 

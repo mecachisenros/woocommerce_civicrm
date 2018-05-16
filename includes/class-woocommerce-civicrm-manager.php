@@ -26,6 +26,7 @@ class Woocommerce_CiviCRM_Manager {
 	 */
 	public function register_hooks(){
 
+		add_action('init', array( $this, 'check_utm'));
 		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
@@ -331,6 +332,7 @@ class Woocommerce_CiviCRM_Manager {
 		$invoice_id = $order->get_id() . '_woocommerce';
 
 		$this->create_custom_contribution_fields();
+		$this->utm_to_order( $order->get_id() );
 
 		$sales_tax_field_id = 'custom_' . get_option( 'woocommerce_civicrm_sales_tax_field_id' );
 		$shipping_cost_field_id = 'custom_' . get_option( 'woocommerce_civicrm_shipping_cost_field_id' );
@@ -387,7 +389,7 @@ class Woocommerce_CiviCRM_Manager {
 				'total_amount' => $rounded_subtotal,
 				'trxn_id' => $txn_id,
 				'invoice_id' => $invoice_id,
-				'source' => $this->create_detail_string( $order ),
+				'source' => $this->generate_source( $order ),
 				'receive_date' => 'now',
 				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
 				'note' => $this->create_detail_string( $order ),
@@ -407,7 +409,7 @@ class Woocommerce_CiviCRM_Manager {
 				'total_amount' => $rounded_total,
 				'trxn_id' => $txn_id,
 				'invoice_id' => $invoice_id,
-				'source' => $this->create_detail_string( $order ),
+				'source' => $this->generate_source( $order ),
 				'receive_date' => 'now',
 				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
 				'note' => $this->create_detail_string( $order ),
@@ -417,6 +419,9 @@ class Woocommerce_CiviCRM_Manager {
 			);
 		}
 
+		// Flush UTM cookies
+		$this->delete_utm_cookies();
+
 		try {
 			/**
 		 * Filter Contribution params before calling the Civi's API.
@@ -424,7 +429,7 @@ class Woocommerce_CiviCRM_Manager {
 		 * @since 2.0
 		 * @param array $params The params to be passsed to the API
 		 */
-			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );			
+			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
 			// Adds order note in reference to the created contribution
 			$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'eelv_base'),
 				'<a href="' .add_query_arg(
@@ -530,6 +535,27 @@ class Woocommerce_CiviCRM_Manager {
 	}
 
 	/**
+	 * Generates a string to define contribution source.
+	 *
+	 * @param  object $order The order object
+	 * @since 2.2
+	 */
+	public function generate_source( $order ){
+		// Default is the order Type
+		// Until 2.2, contribution source was exactly the same as contribution note.
+		$source = $order->get_type();
+		// Checks if users comes from a campaign
+		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ] ) {
+			$source =  esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ]);
+		}
+		// Append medium UTM if present
+		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) {
+			$source .=  ' / '.esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ]);
+		}
+		return $source;
+	}
+
+	/**
 	 * Function to create sales tax and shipping cost custom fields for contribution.
 	 *
 	 * @since 2.0
@@ -610,5 +636,81 @@ class Woocommerce_CiviCRM_Manager {
 			</select>
 		</p>
 		<?php
+	}
+
+	/**
+	 * Action to check if UTM parameters are passed in URL (front only)
+	 *
+	 * @since 2.2
+	 */
+	public function check_utm(){
+		if (is_admin())
+			return;
+
+		if(isset($_GET['utm_campaign']) || isset($_GET['utm_source']) || isset($_GET['utm_medium']) ){
+			$this->save_utm_cookies();
+		}
+	}
+
+	/**
+	 * Save UTM parameters to cookies
+	 *
+	 * @since 2.2
+	 */
+	private function save_utm_cookies(){
+		$expire 	= apply_filters( 'woocommerce_civicrm_utm_cookie_expire', 0 );
+		$secure 	= ( 'https' === parse_url( home_url(), PHP_URL_SCHEME ) );
+
+		if(false !== $campaign = filter_input(INPUT_GET, 'utm_campaign')){
+			try {
+				$params = array(
+					'sequential' => 1,
+					'return' => array("id"),
+					'name' => esc_attr($campaign),
+				);
+				$campaignsResult = civicrm_api3( 'Campaign', 'get', $params );
+				if($campaignsResult && isset($campaignsResult['values'][0]['id'])){
+					setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, $campaignsResult['values'][0]['id'], $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+				}
+				else{
+					// Remove cookie if campaign is invalid
+					setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', time() - YEAR_IN_SECONDS );
+				}
+			} catch ( CiviCRM_API3_Exception $e ){
+				CRM_Core_Error::debug_log_message( __( 'Not able to fetch campaign', 'woocommerce-civicrm' ) );
+				return FALSE;
+			}
+		}
+		if(false !== $source = filter_input(INPUT_GET, 'utm_source')){
+			setcookie( 'woocommerce_civicrm_utm_source_' . COOKIEHASH, esc_attr($source), $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		}
+		if(false !== $medium = filter_input(INPUT_GET, 'utm_medium')){
+			setcookie( 'woocommerce_civicrm_utm_medium_' . COOKIEHASH, esc_attr($medium), $expire, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		}
+	}
+
+	/**
+	 * Saves UTM cookie to post meta
+	 *
+	 * @param int $order_id The order ID
+	 * @since 2.2
+	 */
+	private function utm_to_order( $order_id ){
+		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) {
+			update_post_meta($order_id, '_woocommerce_civicrm_campaign_id', esc_attr( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ));
+		}
+	}
+
+	/**
+	 * Delete UTM cookies
+	 *
+	 * @since 2.2
+	 */
+	private function delete_utm_cookies(){
+		// Remove any existing cookies.
+		$past = time() - YEAR_IN_SECONDS;
+		setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie( 'woocommerce_civicrm_utm_source_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
+		setcookie( 'woocommerce_civicrm_utm_medium_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 	}
 }

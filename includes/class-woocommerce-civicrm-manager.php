@@ -424,27 +424,27 @@ class Woocommerce_CiviCRM_Manager {
 		 * @since 2.0
 		 * @param array $params The params to be passsed to the API
 		 */
-			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
+			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );			
+			// Adds order note in reference to the created contribution
+			$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'eelv_base'),
+				'<a href="' .add_query_arg(
+					array(
+						'page' => 'CiviCRM',
+						'q' => 'civicrm/contact/view/contribution',
+						'reset' => '1',
+						'id' => $contribution['id'],
+						'cid' => $cid,
+						'action' => 'view',
+						'context' => 'dashboard',
+						'selectedChild' => 'contribute'
+					),
+					admin_url('admin.php')
+				). '">' . $contribution['id'] . '</a>')
+			);
 		} catch ( CiviCRM_API3_Exception $e ) {
 			// Log the error, but continue.
 			return FALSE;
 		}
-		// Adds order note in reference to the created contribution
-		$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'eelv_base'),
-			'<a href="' .add_query_arg(
-				array(
-					'page' => 'CiviCRM',
-					'q' => 'civicrm/contact/view/contribution',
-					'reset' => '1',
-					'id' => $contribution['id'],
-					'cid' => $cid,
-					'action' => 'view',
-					'context' => 'dashboard',
-					'selectedChild' => 'contribute'
-				),
-				admin_url('admin.php')
-			). '">' . $contribution['id'] . '</a>')
-		);
 
 		return TRUE;
 	}

@@ -133,11 +133,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			return;
 		}
 
-		//$this->fix_site();
-	    $orders = [1];//$this->get_orders( $uid );
 		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid&no_redirect=1");
-		//$url = site_url($url);
-	//	$this->unfix_site();
 
 		$tabs[] = array( 'id'    => 'woocommerce-orders',
 			'url'   => $url,

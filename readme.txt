@@ -1,5 +1,5 @@
 === Woocommerce CiviCRM ===
-Contributors: veda-consulting, mecachisenros, rajeshrhino, JoeMurray, kcristiano, cdhassell
+Contributors: veda-consulting, mecachisenros, rajeshrhino, JoeMurray, kcristiano, cdhassell, bastho
 Tags: civicrm, woocommerce, integration
 Requires at least: 4.5
 Tested up to: 4.8
@@ -40,6 +40,15 @@ Install this Wordpress plugin as usual. More information about installing plugin
 
 
 == Changelog ==
+
+= 2.2 =
+* Added Campaign support for contributions
+    * UTM support (utm_campaign, utm_source and utm_medium)
+* Added Multisite support
+* Updated contribution source: default to order type. Contribution source was the same as contrinution note
+* Fixed number format for contribution amount must match CiviCRM Settings
+* Fixed i18n
+* Added French L10n
 
 = 2.1 =
 * More refactoring

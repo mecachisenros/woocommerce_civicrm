@@ -198,6 +198,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	public function get_orders( $uid ) {
 		$customer_orders = $this->_get_orders( $uid );
 		$orders = array();
+		$date_format = get_option('date_format').' '.get_option('time_format');
 
 		// If woocommerce is in another blog, ftech the order remotely
 		// FIXME: for now, Partial datas
@@ -210,7 +211,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 				// $item_count = $order->get_item_count();
 				// $total = $order->get_total();
 				$orders[$customer_order->ID]['order_number'] = $order->ID;
-				$orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->post_date ));
+				$orders[$customer_order->ID]['order_date'] = date( $date_format, strtotime( $order->post_date ));
 				$orders[$customer_order->ID]['order_billing_name'] = get_post_meta($order->ID, '_billing_first_name', true).' '.get_post_meta($order->ID, '_billing_last_name', true);
 				$orders[$customer_order->ID]['order_shipping_name'] = get_post_meta($order->ID, '_shipping_first_name', true).' '.get_post_meta($order->ID, '_shipping_last_name', true);
 				$orders[$customer_order->ID]['item_count'] = '--';
@@ -232,7 +233,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			$item_count = $order->get_item_count();
 			$total = $order->get_total();
 			$orders[$customer_order->ID]['order_number'] = $order->get_order_number();
-			$orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->get_date_created() ));
+			$orders[$customer_order->ID]['order_date'] = date( $date_format, strtotime( $order->get_date_created() ));
 			$orders[$customer_order->ID]['order_billing_name'] = $order->get_formatted_billing_full_name();
 			$orders[$customer_order->ID]['order_shipping_name'] = $order->get_formatted_shipping_full_name();
 			$orders[$customer_order->ID]['item_count'] = $item_count;

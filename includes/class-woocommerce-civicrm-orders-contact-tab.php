@@ -17,17 +17,35 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	}
 
 	/**
+	 * Checks if Woocommerce is activated on another blog
+	 *
+	 * @since 2.2
+	 */
+	private function is_remote_wc(){
+		if( false == WCI()->is_network_installed )
+			return false;
+
+		$option = 'woocommerce_civicrm_network_settings';
+		$options = get_site_option($option);
+		if(!$options)
+			return false;
+
+		$wc_site_id = $options['wc_blog_id'];
+		if($wc_site_id == get_current_blog_id())
+			return false;
+
+		return $wc_site_id;
+	}
+
+	/**
 	 * Moves to main woocommerce site if multisite installation
 	 *
 	 * @since 2.2
 	 */
 	private function fix_site(){
-		if(!is_multisite())
+		if( false == $wc_site_id = $this->is_remote_wc() ){
 			return;
-
-		$wc_site_id = get_option( 'woocommerce_civicrm_blog_id' );
-		if($wc_site_id == get_current_blog_id())
-			return;
+		}
 
 		switch_to_blog($wc_site_id);
 	}
@@ -115,17 +133,59 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			return;
 		}
 
-		$this->fix_site();
-		$orders = $this->get_orders( $uid );
-		$this->unfix_site();
+		//$this->fix_site();
+	    $orders = [1];//$this->get_orders( $uid );
+		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid&no_redirect=1");
+		//$url = site_url($url);
+	//	$this->unfix_site();
 
-		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid");
 		$tabs[] = array( 'id'    => 'woocommerce-orders',
 			'url'   => $url,
 			'title' => 'Woocommerce Orders',
-			'count' => count($orders), //$order_count,
+			'count' => $this->count_orders($uid),
 			'weight' => 99
 		);
+	}
+
+	/**
+	 * Get Customer raw orders.
+	 *
+	 * @since 2.2
+	 * @param int $uid The User id for a contact (UFMatch)
+	 * @return array $orders The raw orders
+	 */
+	private function _get_orders( $uid ){
+		$this->fix_site();
+		$order_statuses = apply_filters( 'wc_order_statuses', array(
+			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
+			'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+			'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
+			'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+			'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+			'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+		));
+		$customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
+			'numberposts' => -1,
+			'meta_key'    => '_customer_user',
+			'meta_value'  => $uid,
+			'post_type'   => 'shop_order',
+			'post_status' => array_keys( $order_statuses )
+		) ) );
+		$this->unfix_site();
+
+		return $customer_orders;
+	}
+
+	/**
+	 * Get Customer orders count.
+	 *
+	 * @since 2.2
+	 * @param int $uid The User id for a contact (UFMatch)
+	 * @return int $orders_count The number of orders
+	 */
+	public function count_orders( $uid ){
+		return count($this->_get_orders( $uid ));
 	}
 
 	/**
@@ -136,21 +196,39 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @return array $orders The orders
 	 */
 	public function get_orders( $uid ) {
-		$this->fix_site();
-		$customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
-			'numberposts' => -1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $uid,
-			'post_type'   => 'shop_order',
-			'post_status' => array_keys( wc_get_order_statuses() )
-		) ) );
-
-		$site_url = get_site_url();
+		$customer_orders = $this->_get_orders( $uid );
 		$orders = array();
+
+		// If woocommerce is in another blog, ftech the order remotely
+		// FIXME: for now, Partial datas
+		// TODO: Fetch real datas
+		if( $this->is_remote_wc() ){
+			$this->fix_site();
+			$site_url = get_site_url();
+			foreach ( $customer_orders as $customer_order ) {
+				$order = $customer_order;
+				// $item_count = $order->get_item_count();
+				// $total = $order->get_total();
+				$orders[$customer_order->ID]['order_number'] = $order->ID;
+				$orders[$customer_order->ID]['order_date'] = date( 'Y-m-d', strtotime( $order->post_date ));
+				$orders[$customer_order->ID]['order_billing_name'] = get_post_meta($order->ID, '_billing_first_name', true).' '.get_post_meta($order->ID, '_billing_last_name', true);
+				$orders[$customer_order->ID]['order_shipping_name'] = get_post_meta($order->ID, '_shipping_first_name', true).' '.get_post_meta($order->ID, '_shipping_last_name', true);
+				$orders[$customer_order->ID]['item_count'] = '--';
+				$orders[$customer_order->ID]['order_total'] = get_post_meta($order->ID, '_order_total', true);
+				$orders[$customer_order->ID]['order_status'] = $order->post_status;
+				$orders[$customer_order->ID]['order_link'] = $site_url."/wp-admin/post.php?action=edit&post=".$order->ID;
+			}
+			return $orders;
+
+			$this->unfix_site();
+		}
+
+		// Else continue the main way
+		$site_url = get_site_url();
 		foreach ( $customer_orders as $customer_order ) {
 			$order = new WC_Order($customer_order);
 			//$order->populate( $customer_order );
-			$status = get_term_by( 'slug', $order->get_status(), 'shop_order_status' );
+			//$status = get_term_by( 'slug', $order->get_status(), 'shop_order_status' );
 			$item_count = $order->get_item_count();
 			$total = $order->get_total();
 			$orders[$customer_order->ID]['order_number'] = $order->get_order_number();
@@ -159,9 +237,9 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			$orders[$customer_order->ID]['order_shipping_name'] = $order->get_formatted_shipping_full_name();
 			$orders[$customer_order->ID]['item_count'] = $item_count;
 			$orders[$customer_order->ID]['order_total'] = $total;
+			$orders[$customer_order->ID]['order_status'] = $order->get_status();
 			$orders[$customer_order->ID]['order_link'] = $site_url."/wp-admin/post.php?action=edit&post=".$order->get_order_number();
 		}
-		$this->unfix_site();
 		if( ! empty( $orders ) ) return $orders;
 
 		return false;

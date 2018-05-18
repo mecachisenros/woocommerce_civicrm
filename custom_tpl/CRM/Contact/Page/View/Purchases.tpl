@@ -15,7 +15,7 @@
 <tbody>
 {foreach from=$orders item=row}
 {assign var=id value=$row.order_number}
-<tr>
+<tr class="{$row.order_status}">
   <td>{$row.order_number}</td>
   <td>{$row.order_date}</td>
   <td>{$row.order_billing_name}</td>

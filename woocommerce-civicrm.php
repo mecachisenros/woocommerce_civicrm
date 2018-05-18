@@ -97,13 +97,28 @@ class Woocommerce_CiviCRM {
 	public $states_replacement;
 
 	/**
+	 * Plugin activated in network context
+	 *
+	 * @since 2.2
+	 * @access public
+	 * @var bool $is_network_installed
+	 */
+	public $is_network_installed;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 2.1
 	 */
 	function __construct() {
+		// Makes sure the plugin is defined before trying to use it
+        if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+            require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+        }
+		$plugin_name = basename(__DIR__).'/'.basename(__FILE__);
+        $this->is_network_installed = is_plugin_active_for_network( $plugin_name );
 
-		$this->check_dependencies();
+		add_action( 'admin_init', array( $this, 'check_dependencies' ), 10 );
 		$this->define_constants();
 		$this->include_files();
 		$this->plugin = plugin_basename( __FILE__ );
@@ -147,9 +162,7 @@ class Woocommerce_CiviCRM {
 		$this->register_hooks();
 		$this->enable_translation();
 
-		$plugin_name = basename(__DIR__).'/'.basename(__FILE__);
-        $is_network_installed = (function_exists('is_plugin_active_for_network') && is_plugin_active_for_network( $plugin_name ));
-        if ($is_network_installed) {
+        if ($this->is_network_installed) {
             add_action('network_admin_menu', array( $this, 'network_admin_menu'));
         }
 	}
@@ -183,7 +196,7 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 * @return bool True if dependencies exist, false otherwise
 	 */
-	private function check_dependencies() {
+	public function check_dependencies() {
 
 		// Bail if Woocommerce is not available
 		if ( !is_multisite() && ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){

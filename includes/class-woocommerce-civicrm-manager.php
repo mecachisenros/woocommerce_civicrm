@@ -351,6 +351,29 @@ class Woocommerce_CiviCRM_Manager {
 		// So for now...
 		$rounded_subtotal = $rounded_total - $sales_tax;
 
+		// Ensure number format is Civi compliant
+		$decimal_separator = '.';
+		$thousand_separator = '';
+		try{
+			$civi_decimal_separator = civicrm_api3('Setting', 'getvalue', array(
+			  'sequential' => 1,
+			  'name' => "monetaryDecimalPoint",
+			));
+			$civi_thousand_separator = civicrm_api3('Setting', 'getvalue', array(
+			  'sequential' => 1,
+			  'name' => "monetaryThousandSeparator",
+			));
+			if(is_string($civi_decimal_separator)){
+				$decimal_separator = $civi_decimal_separator;
+			}
+			if(is_string($civi_thousand_separator)){
+				$thousand_separator = $civi_thousand_separator;
+			}
+		} catch ( CiviCRM_API3_Exception $e ){
+			CRM_Core_Error::debug_log_message( __( 'Not able to fetch monetary settings', 'woocommerce-civicrm' ) );
+		}
+		$rounded_subtotal = number_format($rounded_subtotal, 2, $decimal_separator, $thousand_separator);
+
 		$contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
 		$contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type
 

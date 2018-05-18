@@ -70,15 +70,15 @@ class Woocommerce_CiviCRM_Manager {
 		$order = new WC_Order( $order_id );
 
 		$cid = WCI()->helper->civicrm_get_cid( $order );
-  	if ( $cid === FALSE ) {
-			return;
-  	}
+		if ( $cid === FALSE ) {
+				return;
+		}
 
-  	$cid = $this->add_update_contact( $cid, $order );
+		$cid = $this->add_update_contact( $cid, $order );
 
-  	if ( $cid === FALSE ) {
-			return;
-  	}
+		if ( $cid === FALSE ) {
+				return;
+		}
 
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );

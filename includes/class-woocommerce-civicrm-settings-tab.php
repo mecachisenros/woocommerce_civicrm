@@ -57,7 +57,7 @@ class Woocommerce_CiviCRM_Settings_Tab {
                 array( $this, 'settings_field_select'),
                 'woocommerce-civicrm-settings-network',
                 'woocommerce-civicrm-settings-network-general',
-                array( 'name' => 'wc_blog_id', 'network'=>true, 'description'=>__('', 'woocommerce-civicrm') , 'options'=>WCI()->helper->get_sites())
+                array( 'name' => 'wc_blog_id', 'network'=>true, 'description'=>__('The shop on a multisite network', 'woocommerce-civicrm') , 'options'=>WCI()->helper->get_sites())
         );
 	}
 
@@ -217,7 +217,7 @@ class Woocommerce_CiviCRM_Settings_Tab {
 			'woocommerce_civicrm_replace_woocommerce_states' => array(
 				'name' => __( 'Replace Woocommerce States', 'woocommerce-civicrm' ),
 				'type' => 'checkbox',
-				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Counties with CiviCRM\'s States/Provinces, you WILL lose any existing State/County data for existing Customers. Any Woocommerce Settings that relay on State/County will have te be reconfigured.', 'woocommerce-civicrm' ),
+				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Countries with CiviCRM\'s States/Provinces, you WILL lose any existing State/Country data for existing Customers. Any Woocommerce Settings that relay on State/Country will have to be reconfigured.', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_replace_woocommerce_states'
       ),
 			'section_end' => array(

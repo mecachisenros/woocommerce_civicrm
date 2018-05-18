@@ -141,7 +141,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 
 		$tabs[] = array( 'id'    => 'woocommerce-orders',
 			'url'   => $url,
-			'title' => 'Woocommerce Orders',
+			'title' => __('Woocommerce Orders', 'woocommerce-civicrm'),
 			'count' => $this->count_orders($uid),
 			'weight' => 99
 		);

@@ -681,6 +681,9 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.2
 	 */
 	private function save_utm_cookies(){
+		if(defined( 'WP_CLI') && WP_CLI){
+			return;
+		}
 		$expire 	= apply_filters( 'woocommerce_civicrm_utm_cookie_expire', 0 );
 		$secure 	= ( 'https' === parse_url( home_url(), PHP_URL_SCHEME ) );
 
@@ -719,6 +722,9 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.2
 	 */
 	private function utm_to_order( $order_id ){
+		if(defined( 'WP_CLI') && WP_CLI){
+			return;
+		}
 		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) {
 			update_post_meta($order_id, '_woocommerce_civicrm_campaign_id', esc_attr( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ));
 			setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
@@ -731,6 +737,9 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.2
 	 */
 	private function delete_utm_cookies(){
+		if(defined( 'WP_CLI') && WP_CLI){
+			return;
+		}
 		// Remove any existing cookies.
 		$past = time() - YEAR_IN_SECONDS;
 		setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );

@@ -65,17 +65,18 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.0
 	 * @param int $order_id The order id
 	 */
-	 public function action_order( $order_id ){
+	 public function action_order( $order_id , $cid = NULL){
 
 		$order = new WC_Order( $order_id );
 
-		$cid = WCI()->helper->civicrm_get_cid( $order );
-		if ( $cid === FALSE ) {
-				return;
+		if($cid === NULL){
+			$cid = WCI()->helper->civicrm_get_cid( $order );
+			if ( $cid === FALSE ) {
+					return;
+			}
+
+			$cid = $this->add_update_contact( $cid, $order );
 		}
-
-		$cid = $this->add_update_contact( $cid, $order );
-
 		if ( $cid === FALSE ) {
 				return;
 		}

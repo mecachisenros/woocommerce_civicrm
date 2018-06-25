@@ -60,6 +60,11 @@ class Woocommerce_CiviCRM_Settings_Tab {
 	 */
 	public function update_settings_fields(){
 		woocommerce_update_options( $this->civicrm_settings_fields() );
+
+		// Cache data
+		if (isset($_POST['woocommerce_civicrm_cache_data']) && $_POST['woocommerce_civicrm_cache_data'] == 1) {
+			Woocommerce_CiviCRM_Helper::instance()->cache_civicrm_data();
+		}
 	}
 
 	/**
@@ -69,6 +74,8 @@ class Woocommerce_CiviCRM_Settings_Tab {
 	 * @return array $options The fields configuraion
 	 */
 	public function civicrm_settings_fields(){
+
+		$helper = new Woocommerce_CiviCRM_Helper();
 
 		$options = array(
 			'section_title' => array(
@@ -80,25 +87,25 @@ class Woocommerce_CiviCRM_Settings_Tab {
 			'woocommerce_civicrm_financial_type_id' => array(
 				'name' => __( 'Contribution Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
+				'options' => Woocommerce_CiviCRM_Helper::instance()->get_financial_types(),
 				'id'   => 'woocommerce_civicrm_financial_type_id'
 				),
 			'woocommerce_civicrm_financial_type_vat_id' => array(
 				'name' => __( 'Contribution Type VAT (Tax)', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
+				'options' => Woocommerce_CiviCRM_Helper::instance()->get_financial_types(),
 				'id'   => 'woocommerce_civicrm_financial_type_vat_id'
 			),
 			'woocommerce_civicrm_billing_location_type_id' => array(
 				'name' => __( 'Billing Location Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
+				'options' => Woocommerce_CiviCRM_Helper::instance()->get_address_location_types(),
 				'id'   => 'woocommerce_civicrm_billing_location_type_id'
 			),
 			'woocommerce_civicrm_shipping_location_type_id' => array(
 				'name' => __( 'Shipping Location Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
+				'options' => Woocommerce_CiviCRM_Helper::instance()->get_address_location_types(),
 				'id'   => 'woocommerce_civicrm_shipping_location_type_id'
 			),
 			'woocommerce_civicrm_sync_contact_address' => array(
@@ -124,7 +131,13 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'type' => 'checkbox',
 				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Counties with CiviCRM\'s States/Provinces, you WILL lose any existing State/County data for existing Customers. Any Woocommerce Settings that relay on State/County will have te be reconfigured.', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_replace_woocommerce_states'
-      ),
+			),
+			'woocommerce_civicrm_cache_data' => array(
+				'name' => __( 'Cache CiviCRM Data', 'woocommerce-civicrm' ),
+				'type' => 'checkbox',
+				'desc' => __( 'If enabled, this option will cache CiviCRM data (Countries, States, Address Location Types, etc.', 'woocommerce-civicrm' ),
+				'id'   => 'woocommerce_civicrm_cache_data'
+			),
 			'section_end' => array(
 				'type' => 'sectionend',
 				'id' => 'woocommerce_civicrm_section_end'

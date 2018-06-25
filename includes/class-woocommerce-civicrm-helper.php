@@ -56,6 +56,9 @@
 	 */
 	public $civicrm_states = array();
 
+	public $country_table_name = 'woocommerce_civicrm_country';
+	public $state_table_name = 'woocommerce_civicrm_state';
+
 	/**
 	 * Initialises this object.
 	 *
@@ -63,10 +66,15 @@
 	 */
 	public function __construct(){
 
-		$this->financial_types = $this->get_financial_types();
-		$this->location_types = $this->get_address_location_types();
-		$this->civicrm_states = $this->get_civicrm_states();
-		$this->mapped_location_types = $this->set_mapped_location_types();
+		// Prepare table names
+		global $wpdb;
+		$this->country_table_name = $wpdb->prefix.$this->country_table_name;
+		$this->state_table_name = $wpdb->prefix.$this->state_table_name;
+
+		//$this->financial_types = $this->get_financial_types();
+		//$this->location_types = $this->get_address_location_types();
+		//$this->civicrm_states = $this->get_civicrm_states();
+		//$this->mapped_location_types = $this->set_mapped_location_types();
 
 	}
 
@@ -286,21 +294,29 @@
 	 * Build multidimentional array of CiviCRM states | array( 'state_id' => array( 'name', 'id', 'abbreviation', 'country_id' ) )
 	 * @since 2.0
 	 */
-	private function get_civicrm_states(){
+	public function get_civicrm_states(){
 
 		if( ! empty( $this->civicrm_states ) ) return $this->civicrm_states;
 
-		$query = 'SELECT name,id,country_id,abbreviation FROM civicrm_state_province';
-
-		$dao = CRM_Core_DAO::executeQuery( $query );
 		$civicrm_states = array();
-		while( $dao->fetch() ){
-			$civicrm_states[$dao->id] = array(
-				'id' => $dao->id,
-				'name' => $dao->name,
-				'abbreviation' => $dao->abbreviation,
-				'country_id' => $dao->country_id
-			);
+
+		// Get states from cache, if set
+		if ($this->check_yes_no_value(get_option('woocommerce_civicrm_cache_data'))) {
+			$this->get_cached_civicrm_state($civicrm_states);
+		} else {
+			// If cache is not set, get states from civicrm
+			$query = 'SELECT id, name, country_id, abbreviation FROM civicrm_state_province';
+
+			$dao = CRM_Core_DAO::executeQuery( $query );
+
+			while( $dao->fetch() ){
+				$civicrm_states[$dao->id] = array(
+					'id' => $dao->id,
+					'name' => $dao->name,
+					'abbreviation' => $dao->abbreviation,
+					'country_id' => $dao->country_id
+				);
+			}
 		}
     
 		return $civicrm_states;
@@ -332,7 +348,7 @@
 	 * @since 2.0
 	 * @return array $financialTypes The financial types
 	 */
-	private function get_financial_types(){
+	public function get_financial_types(){
 
 		if ( isset( $this->financial_types ) ) return $this->financial_types;
 
@@ -364,7 +380,7 @@
 	 * @since 2.0
 	 * @return array $addressTypes The address location types
 	 */
-	private function get_address_location_types(){
+	public function get_address_location_types(){
 
 		if ( isset( $this->location_types ) ) return $this->location_types;
 
@@ -382,5 +398,146 @@
 	public function check_yes_no_value( $value ){
 		if( $value == 'yes' ) return true;
 		return false;
+	}
+
+	/**
+	 * Function to cache civicrm data
+	 */
+	public function cache_civicrm_data(){
+		// Cache civicrm country
+		$this->cache_civicrm_country();
+
+		// Cache civicrm country
+		$this->cache_civicrm_state();
+	}
+
+	/**
+	 * Function to cached civicrm country
+	 */
+	public function get_cached_civicrm_country(&$civicrm_countries){
+		global $wpdb;
+		// Check if country table exists in WP DB
+		if ($this->check_if_table_exists($this->country_table_name)) {
+			$query = "SELECT * FROM {$this->country_table_name} ORDER BY `name`";
+			$result = $wpdb->get_results($query);
+			foreach ($result as $instance) {
+				$civicrm_countries[$instance->id] = $instance->iso_code;
+			}
+		}
+	}
+
+	/**
+	 * Function to cached civicrm state
+	 */
+	public function get_cached_civicrm_state(&$civicrm_states){
+		global $wpdb;
+		// Check if state table exists in WP DB
+		if ($this->check_if_table_exists($this->state_table_name)) {
+			$query = "SELECT * FROM {$this->state_table_name} ORDER BY `name`";
+			$result = $wpdb->get_results($query);
+			foreach ($result as $instance) {
+				$civicrm_states[$instance->id] = array(
+					'id' => $instance->id,
+					'name' => $instance->name,
+					'abbreviation' => $instance->abbreviation,
+					'country_id' => $instance->country_id
+				);
+			}
+		}
+	}
+
+	/**
+	 * Function to cache civicrm country
+	 */
+	public function cache_civicrm_country(){
+
+		global $wpdb;
+
+		// Check if country table exists in WP DB
+		if (!$this->check_if_table_exists($this->country_table_name)) {
+			//table not in database. Create new table
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE {$this->country_table_name} (
+`id` mediumint(9) NOT NULL AUTO_INCREMENT,
+`name` varchar(64) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Country Name',
+`iso_code` char(2) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'ISO Code',
+`country_code` varchar(4) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'National prefix to be used when dialing TO this country.',
+UNIQUE KEY id (id)
+) $charset_collate;";
+
+			$wpdb->query($wpdb->prepare($sql));
+		}
+
+		$wpdb->query($wpdb->prepare("TRUNCATE TABLE {$this->country_table_name}"));
+
+		// Get country list from civicrm
+		$countries = civicrm_api3( 'Country', 'get', array(
+			'sequential' => 1,
+			'options' => array( 'limit' => 0 ),
+		));
+		foreach($countries['values'] as $country) {
+			$id = $country['id'];
+			$country_name = $country['name'];
+			$iso_code = $country['iso_code'];
+			$insertSql = "INSERT INTO {$this->country_table_name} (id, name, iso_code)
+			VALUES({$id}, '{$country_name}', '{$iso_code}')";
+			$wpdb->query($wpdb->prepare($insertSql));
+		}
+	}
+
+
+	/**
+	 * Function to cache civicrm state
+	 */
+	public function cache_civicrm_state(){
+
+		global $wpdb;
+
+		// Check if country table exists in WP DB
+		if (!$this->check_if_table_exists($this->state_table_name)) {
+			//table not in database. Create new table
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE {$this->state_table_name} (
+`id` mediumint(9) NOT NULL AUTO_INCREMENT,
+`name` varchar(64) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Name of State/Province',
+`abbreviation` varchar(4) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '2-4 Character Abbreviation of State/Province',
+`country_id` int(10) unsigned NOT NULL COMMENT 'ID of Country that State/Province belong',
+UNIQUE KEY id (id)
+) $charset_collate;";
+
+			$wpdb->query($wpdb->prepare($sql));
+		}
+
+		$wpdb->query($wpdb->prepare("TRUNCATE TABLE {$this->state_table_name}"));
+
+		$query = 'SELECT id, name, country_id, abbreviation FROM civicrm_state_province';
+
+		$dao = CRM_Core_DAO::executeQuery( $query );
+		$civicrm_states = array();
+		while( $dao->fetch() ){
+			$state_id = $dao->id;
+			$state_name = $dao->name;
+			$abbreviation = $dao->abbreviation;
+			$country_id = $dao->country_id;
+
+			$insertSql = "INSERT INTO {$this->state_table_name} (id, name, abbreviation, country_id)
+			VALUES({$state_id}, '{$state_name}', '{$abbreviation}', $country_id)";
+			$wpdb->query($wpdb->prepare($insertSql));
+		}
+	}
+
+	/**
+	 * Function to check if a table exists in WP DB
+	 */
+	public function check_if_table_exists($table_name){
+
+		global $wpdb;
+		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name) {
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 }

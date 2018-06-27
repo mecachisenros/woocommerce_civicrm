@@ -399,6 +399,9 @@ class Woocommerce_CiviCRM_Manager {
 			}
 		}
 
+		// Get order paid date
+		// In case of post treatment
+		$order_date = $order->get_date_paid()->date('Y-m-d H:i:s');
 
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){
@@ -414,7 +417,7 @@ class Woocommerce_CiviCRM_Manager {
 				'trxn_id' => $txn_id,
 				'invoice_id' => $invoice_id,
 				'source' => $this->generate_source( $order ),
-				'receive_date' => 'now',
+				'receive_date' => $order_date,
 				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
 				'note' => $this->create_detail_string( $order ),
 				"$sales_tax_field_id" => $sales_tax,
@@ -434,7 +437,7 @@ class Woocommerce_CiviCRM_Manager {
 				'trxn_id' => $txn_id,
 				'invoice_id' => $invoice_id,
 				'source' => $this->generate_source( $order ),
-				'receive_date' => 'now',
+				'receive_date' => $order_date,
 				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
 				'note' => $this->create_detail_string( $order ),
 				"$sales_tax_field_id" => $sales_tax,

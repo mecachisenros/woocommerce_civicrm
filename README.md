@@ -30,9 +30,11 @@ There are a few hooks available
 * `woocommerce_civicrm_contribution_create_params` filter
 * `woocommerce_civicrm_contribution_update_params` filter
 * `woocommerce_civicrm_financial_types_params` filter
+* `woocommerce_civicrm_campaigns_params` filter
 * `woocommerce_civicrm_admin_settings_fields` filter
 * `woocommerce_civicrm_address_map` filter
 * `woocommerce_civicrm_mapped_location_types` filter
+* `woocommerce_civicrm_utm_cookie_expire` filter
 * `woocommerce_civicrm_wc_address_update` action
 * `woocommerce_civicrm_civi_address_updated` action
 * `woocommerce_civicrm_wc_phone_updated` action

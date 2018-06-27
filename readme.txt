@@ -43,7 +43,7 @@ Install this Wordpress plugin as usual. More information about installing plugin
 
 = 2.2 =
 * Added Campaign support for contributions
-    * UTM support (utm_campaign, utm_source and utm_medium)
+* UTM support (utm_campaign, utm_source and utm_medium)
 * Added Multisite support
 * Updated contribution source: default to order type. Contribution source was the same as contrinution note
 * Fixed number format for contribution amount must match CiviCRM Settings

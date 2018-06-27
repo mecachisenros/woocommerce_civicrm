@@ -314,7 +314,7 @@
 			'return' => array("id", "name"),
 			'is_active' => 1,
 			'status_id' => array('NOT IN' => array("Completed", "Cancelled")),
-			'options' => array('sort' => "name"),
+			'options' => array('sort' => 'name', 'limit' => 0),
 		);
 
 		/**

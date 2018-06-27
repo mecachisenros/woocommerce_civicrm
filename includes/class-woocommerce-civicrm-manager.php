@@ -404,7 +404,10 @@ class Woocommerce_CiviCRM_Manager {
 		$order_paid_date = 'now';
 		$order_date = $order->get_date_paid();
 		if(!$order_date){
-			$order_date = $order->get_date();
+			$order_date = $order->get_date_completed();
+		}
+		if(!$order_date){
+			$order_date = $order->get_date_created();
 		}
 		if($order_date){
 			$order_paid_date = $order_date->date('Y-m-d H:i:s');

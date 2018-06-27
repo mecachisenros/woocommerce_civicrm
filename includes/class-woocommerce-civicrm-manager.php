@@ -401,7 +401,14 @@ class Woocommerce_CiviCRM_Manager {
 
 		// Get order paid date
 		// In case of post treatment
-		$order_date = $order->get_date_paid()->date('Y-m-d H:i:s');
+		$order_paid_date = 'now';
+		$order_date = $order->get_date_paid();
+		if(!$order_date){
+			$order_date = $order->get_date();
+		}
+		if($order_date){
+			$order_paid_date = $order_date->date('Y-m-d H:i:s');
+		}
 
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){

@@ -233,7 +233,7 @@ class Woocommerce_CiviCRM_Manager {
 						'contact_id' => $cid,
 					);
 					foreach( $existing_phones as $existing_phone ){
-						if( $existing_phone['location_type_id'] == $location_type_id ){
+						if( isset($existing_phone['location_type_id']) && $existing_phone['location_type_id'] == $location_type_id ){
 							$phone['id'] = $existing_phone['id'];
 						}
 						if( $existing_phone['phone'] == $phone['phone'] ){

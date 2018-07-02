@@ -243,7 +243,7 @@ class Woocommerce_CiviCRM_Manager {
 					if( ! $phone_exists ){
 						civicrm_api3( 'Phone', 'create', $phone );
 
-						$note = sprintf(__( 'Created new CiviCRM Phone of type %$1s: %2$s', 'woocommerce-civicrm' ), $address_type, $phone['phone']);
+						$note = sprintf(__( 'Created new CiviCRM Phone of type %1$s: %2$s', 'woocommerce-civicrm' ), $address_type, $phone['phone']);
 						$order->add_order_note( $note );
 					}
 				}
@@ -267,7 +267,7 @@ class Woocommerce_CiviCRM_Manager {
 					}
 					if( ! $email_exists ){
 					civicrm_api3( 'Email', 'create', $email );
-						$note = sprintf(__( 'Created new CiviCRM Email of type %$1s: %2$s', 'woocommerce-civicrm' ), $address_type, $email['email']);
+						$note = sprintf(__( 'Created new CiviCRM Email of type %1$s: %2$s', 'woocommerce-civicrm' ), $address_type, $email['email']);
 						$order->add_order_note( $note );
 					}
 				}

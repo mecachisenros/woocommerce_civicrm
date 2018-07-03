@@ -342,15 +342,6 @@ class Woocommerce_CiviCRM_Manager {
 		$sales_tax = number_format( $sales_tax, 2 );
 
 		$shipping_cost = $order->get_total_shipping();
-		$shipping_cost = number_format( $shipping_cost, 2 );
-
-		// @FIXME Landmine. CiviCRM doesn't seem to accept financial values
-		// with precision greater than 2 digits after the decimal.
-		$rounded_total = round( $order->get_total() * 100 ) / 100;
-
-		// Couldn't figure where Woocommerce stores the subtotal (ie no TAX price)
-		// So for now...
-		$rounded_subtotal = $rounded_total - $sales_tax;
 
 		// Ensure number format is Civi compliant
 		$decimal_separator = '.';
@@ -373,6 +364,19 @@ class Woocommerce_CiviCRM_Manager {
 		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to fetch monetary settings', 'woocommerce-civicrm' ) );
 		}
+		if (!$shipping_cost) {
+			$shipping_cost = 0;
+		}
+		$shipping_cost = number_format($shipping_cost, 2, $decimal_separator, $thousand_separator );
+
+		// @FIXME Landmine. CiviCRM doesn't seem to accept financial values
+		// with precision greater than 2 digits after the decimal.
+		$rounded_total = round( $order->get_total() * 100 ) / 100;
+
+		// Couldn't figure where Woocommerce stores the subtotal (ie no TAX price)
+		// So for now...
+		$rounded_subtotal = $rounded_total - $sales_tax;
+
 		$rounded_subtotal = number_format($rounded_subtotal, 2, $decimal_separator, $thousand_separator);
 
 		$contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );

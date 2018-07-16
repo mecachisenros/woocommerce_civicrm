@@ -27,7 +27,7 @@ class Woocommerce_CiviCRM_Manager {
 	public function register_hooks(){
 
 		add_action('init', array( $this, 'check_utm'));
-		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10, 2 );
+		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10, 3 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
 		add_action('save_post', array( $this, 'save_post'), 10);
@@ -65,7 +65,7 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.0
 	 * @param int $order_id The order id
 	 */
-	 public function action_order( $order_id , $cid = NULL){
+	 public function action_order( $order_id , $cid = NULL, $order_inf = false){
 
 		$order = new WC_Order( $order_id );
 
@@ -82,7 +82,7 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 		// Add the contribution record.
-		$this->add_contribution( $cid, $order );
+		$this->add_contribution( $cid, $order, $order_inf );
 
 		return $order_id;
 
@@ -327,11 +327,10 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param int $cid The contact_id
 	 * @param object $order The order object
 	 */
-	public function add_contribution( $cid, &$order ) {
+	public function add_contribution( $cid, &$order, $order_inf ) {
 
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order->get_id();
-		$invoice_id = $order->get_id() . '_woocommerce';
-
+		$invoice_id = $order_inf['invoice_no'] ? $order_inf['invoice_no'] : $order->get_id() . '_woocommerce';
 		$this->create_custom_contribution_fields();
 		$this->utm_to_order( $order->get_id() );
 
@@ -381,7 +380,6 @@ class Woocommerce_CiviCRM_Manager {
 
 		$contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
 		$contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type
-
 		$campaign_name = '';
 		$woocommerce_civicrm_campaign_id = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
 		if(false !== $local_campaign_id = get_post_meta($order->get_id(), '_woocommerce_civicrm_campaign_id', true)){
@@ -402,6 +400,8 @@ class Woocommerce_CiviCRM_Manager {
 				return FALSE;
 			}
 		}
+
+		$contribution_status_id = (false == $status_id = $this->map_contribution_status($order_inf['status'])) ? $status_id : $this->map_contribution_status($order->get_status());
 
 		// Get order paid date
 		// In case of post treatment
@@ -432,7 +432,7 @@ class Woocommerce_CiviCRM_Manager {
 				'invoice_id' => $invoice_id,
 				'source' => $this->generate_source( $order ),
 				'receive_date' => $order_date,
-				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
+				'contribution_status_id' => $contribution_status_id,
 				'note' => $this->create_detail_string( $order ),
 				"$sales_tax_field_id" => $sales_tax,
 				"$shipping_cost_field_id" => $shipping_cost,
@@ -452,7 +452,7 @@ class Woocommerce_CiviCRM_Manager {
 				'invoice_id' => $invoice_id,
 				'source' => $this->generate_source( $order ),
 				'receive_date' => $order_date,
-				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
+				'contribution_status_id' => $contribution_status_id,
 				'note' => $this->create_detail_string( $order ),
 				"$sales_tax_field_id" => $sales_tax,
 				"$shipping_cost_field_id" => $shipping_cost,

@@ -97,6 +97,15 @@ class Woocommerce_CiviCRM {
 	public $states_replacement;
 
 	/**
+	 * Woocommerce Product management object.
+	 *
+	 * @since 2.2
+	 * @access public
+	 * @var object products The Product management object
+	 */
+	public $products;
+
+	/**
 	 * Plugin activated in network context
 	 *
 	 * @since 2.2
@@ -233,6 +242,8 @@ class Woocommerce_CiviCRM {
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-sync.php';
 		// Include States replacement functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-states.php';
+		// Include Products functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-products.php';
 	}
 
 	/**
@@ -253,6 +264,8 @@ class Woocommerce_CiviCRM {
 		$this->states_replacement = new Woocommerce_CiviCRM_States;
 		// init sync manager
 		$this->sync = new Woocommerce_CiviCRM_Sync;
+		// init sync manager
+		$this->products = new Woocommerce_CiviCRM_Products;
 	}
 
 	/**

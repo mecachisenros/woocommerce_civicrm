@@ -32,18 +32,17 @@ class Woocommerce_CiviCRM_Products {
 
         $default_contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
         $contributions_types = WCI()->helper->financial_types;
-        $options = array_merge(
+        $options =
             array(
                 '' => sprintf(
                     '-- '.__('Default (%s)', 'woocommerce-civicrm'),
                     isset($contributions_types[$default_contribution_type_id]) ? $contributions_types[$default_contribution_type_id] : __('unset', 'woocommerce-civicrm')
                 )
-            ),
-            $contributions_types,
+            ) +
+            $contributions_types +
             array(
                 'exclude' => '-- '.__('Exclude', 'woocommerce-civicrm')
-            )
-        );
+            );
 
         // Contribution field :
         woocommerce_wp_select(

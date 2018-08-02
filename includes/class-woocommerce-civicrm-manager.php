@@ -60,7 +60,7 @@ class Woocommerce_CiviCRM_Manager {
 	}
 
 	/**
-	 * Action called when order is created in Woocommenrce.
+	 * Action called when order is created in Woocommerce.
 	 *
 	 * @since 2.0
 	 * @param int $order_id The order id
@@ -321,7 +321,7 @@ class Woocommerce_CiviCRM_Manager {
 	}
 
 	/**
-	 * Fuction to add a contribution record.
+	 * Function to add a contribution record.
 	 *
 	 * @since 2.0
 	 * @param int $cid The contact_id

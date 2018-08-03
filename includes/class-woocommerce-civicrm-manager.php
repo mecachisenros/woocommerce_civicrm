@@ -430,8 +430,8 @@ class Woocommerce_CiviCRM_Manager {
 			// Need to be set in admin page
 			'contribution_type_id' => $default_contribution_type_id,
 			'payment_instrument_id' => $payment_instrument,
-			'non_deductible_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator );,
-			'fee_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator );,
+			'non_deductible_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator ),
+			'fee_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator ),
 			'trxn_id' => $txn_id,
 			'invoice_id' => $invoice_id,
 			'source' => $source,
@@ -466,8 +466,8 @@ class Woocommerce_CiviCRM_Manager {
 				  '0' => 3,
 				),
 				'qty' => $item['qty'],
-				'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator );,
-				'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator );,
+				'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator ),
+				'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator ),
 				'label' => $item['name'],
 				'financial_type_id' => $custom_contribution_type,
 			);

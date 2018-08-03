@@ -339,11 +339,6 @@ class Woocommerce_CiviCRM_Manager {
 		$sales_tax_field_id = 'custom_' . get_option( 'woocommerce_civicrm_sales_tax_field_id' );
 		$shipping_cost_field_id = 'custom_' . get_option( 'woocommerce_civicrm_shipping_cost_field_id' );
 
-		$sales_tax = $order->get_total_tax();
-		$sales_tax = number_format( $sales_tax, 2 );
-
-		$shipping_cost = $order->get_total_shipping();
-
 		// Ensure number format is Civi compliant
 		$decimal_separator = '.';
 		$thousand_separator = '';
@@ -365,6 +360,12 @@ class Woocommerce_CiviCRM_Manager {
 		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to fetch monetary settings', 'woocommerce-civicrm' ) );
 		}
+
+		$sales_tax = $order->get_total_tax();
+		$sales_tax = number_format( $sales_tax, 2, $decimal_separator, $thousand_separator );
+
+		$shipping_cost = $order->get_total_shipping();
+
 		if (!$shipping_cost) {
 			$shipping_cost = 0;
 		}
@@ -429,8 +430,8 @@ class Woocommerce_CiviCRM_Manager {
 			// Need to be set in admin page
 			'contribution_type_id' => $default_contribution_type_id,
 			'payment_instrument_id' => $payment_instrument,
-			'non_deductible_amount' => 00.00,
-			'fee_amount' => 00.00,
+			'non_deductible_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator );,
+			'fee_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator );,
 			'trxn_id' => $txn_id,
 			'invoice_id' => $invoice_id,
 			'source' => $source,
@@ -465,8 +466,8 @@ class Woocommerce_CiviCRM_Manager {
 				  '0' => 3,
 				),
 				'qty' => $item['qty'],
-				'line_total' => $item['line_total'],
-				'unit_price' => $item['line_total'] / $item['qty'],
+				'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator );,
+				'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator );,
 				'label' => $item['name'],
 				'financial_type_id' => $custom_contribution_type,
 			);

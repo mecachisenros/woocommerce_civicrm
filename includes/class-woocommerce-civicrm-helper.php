@@ -100,11 +100,9 @@
 				'WordPress', FALSE, 'Individual'
 			);
 
-			if ( ! is_object( $match ) ) {
-				return FALSE;
+			if ( is_object( $match ) ) {
+				return $match->contact_id;
 			}
-
-			return $match->contact_id;
 		}
 
 		// The customer is anonymous.  Look in the CiviCRM contacts table for a

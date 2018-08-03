@@ -65,24 +65,21 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.0
 	 * @param int $order_id The order id
 	 */
-	 public function action_order( $order_id , $cid = NULL, $order_inf = false){
+	 public function action_order( $order_id, $posted_data, $order){
 
-		$order = new WC_Order( $order_id );
 
-		if($cid === NULL){
-			$cid = WCI()->helper->civicrm_get_cid( $order );
-			if ( $cid === FALSE ) {
-					return;
-			}
-
-			$cid = $this->add_update_contact( $cid, $order );
+		$cid = WCI()->helper->civicrm_get_cid( $order );
+		if ( $cid === FALSE ) {
+				return;
 		}
+		$cid = $this->add_update_contact( $cid, $order );
+
 		if ( $cid === FALSE ) {
 				return;
 		}
 
 		// Add the contribution record.
-		$this->add_contribution( $cid, $order, $order_inf );
+		$this->add_contribution( $cid, $order );
 
 		return $order_id;
 
@@ -327,7 +324,7 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param int $cid The contact_id
 	 * @param object $order The order object
 	 */
-	public function add_contribution( $cid, &$order, $order_inf ) {
+	public function add_contribution( $cid, &$order ) {
 
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order->get_id();
 		$invoice_id = $order_inf['invoice_no'] ? $order_inf['invoice_no'] : $order->get_id() . '_woocommerce';

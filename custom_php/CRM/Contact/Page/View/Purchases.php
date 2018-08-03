@@ -17,8 +17,10 @@ class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 		    'itemCount' 	=> __('Item count', 'woocommerce-civicrm'),
 		    'amount'		=> __('Amount', 'woocommerce-civicrm'),
 		    'actions' 		=> __('Actions', 'woocommerce-civicrm'),
+		    'emptyUid' 		=> __('This contact is not linked to any WordPress user or WooCommerce Customer', 'woocommerce-civicrm'),
 		) );
 		$this->assign( 'orders', $orders );
+		$this->assign( 'uid', $uid );
 
 		parent::run();
 	}

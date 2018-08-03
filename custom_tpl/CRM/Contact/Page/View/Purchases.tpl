@@ -1,5 +1,5 @@
+{if $uid}
 <h3>Orders</h3>
-
 <table class="selector row-highlight">
 <thead class="sticky">
 <tr>
@@ -32,3 +32,9 @@
 {/literal}
 </tbody>
 </table>
+{else}
+<div class="messages status no-popup">
+    <div class="icon inform-icon"></div>
+        {ts}{$i18n.emptyUid}{/ts}
+   </div>
+{/if}

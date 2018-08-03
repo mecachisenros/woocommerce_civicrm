@@ -129,16 +129,13 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 */
 	public function add_orders_contact_tab( $tabsetName, &$tabs, $context ) {
 		$uid = CRM_Core_BAO_UFMatch::getUFId( $context['contact_id'] );
-		if (empty($uid)) {
-			return;
-		}
 
 		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid&no_redirect=1");
 
 		$tabs[] = array( 'id'    => 'woocommerce-orders',
 			'url'   => $url,
 			'title' => __('Woocommerce Orders', 'woocommerce-civicrm'),
-			'count' => $this->count_orders($uid),
+			'count' => $uid ? $this->count_orders($uid) : 0,
 			'weight' => 99
 		);
 	}

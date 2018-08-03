@@ -67,7 +67,7 @@ class Woocommerce_CiviCRM {
 	 */
 	public $manager;
 
-    /**
+	/**
 	 * The Sync management object.
 	 *
 	 * Encapsulates the Woocommerce and CiviCRM synchrinzation objects.
@@ -121,11 +121,11 @@ class Woocommerce_CiviCRM {
 	 */
 	function __construct() {
 		// Makes sure the plugin is defined before trying to use it
-        if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
-            require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
-        }
+		if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+			require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+		}
 		$plugin_name = basename(__DIR__).'/'.basename(__FILE__);
-        $this->is_network_installed = is_plugin_active_for_network( $plugin_name );
+		$this->is_network_installed = is_plugin_active_for_network( $plugin_name );
 
 		add_action( 'admin_init', array( $this, 'check_dependencies' ), 10 );
 		$this->define_constants();
@@ -177,8 +177,8 @@ class Woocommerce_CiviCRM {
 	}
 
 	function network_admin_menu(){
-        add_submenu_page('settings.php', __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), 'manage_network_options', 'woocommerce-civicrm-settings', array( $this->settings_tab, 'network_settings'));
-    }
+		add_submenu_page('settings.php', __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), 'manage_network_options', 'woocommerce-civicrm-settings', array( $this->settings_tab, 'network_settings'));
+	}
 
 	/**
 	 * Define constants.
@@ -274,7 +274,7 @@ class Woocommerce_CiviCRM {
 	 * @since 2.0
 	 */
 	private function register_hooks() {
-    	// add settings link to plugin lisitng page
+		// add settings link to plugin lisitng page
 		add_filter( 'plugin_action_links', array( $this, 'add_action_links' ), 10, 2 );
 	}
 

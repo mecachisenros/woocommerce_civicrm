@@ -70,11 +70,13 @@ class Woocommerce_CiviCRM_Manager {
 
 		$cid = WCI()->helper->civicrm_get_cid( $order );
 		if ( $cid === FALSE ) {
+				$order->add_order_note(  __( 'CiviCRM Contact could not be fetched', 'woocommerce-civicrm' ) );
 				return;
 		}
 		$cid = $this->add_update_contact( $cid, $order );
 
 		if ( $cid === FALSE ) {
+				$order->add_order_note(  __( 'CiviCRM Contact could not be found or created', 'woocommerce-civicrm' ) );
 				return;
 		}
 
@@ -504,8 +506,8 @@ class Woocommerce_CiviCRM_Manager {
 		} catch ( CiviCRM_API3_Exception $e ) {
 			// Log the error, but continue.
 			CRM_Core_Error::debug_log_message( __( 'Not able to add contribution', 'woocommerce-civicrm' ) );
-			return FALSE;
 		}
+		$order->add_order_note(  __( 'CiviCRM Contribution could not be created', 'woocommerce-civicrm' ) );
 		return false;
 	}
 

@@ -7,7 +7,7 @@ class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 
 		$uid = CRM_Utils_Request::retrieve( 'uid', 'Positive', $this );
 
-		$orders = WCI()->orders_tab->get_orders( $uid );
+		$orders = $uid ? WCI()->orders_tab->get_orders( $uid ) : array();
 
 		$this->assign( 'i18n', array(
 			'orderNumber' 	=> __('Order Number', 'woocommerce-civicrm'),

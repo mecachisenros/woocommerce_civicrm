@@ -171,9 +171,9 @@ class Woocommerce_CiviCRM {
 		$this->register_hooks();
 		$this->enable_translation();
 
-        if ($this->is_network_installed) {
-            add_action('network_admin_menu', array( $this, 'network_admin_menu'));
-        }
+		if ($this->is_network_installed) {
+			add_action('network_admin_menu', array( $this, 'network_admin_menu'));
+		}
 	}
 
 	function network_admin_menu(){

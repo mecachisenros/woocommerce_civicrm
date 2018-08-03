@@ -326,8 +326,11 @@ class Woocommerce_CiviCRM_Manager {
 	 */
 	public function add_contribution( $cid, &$order ) {
 
-		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order->get_id();
-		$invoice_id = $order_inf['invoice_no'] ? $order_inf['invoice_no'] : $order->get_id() . '_woocommerce';
+		$debug['cid']=$cid;
+
+		$order_id = $order->get_id();
+		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
+		$invoice_id = (false != $invoice_no = get_post_meta($order_id, '_order_number')) ? $invoice_no : $order_id . '_woocommerce';
 		$this->create_custom_contribution_fields();
 		$this->utm_to_order( $order->get_id() );
 
@@ -375,7 +378,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		$rounded_subtotal = number_format($rounded_subtotal, 2, $decimal_separator, $thousand_separator);
 
-		$contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
+		$default_contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
 		$contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type
 		$campaign_name = '';
 		$woocommerce_civicrm_campaign_id = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
@@ -398,7 +401,7 @@ class Woocommerce_CiviCRM_Manager {
 			}
 		}
 
-		$contribution_status_id = (false == $status_id = $this->map_contribution_status($order_inf['status'])) ? $status_id : $this->map_contribution_status($order->get_status());
+		$contribution_status_id = $this->map_contribution_status($order->get_status());
 
 		// Get order paid date
 		// In case of post treatment
@@ -414,46 +417,56 @@ class Woocommerce_CiviCRM_Manager {
 			$order_paid_date = $order_date->date('Y-m-d H:i:s');
 		}
 
+		$items = $order->get_items();
+
+		$payment_instrument = $this->map_payment_instrument( $order->get_payment_method() );
+		$source = $this->generate_source( $order );
+		$params = array(
+			'contact_id' => $cid,
+			'total_amount' => $rounded_subtotal,
+			// Need to be set in admin page
+			'contribution_type_id' => $default_contribution_type_id,
+			'payment_instrument_id' => $payment_instrument,
+			'non_deductible_amount' => 00.00,
+			'fee_amount' => 00.00,
+			'trxn_id' => $txn_id,
+			'invoice_id' => $invoice_id,
+			'source' => $source,
+			'receive_date' => $order_paid_date,
+			'contribution_status_id' => $contribution_status_id,
+			'note' => $this->create_detail_string( $items ),
+			"$sales_tax_field_id" => $sales_tax,
+			"$shipping_cost_field_id" => $shipping_cost,
+			'campaign_id' => $campaign_name,
+			'api.line_item.create' => array(),
+		);
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){
-			$params = array(
-				'contact_id' => $cid,
-				'total_amount' => $rounded_subtotal,
-				// Need to be set in admin page
-				'contribution_type_id' => $contribution_type_vat_id,
-				'payment_instrument_id' => $this->map_payment_instrument( $order->get_payment_method() ),
-				'non_deductible_amount' => 00.00,
-				'fee_amount' => 00.00,
-				'total_amount' => $rounded_subtotal,
-				'trxn_id' => $txn_id,
-				'invoice_id' => $invoice_id,
-				'source' => $this->generate_source( $order ),
-				'receive_date' => $order_date,
-				'contribution_status_id' => $contribution_status_id,
-				'note' => $this->create_detail_string( $order ),
-				"$sales_tax_field_id" => $sales_tax,
-				"$shipping_cost_field_id" => $shipping_cost,
-				'campaign_id' => $campaign_name,
-			);
-		} else {
-			$params = array(
-				'contact_id' => $cid,
-				'total_amount' => $rounded_total,
-				// Need to be set in admin page
-				'contribution_type_id' => $contribution_type_id,
-				'payment_instrument_id' => $this->map_payment_instrument( $order->get_payment_method() ),
-				'non_deductible_amount' => 00.00,
-				'fee_amount' => 00.00,
-				'total_amount' => $rounded_total,
-				'trxn_id' => $txn_id,
-				'invoice_id' => $invoice_id,
-				'source' => $this->generate_source( $order ),
-				'receive_date' => $order_date,
-				'contribution_status_id' => $contribution_status_id,
-				'note' => $this->create_detail_string( $order ),
-				"$sales_tax_field_id" => $sales_tax,
-				"$shipping_cost_field_id" => $shipping_cost,
-				'campaign_id' => $campaign_name,
+			// Need to be set in admin page
+			$params['contribution_type_id'] = $contribution_type_vat_id;
+		}
+
+		/**
+		 * Add line items to CiviCRM contribution
+		 * @since 2.2
+		 */
+		foreach( $items as $item ){
+			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
+			if($custom_contribution_type === 'exclude')
+				continue;
+
+			if(!$custom_contribution_type){
+				$custom_contribution_type = $default_contribution_type_id;
+			}
+			$params['api.line_item.create'][] = array(
+				'price_field_id' => array(
+				  '0' => 3,
+				),
+				'qty' => $item['qty'],
+				'line_total' => $item['line_total'],
+				'unit_price' => $item['line_total'] / $item['qty'],
+				'label' => $item['name'],
+				'financial_type_id' => $custom_contribution_type,
 			);
 		}
 
@@ -468,8 +481,11 @@ class Woocommerce_CiviCRM_Manager {
 		 * @param array $params The params to be passsed to the API
 		 */
 			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
+			if(!isset($contribution['id']) || !$contribution['id']){
+				return false;
+			}
 			// Adds order note in reference to the created contribution
-			$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'eelv_base'),
+			$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'woocommerce-civicrm'),
 				'<a href="' .add_query_arg(
 					array(
 						'page' => 'CiviCRM',
@@ -484,12 +500,13 @@ class Woocommerce_CiviCRM_Manager {
 					admin_url('admin.php')
 				). '">' . $contribution['id'] . '</a>')
 			);
+			return $contribution;
 		} catch ( CiviCRM_API3_Exception $e ) {
 			// Log the error, but continue.
+			CRM_Core_Error::debug_log_message( __( 'Not able to add contribution', 'woocommerce-civicrm' ) );
 			return FALSE;
 		}
-
-		return TRUE;
+		return false;
 	}
 
 	/**
@@ -525,8 +542,7 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param object $order The order object
 	 * @return string $str
 	 */
-	public function create_detail_string( $order ) {
-		$items = $order->get_items();
+	public function create_detail_string( $items ) {
 
 		$str = '';
 		$n = 1;

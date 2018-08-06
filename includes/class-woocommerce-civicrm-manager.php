@@ -51,9 +51,6 @@ class Woocommerce_CiviCRM_Manager {
 
 		$current_campaign_id = get_post_meta( $post_id, '_woocommerce_civicrm_campaign_id', true);
 		if((false !== $new_campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $new_campaign_id != $current_campaign_id ){
-
-			var_dump($new_campaign_id);
-			die();
 			$this->update_campaign($post_id,$current_campaign_id,$new_campaign_id);
 			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $new_campaign_id ));
 		}
@@ -165,7 +162,13 @@ class Woocommerce_CiviCRM_Manager {
 				return FALSE;
 			}
 		}
+		echo "campaign_name";
+		var_dump($campaign_name);
 
+		echo "order_id";
+		var_dump($order_id);
+
+		die();
 		$params = array(
 			'invoice_id' => $order_id . '_woocommerce',
 			'return' => 'id'

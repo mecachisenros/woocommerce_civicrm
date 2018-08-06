@@ -189,6 +189,8 @@ class Woocommerce_CiviCRM_Manager {
 				'id' => $contribution['id'],
 			);
 			$result = civicrm_api3( 'Contribution', 'create', $params );
+			var_dump($result);
+			die();
 		} catch ( Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to update contribution', 'woocommerce-civicrm' ) );
 			return;

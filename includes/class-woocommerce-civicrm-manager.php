@@ -187,6 +187,7 @@ class Woocommerce_CiviCRM_Manager {
 			die();
 		} catch ( Exception $e ) {
 			CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+			die();
 			return;
 		}
 

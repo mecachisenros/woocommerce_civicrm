@@ -35,6 +35,16 @@ class Woocommerce_CiviCRM_Manager {
 	}
 
 	/**
+	 * return the order number
+	 *
+	 * @param int $post_id
+	 * @since 2.2
+	 */
+	public function order_number( $post_id ){
+		return (false != $invoice_no = get_post_meta($order_id, '_order_number')) ? $invoice_no : $order_id . '_woocommerce';
+	}
+
+	/**
 	 * Action called when a post is saved
 	 *
 	 * @param int $post_id
@@ -102,7 +112,7 @@ class Woocommerce_CiviCRM_Manager {
 		$order = new WC_Order( $order_id );
 
 		$params = array(
-			'invoice_id' => $order_id . '_woocommerce',
+			'invoice_id' => order_number($order_id),
 			'return' => 'id'
 		);
 
@@ -164,7 +174,7 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 		$params = array(
-			'invoice_id' => $order_id . '_woocommerce',
+			'invoice_id' => order_number($order_id),
 			'return' => 'id'
 		);
 
@@ -407,7 +417,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		$order_id = $order->get_id();
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
-		$invoice_id = (false != $invoice_no = get_post_meta($order_id, '_order_number')) ? $invoice_no : $order_id . '_woocommerce';
+		$invoice_id = order_number($order_id);
 		$this->create_custom_contribution_fields();
 		$this->utm_to_order( $order->get_id() );
 

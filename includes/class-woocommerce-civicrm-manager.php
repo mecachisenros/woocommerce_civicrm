@@ -162,13 +162,7 @@ class Woocommerce_CiviCRM_Manager {
 				return FALSE;
 			}
 		}
-		echo "campaign_name";
-		var_dump($campaign_name);
 
-		echo "order_id";
-		var_dump($order_id);
-
-		die();
 		$params = array(
 			'invoice_id' => $order_id . '_woocommerce',
 			'return' => 'id'
@@ -183,6 +177,14 @@ class Woocommerce_CiviCRM_Manager {
 			 * @param array $params The params to be passsed to the API
 			 */
 			$contribution = civicrm_api3( 'Contribution', 'getsingle', apply_filters( 'woocommerce_civicrm_contribution_update_params', $params ) );
+
+			echo "contribution : ";
+			var_dump($contribution);
+
+			echo "params : ";
+			var_dump($params);
+
+			die();
 		} catch ( Exception $e ) {
 			CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
 			return;

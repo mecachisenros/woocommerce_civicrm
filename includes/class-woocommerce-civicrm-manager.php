@@ -189,19 +189,8 @@ class Woocommerce_CiviCRM_Manager {
 			 */
 			$contribution = civicrm_api3( 'Contribution', 'getsingle', apply_filters( 'woocommerce_civicrm_contribution_update_params', $params ) );
 
-			echo "contribution : ";
-			var_dump($contribution);
-
-			echo "params : ";
-			var_dump($params);
-
-			die();
 		} catch ( Exception $e ) {
 			CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
-
-			var_dump($this->get_invoice_id($order_id));
-			echo "Not able to find contribution";
-			die();
 			return;
 		}
 
@@ -212,8 +201,6 @@ class Woocommerce_CiviCRM_Manager {
 				'id' => $contribution['id'],
 			);
 			$result = civicrm_api3( 'Contribution', 'create', $params );
-			var_dump($result);
-			die();
 		} catch ( Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to update contribution', 'woocommerce-civicrm' ) );
 			return;

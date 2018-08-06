@@ -40,8 +40,9 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param int $post_id
 	 * @since 2.2
 	 */
-	public function order_number( $post_id ){
-		return (false != $invoice_no = get_post_meta($order_id, '_order_number')) ? $invoice_no : $order_id . '_woocommerce';
+	public function get_invoice_id( $post_id ){
+		$invoice_id = (false != $invoice_no = get_post_meta($post_id, '_order_number')) ? $invoice_no : $post_id . '_woocommerce';
+		return $invoice_id;
 	}
 
 	/**
@@ -112,7 +113,7 @@ class Woocommerce_CiviCRM_Manager {
 		$order = new WC_Order( $order_id );
 
 		$params = array(
-			'invoice_id' => order_number($order_id),
+			'invoice_id' => $this->get_invoice_id($order_id),
 			'return' => 'id'
 		);
 
@@ -174,7 +175,7 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 		$params = array(
-			'invoice_id' => order_number($order_id),
+			'invoice_id' => $this->get_invoice_id($order_id),
 			'return' => 'id'
 		);
 
@@ -197,6 +198,9 @@ class Woocommerce_CiviCRM_Manager {
 			die();
 		} catch ( Exception $e ) {
 			CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+
+			var_dump($this->get_invoice_id($order_id));
+			echo "Not able to find contribution";
 			die();
 			return;
 		}
@@ -417,7 +421,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		$order_id = $order->get_id();
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
-		$invoice_id = order_number($order_id);
+		$invoice_id = $this->get_invoice_id($order_id);
 		$this->create_custom_contribution_fields();
 		$this->utm_to_order( $order->get_id() );
 

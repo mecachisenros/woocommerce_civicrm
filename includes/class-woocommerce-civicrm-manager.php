@@ -48,10 +48,12 @@ class Woocommerce_CiviCRM_Manager {
 			return;
 
 		// Add the campaign ID to order
-		if((false !== $campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $campaign_id){
-			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $campaign_id ));
-		}
 
+		$current_campaign_id = get_post_meta( $post_id, '_woocommerce_civicrm_campaign_id', true);
+		if((false !== $new_campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $new_campaign_id != $current_campaign_id ){
+			$this->update_campaign($post_id,$current_campaign_id,$new_campaign_id);
+			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $new_campaign_id ));
+		}
 		// In dashbord context, woocommerce_checkout_order_processed is not called after a creation
 		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new')) {
 			$this->action_order( $post_id );
@@ -122,6 +124,68 @@ class Woocommerce_CiviCRM_Manager {
 		try {
 			$params = array(
 				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
+				'id' => $contribution['id'],
+			);
+			$result = civicrm_api3( 'Contribution', 'create', $params );
+		} catch ( Exception $e ){
+			CRM_Core_Error::debug_log_message( __( 'Not able to update contribution', 'woocommerce-civicrm' ) );
+			return;
+		}
+
+	}
+
+	/**
+	 * Update Campaign.
+	 *
+	 * @since 2.0
+	 * @param int $order_id The order id
+	 * @param string $old_campaign_id The old campaign
+	 * @param string $new_campaign_id The new campaign
+	 */
+	public function update_campaign( $order_id, $old_campaign_id, $new_campaign_id ){
+
+		$order = new WC_Order( $order_id );
+
+		$campaign_name = '';
+		if($new_campaign_id!==false){
+			$params = array(
+				'sequential' => 1,
+				'return' => array("name"),
+				'id' => $new_campaign_id,
+				'options' => array('limit' => 1),
+			);
+			try{
+				$campaignsResult = civicrm_api3( 'Campaign', 'get', $params );
+				$campaign_name = isset($campaignsResult['values'][0]['name']) ? $campaignsResult['values'][0]['name'] : '';
+			} catch ( CiviCRM_API3_Exception $e ){
+				CRM_Core_Error::debug_log_message( __( 'Not able to fetch campaign', 'woocommerce-civicrm' ) );
+				return FALSE;
+			}
+		}
+
+		$params = array(
+			'invoice_id' => $order_id . '_woocommerce',
+			'return' => 'id'
+		);
+
+		try {
+
+			/**
+			 * Filter Contribution params before calling the Civi's API.
+			 *
+			 * @since 2.0
+			 * @param array $params The params to be passsed to the API
+			 */
+			$contribution = civicrm_api3( 'Contribution', 'getsingle', apply_filters( 'woocommerce_civicrm_contribution_update_params', $params ) );
+		} catch ( Exception $e ) {
+			CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+			return;
+		}
+
+		// Update contribution
+		try {
+			$params = array(
+				'campaign_id' => $campaign_name,
 				'id' => $contribution['id'],
 			);
 			$result = civicrm_api3( 'Contribution', 'create', $params );
@@ -682,7 +746,7 @@ class Woocommerce_CiviCRM_Manager {
 		}
 		$order_campaign = get_post_meta($order->get_id(), '_woocommerce_civicrm_campaign_id', true);
 
-		if(is_empty($order_campaign)){// if there is no campaign selected, select the default one (set up in WC -> settings -> CiviCRM)
+		if($order_campaign==""||$order_campaign===false){// if there is no campaign selected, select the default one (set up in WC -> settings -> CiviCRM)
 			$order_campaign = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
 		}
 

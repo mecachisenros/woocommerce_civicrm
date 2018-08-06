@@ -41,7 +41,7 @@ class Woocommerce_CiviCRM_Manager {
 	 * @since 2.2
 	 */
 	public function get_invoice_id( $post_id ){
-		$invoice_id = (false != $invoice_no = get_post_meta($post_id, '_order_number')) ? $invoice_no : $post_id . '_woocommerce';
+		$invoice_id = (false != $invoice_no = get_post_meta($post_id, '_order_number',true)) ? $invoice_no : $post_id . '_woocommerce';
 		return $invoice_id;
 	}
 

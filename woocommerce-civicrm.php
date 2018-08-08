@@ -244,6 +244,9 @@ class Woocommerce_CiviCRM {
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-states.php';
 		// Include Products functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-products.php';
+
+		// Include POS functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-pos.php';
 	}
 
 	/**
@@ -264,17 +267,19 @@ class Woocommerce_CiviCRM {
 		$this->states_replacement = new Woocommerce_CiviCRM_States;
 		// init sync manager
 		$this->sync = new Woocommerce_CiviCRM_Sync;
-		// init sync manager
+		// init products
 		$this->products = new Woocommerce_CiviCRM_Products;
-	}
+		// init POS
+		$this->products = new Woocommerce_CiviCRM_POS;
 
+	}
 	/**
 	 * Register hooks.
 	 *
 	 * @since 2.0
 	 */
 	private function register_hooks() {
-		// add settings link to plugin lisitng page
+		// add settings link to plugin listing page
 		add_filter( 'plugin_action_links', array( $this, 'add_action_links' ), 10, 2 );
 	}
 

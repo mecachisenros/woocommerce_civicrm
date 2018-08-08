@@ -1,0 +1,7 @@
+.panel.cart .wc-civicrmcampaign{
+  background: #fff;
+  border-top: 2px solid #dbdbdb;
+}
+.panel.cart .wc-civicrmcampaign select{
+  padding: 7px;
+}

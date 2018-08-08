@@ -270,7 +270,7 @@ class Woocommerce_CiviCRM {
 		// init products
 		$this->products = new Woocommerce_CiviCRM_Products;
 		// init POS
-		$this->products = new Woocommerce_CiviCRM_POS;
+		$this->pos = new Woocommerce_CiviCRM_POS;
 
 	}
 	/**

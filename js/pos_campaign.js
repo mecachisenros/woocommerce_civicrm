@@ -9,12 +9,32 @@ jQuery( document ).ready(function(){
 
 function addCampaignList(){
 
-//  POS.options.nonce
   var data = {
 		'action': 'get_campaign',
+    'nonce' : POS.options.nonce
 	};
 
 	jQuery.post(POS.options.ajaxurl, data, function(response) {
 		$( ".cart-customer" ).after(response );
+    changeCampaign();
+    $( "#order_civicrmcampaign").change(function(){
+      console.log( $( "#order_civicrmcampaign").val());
+      changeCampaign();
+    });
+
+	});
+}
+var campaign_id;
+function changeCampaign(){
+  campaign_id = $( "#order_civicrmcampaign").val();
+
+  var data = {
+		'action': 'set_campaign',
+    'campaign_id' :campaign_id,
+    'nonce' : POS.options.nonce
+	};
+
+	jQuery.post(POS.options.ajaxurl, data, function(response) {
+
 	});
 }

@@ -5,8 +5,9 @@
  *
  * @since 2.0
  */
-
 class Woocommerce_CiviCRM_POS {
+
+
 
 	/**
 	 * Initialises this object.
@@ -29,6 +30,10 @@ class Woocommerce_CiviCRM_POS {
 
 
 		// add the filter
+
+		add_action( 'wp_ajax_set_campaign', array( $this,'set_campaign') );
+    add_action( 'wp_ajax_nopriv_set_campaign', array( $this,'set_campaign') );
+
 		add_action( 'wp_ajax_get_campaign', array( $this,'get_campaign') );
     add_action( 'wp_ajax_nopriv_get_campaign', array( $this,'get_campaign') );
 
@@ -36,10 +41,12 @@ class Woocommerce_CiviCRM_POS {
 
 		add_filter( 'woocommerce_pos_enqueue_head_css', array( $this,'wc_pos_campaign_css'), 10, 1 );
 
-		//add_filter( 'woocommerce_rest_prepare_shop_order_object', array( $this, 'wc_pos_campaign_prepare_shop_order_object' ), 11, 3 );
+		add_filter( 'woocommerce_rest_prepare_shop_order_object', array( $this, 'wc_pos_campaign_prepare_shop_order_object' ), 11, 3 );
 	}
 	public function wc_pos_campaign_prepare_shop_order_object( $response, $order, $request ) {
-
+		WCI()->manager->update_campaign( $response->data['id'], '', get_user_meta(get_current_user_id(),"pos_campaign_id", true) );
+		die();
+		return $response;
 	}
 	function wc_pos_campaign_js($js) {
 		$js['pos-campaign-js']= WOOCOMMERCE_CIVICRM_URL . 'js/pos_campaign.js';
@@ -51,11 +58,17 @@ class Woocommerce_CiviCRM_POS {
 		return $var;
 	}
 
-
+	function set_campaign() {
+		update_user_meta(get_current_user_id(),"pos_campaign_id",  $_POST['campaign_id']);
+	}
 	function get_campaign() {
-		$order_campaign = get_option( 'woocommerce_civicrm_campaign_id', false);
+		$order_campaign = get_user_meta(get_current_user_id(),"pos_campaign_id", true);
 		if(!$order_campaign){
-			$order_campaign = 0;
+			$order_campaign = get_option( 'woocommerce_civicrm_campaign_id', false);
+			if(!$order_campaign){
+				$order_campaign = 0;
+			}
+			add_user_meta(get_current_user_id(),"pos_campaign_id", $order_campaign);
 		}
 		$render = '
 			<div class="wc-civicrmcampaign">

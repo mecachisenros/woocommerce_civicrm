@@ -67,7 +67,7 @@ class Woocommerce_CiviCRM_Manager {
 		}
 		// In dashbord context, woocommerce_checkout_order_processed is not called after a creation
 		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new')) {
-			$this->action_order( $post_id );
+			$this->action_order( $post_id , array(), new WC_Order($post_id));
 		}
 
 	}

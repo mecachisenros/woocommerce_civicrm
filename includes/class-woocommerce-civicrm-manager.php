@@ -517,8 +517,9 @@ class Woocommerce_CiviCRM_Manager {
 			"$sales_tax_field_id" => $sales_tax,
 			"$shipping_cost_field_id" => $shipping_cost,
 			'campaign_id' => $campaign_name,
-			'api.line_item.create' => array(),
+
 		);
+
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){
 			// Need to be set in admin page
@@ -529,29 +530,33 @@ class Woocommerce_CiviCRM_Manager {
 		 * Add line items to CiviCRM contribution
 		 * @since 2.2
 		 */
-		foreach( $items as $item ){
-			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
-			if($custom_contribution_type === 'exclude')
-				continue;
+		 if(count($items)){
+				$params['api.line_item.create'] = array();
+				foreach( $items as $item ){
+		 			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
+		 			if($custom_contribution_type === 'exclude')
+		 				continue;
 
-			if(!$custom_contribution_type){
-				$custom_contribution_type = $default_contribution_type_id;
-			}
-			$params['api.line_item.create'][] = array(
-				'price_field_id' => array(
-				  '0' => 3,
-				),
-				'qty' => $item['qty'],
-				'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator ),
-				'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator ),
-				'label' => $item['name'],
-				'financial_type_id' => $custom_contribution_type,
-			);
-		}
+		 			if(!$custom_contribution_type){
+		 				$custom_contribution_type = $default_contribution_type_id;
+		 			}
+		 			$params['api.line_item.create'][] = array(
+		 				'price_field_id' => array(
+		 				  '0' => 3,
+		 				),
+		 				'qty' => $item['qty'],
+		 				'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator ),
+		 				'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator ),
+		 				'label' => $item['name'],
+		 				'financial_type_id' => $custom_contribution_type,
+		 			);
+		 		}
+		 }
+
+
 
 		// Flush UTM cookies
 		$this->delete_utm_cookies();
-
 		try {
 			/**
 		 * Filter Contribution params before calling the Civi's API.
@@ -560,6 +565,7 @@ class Woocommerce_CiviCRM_Manager {
 		 * @param array $params The params to be passsed to the API
 		 */
 			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
+
 			if(isset($contribution['id']) && $contribution['id']){
 				// Adds order note in reference to the created contribution
 				$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'woocommerce-civicrm'),
@@ -583,6 +589,8 @@ class Woocommerce_CiviCRM_Manager {
 			// Log the error, but continue.
 			CRM_Core_Error::debug_log_message( __( 'Not able to add contribution', 'woocommerce-civicrm' ) );
 		}
+
+
 		$order->add_order_note(  __( 'CiviCRM Contribution could not be created', 'woocommerce-civicrm' ) );
 		return false;
 	}

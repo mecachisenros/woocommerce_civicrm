@@ -104,7 +104,7 @@
 			//	return $match->contact_id;
 			//}
 		}else{
-      $email = $order->get_billing_email()
+      $email = $order->get_billing_email();
     }
 
     var_dump($email);

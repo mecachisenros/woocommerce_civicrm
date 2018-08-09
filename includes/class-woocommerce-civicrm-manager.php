@@ -94,8 +94,7 @@ class Woocommerce_CiviCRM_Manager {
 				$order->add_order_note(  __( 'CiviCRM Contact could not be found or created', 'woocommerce-civicrm' ) );
 				return;
 		}
-		var_dump($cid);
-		die();
+
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );
 
@@ -566,7 +565,8 @@ class Woocommerce_CiviCRM_Manager {
 		 * @param array $params The params to be passsed to the API
 		 */
 			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
-
+			var_dump($contribution);
+			die();
 			if(isset($contribution['id']) && $contribution['id']){
 				// Adds order note in reference to the created contribution
 				$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'woocommerce-civicrm'),

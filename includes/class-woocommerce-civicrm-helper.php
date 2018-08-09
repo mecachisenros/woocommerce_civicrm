@@ -91,7 +91,7 @@
  	 */
  	public function civicrm_get_cid( $order ){
     $email = "";
-		if ( is_user_logged_in() && !is_admin() ) {
+		if ( is_user_logged_in() && !is_admin() ) { // if user is logged in but not in the admin (not a manual order)
 			$current_user = wp_get_current_user();
 			//$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
 			//	$current_user,
@@ -104,15 +104,14 @@
 			//	return $match->contact_id;
 			//}
 		}else{
-      if(filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT)){
+      if(filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT)){ // if there was a fiel customer user in form (manual order)
         $cu_id = filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT);
-
 
         $user_info = get_userdata($cu_id);
         $email = $user_info->user_email;
 
       }else{
-        $email = $order->get_billing_email();
+        $email = $order->get_billing_email(); 
       }
     }
 

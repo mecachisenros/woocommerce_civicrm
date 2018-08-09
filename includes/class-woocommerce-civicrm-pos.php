@@ -63,7 +63,7 @@ class Woocommerce_CiviCRM_POS {
 	/**
 	 *
 	 * Add JS and CSS to the POS page
-	 *
+	 * 
 	 */
 	function wc_pos_campaign_js($js) {
 		wp_nonce_field('woocommerce_civicrm_order_new', 'woocommerce_civicrm_order_new');
@@ -106,7 +106,7 @@ class Woocommerce_CiviCRM_POS {
 					<div>
 						<select id="order_civicrmcampaign" name="order_civicrmcampaign" data-placeholder="'. __('CiviCRM Campaign', 'woocommerce-civicrm') .'">';
 						foreach (WCI()->helper->campaigns as $campaign_id => $campaign_name){
-							$render .= '<option value="'. $campaign_id .'" '.selected($campaign_id, $order_campaign, false).'>'. $campaign_name.'</option>'; // select by default the $order_camapaign 
+							$render .= '<option value="'. $campaign_id .'" '.selected($campaign_id, $order_campaign, false).'>'. $campaign_name.'</option>'; // select by default the $order_camapaign
 						}
 						$render .= '</select>
 					</div>

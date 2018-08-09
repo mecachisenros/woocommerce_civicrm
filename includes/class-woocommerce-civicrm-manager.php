@@ -67,6 +67,8 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new') || (filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT)===NULL && get_post_meta( $post_id, '_pos', true)) ) {
+			var_dump($post_id);
+			die();
 			$this->action_order( $post_id , array(), new WC_Order($post_id));
 		}
 

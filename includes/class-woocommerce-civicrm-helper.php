@@ -90,8 +90,7 @@
  	 * @return int $cid The contact_id
  	 */
  	public function civicrm_get_cid( $order ){
-
-		if ( is_user_logged_in() ) {
+		if ( is_user_logged_in() && !is_admin() ) {
 			$current_user = wp_get_current_user();
 			$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
 				$current_user,

@@ -1,11 +1,17 @@
 jQuery( document ).ready(function(){
-  var checkExist = setInterval(function() {
-     if (jQuery(".cart-customer").length) {
+  var checkExist = setInterval(function() { // loop until POS is loaded to add the campaign list
+     if (jQuery("#page.two-column #main").length) {
         addCampaignList();
         clearInterval(checkExist);
      }
   }, 100); // check every 100ms
 });
+
+/*
+*
+* Add campaign list to the top of the page
+*
+*/
 
 function addCampaignList(){
 
@@ -14,17 +20,21 @@ function addCampaignList(){
     'nonce' : POS.options.nonce
 	};
 
-	jQuery.post(POS.options.ajaxurl, data, function(response) {
-		$( ".cart-customer" ).after(response );
-    changeCampaign();
+	jQuery.post(POS.options.ajaxurl, data, function(response) { // Ajax to get the campaign list back
+		jQuery("#page.two-column #main").prepend(response);
+    changeCampaign(); // set the campaign list for this user
     $( "#order_civicrmcampaign").change(function(){
-      console.log( $( "#order_civicrmcampaign").val());
       changeCampaign();
     });
 
 	});
 }
-var campaign_id;
+
+/*
+*
+* Send the selected campaign to AJAX set_campaign to save it to the user meta
+*
+*/
 function changeCampaign(){
   campaign_id = $( "#order_civicrmcampaign").val();
 

@@ -438,8 +438,8 @@ class Woocommerce_CiviCRM_Manager {
 			CRM_Core_Error::debug_log_message( __( 'Not able to fetch monetary settings', 'woocommerce-civicrm' ) );
 		}
 
-		$sales_tax = $order->get_total_tax();
-		$sales_tax = number_format( $sales_tax, 2, $decimal_separator, $thousand_separator );
+		$sales_tax_raw = $order->get_total_tax();
+		$sales_tax = number_format( $sales_tax_raw, 2, $decimal_separator, $thousand_separator );
 
 		$shipping_cost = $order->get_total_shipping();
 
@@ -454,7 +454,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		// Couldn't figure where Woocommerce stores the subtotal (ie no TAX price)
 		// So for now...
-		$rounded_subtotal = $rounded_total - $sales_tax;
+		$rounded_subtotal = $rounded_total - $sales_tax_raw;
 
 		$rounded_subtotal = number_format($rounded_subtotal, 2, $decimal_separator, $thousand_separator);
 

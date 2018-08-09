@@ -68,7 +68,8 @@ class Woocommerce_CiviCRM_Manager {
 
 		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new') || (filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT)===NULL && get_post_meta( $post_id, '_pos', true)) ) {
 
-			$this->action_order( $post_id , array(), new WC_Order($post_id));
+
+			$this->action_order( $post_id , $data, new WC_Order($post_id));
 		}
 
 
@@ -81,7 +82,6 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param int $order_id The order id
 	 */
 	 public function action_order( $order_id, $posted_data, $order){
-
 
 		$cid = WCI()->helper->civicrm_get_cid( $order );
 		if ( $cid === FALSE ) {
@@ -565,7 +565,6 @@ class Woocommerce_CiviCRM_Manager {
 		 * @param array $params The params to be passsed to the API
 		 */
 			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
-			var_dump($contribution);
 			if(isset($contribution['id']) && $contribution['id']){
 				// Adds order note in reference to the created contribution
 				$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'woocommerce-civicrm'),

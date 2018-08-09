@@ -104,10 +104,19 @@
 			//	return $match->contact_id;
 			//}
 		}else{
-      $email = $order->get_billing_email();
+      if(filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT)){
+        $cu_id = filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT);
+
+
+        $user_info = get_userdata($cu_id);
+        $email = $user_info->user_email;
+
+      }else{
+        $email = $order->get_billing_email();
+      }
     }
 
-    var_dump($email);
+
 		// The customer is anonymous.  Look in the CiviCRM contacts table for a
 		// contact that matches the billing email.
 		$params = array(
@@ -128,8 +137,7 @@
 			return 0;
 		}
 		$cid = $contact['values'][0]['id'];
-    var_dump($cid);
-    die();
+
 		return $cid;
 
 	}

@@ -30,8 +30,8 @@ class Woocommerce_CiviCRM_Manager {
 		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10, 3 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
-		add_action('save_post', array( $this, 'save_post'), 10);
-
+		//add_action('save_post', array( $this, 'save_post'), 49);
+		add_action( 'save_post_shop_order', array(&$this,'save_post' ), 55);
 	}
 
 	/**
@@ -51,7 +51,7 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param int $post_id
 	 * @since 2.2
 	 */
-	public function save_post( $post_id ){
+	public function save_post( $post_id, $data='null' ){
 		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
 			return;
 
@@ -65,10 +65,11 @@ class Woocommerce_CiviCRM_Manager {
 			$this->update_campaign($post_id,$current_campaign_id,$new_campaign_id);
 			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $new_campaign_id ));
 		}
-		// In dashbord context, woocommerce_checkout_order_processed is not called after a creation
-		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new')) {
+
+		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new') || (filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT)===NULL && get_post_meta( $post_id, '_pos', true)) ) {
 			$this->action_order( $post_id , array(), new WC_Order($post_id));
 		}
+
 
 	}
 
@@ -95,6 +96,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );
+
 
 		return $order_id;
 
@@ -403,7 +405,6 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param object $order The order object
 	 */
 	public function add_contribution( $cid, &$order ) {
-
 		$debug['cid']=$cid;
 
 		$order_id = $order->get_id();
@@ -517,7 +518,6 @@ class Woocommerce_CiviCRM_Manager {
 			"$sales_tax_field_id" => $sales_tax,
 			"$shipping_cost_field_id" => $shipping_cost,
 			'campaign_id' => $campaign_name,
-
 		);
 
 		// If the order has VAT (Tax) use VAT Fnancial type
@@ -530,6 +530,7 @@ class Woocommerce_CiviCRM_Manager {
 		 * Add line items to CiviCRM contribution
 		 * @since 2.2
 		 */
+
 		 if(count($items)){
 				$params['api.line_item.create'] = array();
 				foreach( $items as $item ){
@@ -552,8 +553,6 @@ class Woocommerce_CiviCRM_Manager {
 		 			);
 		 		}
 		 }
-
-
 
 		// Flush UTM cookies
 		$this->delete_utm_cookies();
@@ -684,14 +683,20 @@ class Woocommerce_CiviCRM_Manager {
 		// Default is the order Type
 		// Until 2.2, contribution source was exactly the same as contribution note.
 		$source = $order->get_type();
-		// Checks if users comes from a campaign
-		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ] ) {
-			$source =  esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ]);
+
+		if(get_post_meta( $order->get_id(), '_order_source', true)==="pos"){
+			$source = "pos";
+		}else{
+			// Checks if users comes from a campaign
+			if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ] ) {
+				$source =  esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_source_' . COOKIEHASH ]);
+			}
+			// Append medium UTM if present
+			if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) {
+				$source .=  ' / '.esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ]);
+			}
 		}
-		// Append medium UTM if present
-		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) {
-			$source .=  ' / '.esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ]);
-		}
+
 		return $source;
 	}
 

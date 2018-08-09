@@ -143,9 +143,11 @@ class Woocommerce_CiviCRM_Products {
 	 */
 	 function bulk_and_quick_edit_save_post( $post_id, $post ) {
 		 if(isset($_GET['civicrm_contribution_type'])){
- 			$civicrm_contribution_type = sanitize_text_field($_GET['civicrm_contribution_type']);
- 			 update_post_meta( $post_id, '_civicrm_contribution_type', $civicrm_contribution_type );
- 		}
+
+			 $civicrm_contribution_type = sanitize_text_field($_GET['civicrm_contribution_type']);
+				update_post_meta( $post_id, '_civicrm_contribution_type', $civicrm_contribution_type );
+		 }
+
 	 }
 
 

@@ -1,0 +1,21 @@
+#page.two-column #main .wc-civicrmcampaign{
+  height: auto;
+  display: block;
+  width: 50%;
+  position: absolute;
+  right: 0;
+  top: 5px;
+}
+#page.two-column #main .wc-civicrmcampaign select{
+  padding: 7px;
+}
+#page.two-column #main .wc-civicrmcampaign .list-row{
+  background-color: #607d8b;
+  border-top: 2px solid #dbdbdb;
+  margin:0 0.3rem ;
+  color: #ffffff;
+}
+
+#page.two-column #main #right{
+  padding: 55px 0 0 0;
+}

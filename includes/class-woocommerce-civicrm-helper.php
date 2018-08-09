@@ -90,24 +90,28 @@
  	 * @return int $cid The contact_id
  	 */
  	public function civicrm_get_cid( $order ){
-		if ( is_user_logged_in()) {
+    $email = "";
+		if ( is_user_logged_in() && !is_admin() ) {
 			$current_user = wp_get_current_user();
-			$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-				$current_user,
-				$current_user->ID,
-				$current_user->user_email,
-				'WordPress', FALSE, 'Individual'
-			);
+			//$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
+			//	$current_user,
+			//	$current_user->ID,
+			$email =	$current_user->user_email;
+			//	'WordPress', FALSE, 'Individual'
+			//);
 
-			if ( is_object( $match ) ) {
-				return $match->contact_id;
-			}
-		}
+			//if ( is_object( $match ) ) {
+			//	return $match->contact_id;
+			//}
+		}else{
+      $email = $order->get_billing_email()
+    }
 
+    var_dump($email);
 		// The customer is anonymous.  Look in the CiviCRM contacts table for a
 		// contact that matches the billing email.
 		$params = array(
-			'email' => $order->get_billing_email(),
+			'email' => $email,
 			'return.contact_id' => TRUE,
 			'sequential' => 1,
 		);
@@ -124,7 +128,8 @@
 			return 0;
 		}
 		$cid = $contact['values'][0]['id'];
-
+    var_dump($cid);
+    die();
 		return $cid;
 
 	}

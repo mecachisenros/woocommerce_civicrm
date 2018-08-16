@@ -248,8 +248,6 @@ class Woocommerce_CiviCRM {
 		// Include POS functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-pos.php';
 
-		// Include Donation functionality class
-		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-donation-products.php';
 
 
 	}
@@ -276,9 +274,6 @@ class Woocommerce_CiviCRM {
 		$this->products = new Woocommerce_CiviCRM_Products;
 		// init POS
 		$this->pos = new Woocommerce_CiviCRM_POS;
-
-		// init donation product
-		$this->donation_products = new Woocommerce_CiviCRM_Donation_Products;
 
 	}
 	/**

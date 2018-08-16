@@ -247,6 +247,9 @@ class Woocommerce_CiviCRM {
 
 		// Include POS functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-pos.php';
+
+
+
 	}
 
 	/**

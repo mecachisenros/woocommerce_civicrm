@@ -98,6 +98,7 @@ class Woocommerce_CiviCRM_Manager {
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );
 
+		do_action('woocommerce_civicrm_action_order', $order, $cid);
 
 		return $order_id;
 

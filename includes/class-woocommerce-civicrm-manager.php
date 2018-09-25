@@ -721,55 +721,87 @@ class Woocommerce_CiviCRM_Manager {
 		try {
 			$custom_group = civicrm_api3( 'CustomGroup', 'getSingle', $params );
 			if(isset($custom_group['id']) && $custom_group['id'] && is_numeric($custom_group['id'])){
-				add_option( 'woocommerce_civicrm_contribution_group_id', $custom_group['id'] );
+				$group_id = $custom_group['id'];
+				update_option( 'woocommerce_civicrm_contribution_group_id', $group_id);
 			}
 		} catch ( CiviCRM_API3_Exception $e ){
 			CRM_Core_Error::debug_log_message( __( 'Not able to get custom group', 'woocommerce-civicrm' ) );
 		}
+		if(!$group_id){
+			// First we need to check if the VAT and Shipping custom fields have
+			// already been created.
+			$params = array(
+				'title'            => 'Woocommerce Purchases',
+				'name'             => 'Woocommerce_purchases',
+				'extends'          => array( 'Contribution' ),
+				'weight'           => 1,
+				'collapse_display' => 0,
+				'is_active'        => 1,
+			);
 
-		// First we need to check if the VAT and Shipping custom fields have
-		// already been created.
-		$params = array(
-			'title'            => 'Woocommerce Purchases',
-			'name'             => 'Woocommerce_purchases',
-			'extends'          => array( 'Contribution' ),
-			'weight'           => 1,
-			'collapse_display' => 0,
-			'is_active'        => 1,
-		);
-
-		try {
-			$custom_group = civicrm_api3( 'CustomGroup', 'create', $params );
-		} catch ( CiviCRM_API3_Exception $e ){
-			CRM_Core_Error::debug_log_message( __( 'Not able to create custom group', 'woocommerce-civicrm' ) );
+			try {
+				$custom_group = civicrm_api3( 'CustomGroup', 'create', $params );
+			} catch ( CiviCRM_API3_Exception $e ){
+				CRM_Core_Error::debug_log_message( __( 'Not able to create custom group', 'woocommerce-civicrm' ) );
+			}
+			update_option( 'woocommerce_civicrm_contribution_group_id', $custom_group['id'] );
 		}
-		add_option( 'woocommerce_civicrm_contribution_group_id', $custom_group['id'] );
 
 		$params = array(
-			'custom_group_id' => $custom_group['id'],
-			'label'           => 'Sales tax',
-			'html_type'       => 'Text',
-			'data_type'       => 'String',
-			'weight'          => 1,
-			'is_required'     => 0,
-			'is_searchable'   => 0,
-			'is_active'       => 1,
+			'label'             => 'Sales tax',
+			'return'		   => 'id',
 		);
-		$tax_field = civicrm_api3( 'Custom_field', 'create', $params );
-		add_option( 'woocommerce_civicrm_sales_tax_field_id', $tax_field['id'] );
+		try {
+			$custom_field = civicrm_api3( 'CustomField', 'getSingle', $params );
+			if(isset($custom_field['id']) && $custom_field['id'] && is_numeric($custom_field['id'])){
+				$tax_field = $custom_field['id'];
+				update_option( 'woocommerce_civicrm_sales_tax_field_id', $tax_field);
+			}
+		} catch ( CiviCRM_API3_Exception $e ){
+			CRM_Core_Error::debug_log_message( __( 'Not able to get custom field', 'woocommerce-civicrm' ) );
+		}
+		if(!$tax_field){
+			$params = array(
+				'custom_group_id' => $custom_group['id'],
+				'label'           => 'Sales tax',
+				'html_type'       => 'Text',
+				'data_type'       => 'String',
+				'weight'          => 1,
+				'is_required'     => 0,
+				'is_searchable'   => 0,
+				'is_active'       => 1,
+			);
+			$tax_field = civicrm_api3( 'CustomField', 'create', $params );
+			update_option( 'woocommerce_civicrm_sales_tax_field_id', $tax_field['id'] );
+		}
 
 		$params = array(
-			'custom_group_id' => $custom_group['id'],
-			'label'           => 'Shipping Cost',
-			'html_type'       => 'Text',
-			'data_type'       => 'String',
-			'weight'          => 2,
-			'is_required'     => 0,
-			'is_searchable'   => 0,
-			'is_active'       => 1,
+			'label'             => 'Shipping Cost',
+			'return'		   => 'id',
 		);
-		$shipping_field = civicrm_api3( 'Custom_field', 'create', $params );
-		add_option( 'woocommerce_civicrm_shipping_cost_field_id', $shipping_field['id'] );
+		try {
+			$custom_field = civicrm_api3( 'CustomField', 'getSingle', $params );
+			if(isset($custom_field['id']) && $custom_field['id'] && is_numeric($custom_field['id'])){
+				$shipping_field = $custom_field['id'];
+				update_option( 'woocommerce_civicrm_shipping_cost_field_id', $shipping_field);
+			}
+		} catch ( CiviCRM_API3_Exception $e ){
+			CRM_Core_Error::debug_log_message( __( 'Not able to get custom field', 'woocommerce-civicrm' ) );
+		}
+		if(!$shipping_field){
+			$params = array(
+				'custom_group_id' => $custom_group['id'],
+				'label'           => 'Shipping Cost',
+				'html_type'       => 'Text',
+				'data_type'       => 'String',
+				'weight'          => 2,
+				'is_required'     => 0,
+				'is_searchable'   => 0,
+				'is_active'       => 1,
+			);
+			$shipping_field = civicrm_api3( 'CustomField', 'create', $params );
+			update_option( 'woocommerce_civicrm_shipping_cost_field_id', $shipping_field['id'] );
+		}
 	}
 
 	/**

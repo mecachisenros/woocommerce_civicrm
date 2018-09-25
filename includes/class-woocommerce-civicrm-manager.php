@@ -713,6 +713,20 @@ class Woocommerce_CiviCRM_Manager {
 			return;
 		}
 
+		// Let's check if the custom group already exists in CiviCRM
+		$params = array(
+			'name'             => 'Woocommerce_purchases',
+			'return'		   => 'id',
+		);
+		try {
+			$custom_group = civicrm_api3( 'CustomGroup', 'getSingle', $params );
+			if(isset($custom_group['id']) && $custom_group['id'] && is_numeric($custom_group['id'])){
+				add_option( 'woocommerce_civicrm_contribution_group_id', $custom_group['id'] );
+			}
+		} catch ( CiviCRM_API3_Exception $e ){
+			CRM_Core_Error::debug_log_message( __( 'Not able to get custom group', 'woocommerce-civicrm' ) );
+		}
+
 		// First we need to check if the VAT and Shipping custom fields have
 		// already been created.
 		$params = array(

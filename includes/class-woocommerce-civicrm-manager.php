@@ -337,10 +337,10 @@ class Woocommerce_CiviCRM_Manager {
 						'contact_id' => $cid,
 					);
 					foreach( $existing_emails as $existing_email ){
-						if( $existing_email['location_type_id'] == $location_type_id ){
+						if( isset($existing['location_type_id']) && $existing_email['location_type_id'] == $location_type_id ){
 							$email['id'] = $existing_email['id'];
 						}
-						if( $existing_email['email'] == $email['email'] ){
+						if( isset($existing_email['email']) && $existing_email['email'] == $email['email'] ){
 							$email_exists = TRUE;
 						}
 					}
@@ -369,13 +369,14 @@ class Woocommerce_CiviCRM_Manager {
 					);
 
 					foreach( $existing_addresses as $existing ){
-						if( $existing['location_type_id'] == $location_type_id ){
+						if( isset($existing['location_type_id']) && $existing['location_type_id'] == $location_type_id ){
 							$address['id'] = $existing['id'];
 						}
 						// @TODO Don't create if exact match of another - should
 						// we make 'exact match' configurable.
 						elseif (
-							$existing['street_address'] == $address['street_address']
+							isset($existing['street_address']) && isset($existing['city']) && isset($existing['postal_code'])
+							&& $existing['street_address'] == $address['street_address']
 							&& CRM_Utils_Array::value( 'supplemental_address_1', $existing ) == CRM_Utils_Array::value( 'supplemental_address_1', $address )
 							&& $existing['city'] == $address['city']
 							&& $existing['postal_code'] == $address['postal_code']

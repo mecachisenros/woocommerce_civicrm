@@ -111,7 +111,7 @@
         $email = $user_info->user_email;
 
       }else{
-        $email = $order->get_billing_email(); 
+        $email = $order->get_billing_email();
       }
     }
 
@@ -135,7 +135,7 @@
 		if ( count( $contact ) == 0 ) {
 			return 0;
 		}
-		$cid = $contact['values'][0]['id'];
+		$cid = isset($contact['values'][0]['id']) ? $contact['values'][0]['id'] : 0;
 
 		return $cid;
 

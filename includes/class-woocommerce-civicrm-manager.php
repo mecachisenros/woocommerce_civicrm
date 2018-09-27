@@ -27,7 +27,7 @@ class Woocommerce_CiviCRM_Manager {
 	public function register_hooks(){
 
 		add_action('init', array( $this, 'check_utm'));
-		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10, 4 );
+		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10, 3 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
 		//add_action('save_post', array( $this, 'save_post'), 49);

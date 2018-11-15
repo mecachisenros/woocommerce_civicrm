@@ -197,6 +197,8 @@ class Woocommerce_CiviCRM {
 	 * @since 2.1
 	 */
 	public function boot_civi() {
+		if(!function_exists('civi_wp'))
+			return;
 		return civi_wp()->initialize();
 	}
 

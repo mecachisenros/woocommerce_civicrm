@@ -73,7 +73,8 @@
 	 */
 	public function inited() {
 
-		WCI()->boot_civi();
+		if(!WCI()->boot_civi())
+      return;
 		$this->financial_types = $this->get_financial_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();

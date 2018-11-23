@@ -1,6 +1,5 @@
 {if $uid}
-<h3>{ts}{$i18n.orders}{/ts}</h3>
-<a href="{$newOrderUrl}">{ts}{$i18n.addOrder}{/ts}</a>
+<h3>{ts}{$i18n.orders}{/ts} <a class="button-new_order button" href="{$newOrderUrl}">{ts}{$i18n.addOrder}{/ts}</a></h3>
 <table class="selector row-highlight">
 <thead class="sticky">
 <tr>

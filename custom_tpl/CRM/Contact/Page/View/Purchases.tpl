@@ -1,5 +1,6 @@
 {if $uid}
-<h3>Orders</h3>
+<h3>{ts}{$i18n.orders}{/ts}</h3>
+<a href="{$newOrderUrl}">{ts}{$i18n.addOrder}{/ts}</a>
 <table class="selector row-highlight">
 <thead class="sticky">
 <tr>

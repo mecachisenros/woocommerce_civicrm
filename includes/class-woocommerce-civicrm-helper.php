@@ -18,6 +18,16 @@
 	 */
 	public $financial_types;
 
+  /**
+	 * The active Membership Types.
+	 *
+	 * Array of key/value pairs holding the active Membership types.
+	 * @since 2.0
+	 * @access public
+	 * @var array $financial_types The Membership types
+	 */
+	public $membership_types;
+
 	/**
 	 * The Address Location Type.
 	 *
@@ -76,6 +86,7 @@
 		if(!WCI()->boot_civi())
       return;
 		$this->financial_types = $this->get_financial_types();
+    $this->membership_types = $this->civicrm_get_membership_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();
         $this->campaigns = $this->get_campaigns();
@@ -410,6 +421,40 @@
 		return $addressTypesResult['values'];
 
 	}
+
+  /**
+ 	 * Get CiviCRM Membership Types.
+ 	 *
+ 	 * @since 2.0
+ 	 */
+ 	public function civicrm_get_membership_types( ){
+
+
+    if ( isset( $this->$membership_types ) ) return $this->$membership_types;
+
+		$params = array(
+			'sequential' => 1,
+			'is_active' => 1,
+		);
+
+		/**
+		 * Filter Financial type params before calling the Civi's API.
+		 *
+		 * @since 2.0
+		 * @param array $params The params to be passsed to the API
+		 */
+		$membershipTypesResult = civicrm_api3( 'MembershipType', 'get', apply_filters( 'woocommerce_civicrm_membership_types_params', $params ) );
+
+		$membershipTypes = array();
+		foreach( $membershipTypesResult['values'] as $key => $value ) {
+			$membershipTypes[$value['id']] = $value['name'];
+		}
+
+		return $membershipTypes;
+
+
+  }
+
 
 	/**
 	 * Function to check whether a value is (string) 'yes'.

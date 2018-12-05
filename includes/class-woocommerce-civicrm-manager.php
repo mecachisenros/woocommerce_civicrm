@@ -72,6 +72,11 @@ class Woocommerce_CiviCRM_Manager {
 			$this->action_order( $post_id , $data, new WC_Order($post_id));
 		}
 
+		$membership_id = get_post_meta($post_id, '_civicrm_membership', true);
+		// In Front context, let action_order() make the stuff
+		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
+				$this->check_membership($post_id);
+		}
 
 	}
 
@@ -924,5 +929,105 @@ class Woocommerce_CiviCRM_Manager {
 		setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'woocommerce_civicrm_utm_source_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'woocommerce_civicrm_utm_medium_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
+	}
+
+	/**
+	 * Check if the order contains a Membership Due item and create a Membership if needed
+	 *
+	 * @param  WC_Order $order The order
+	 * @return void
+	 */
+	private function check_membership($order, $cid=null){
+			if(!$cid){
+					if(!function_exists('WCI'))
+							return;
+
+					$cid = WCI()->helper->civicrm_get_cid( $order );
+			}
+			if(!$cid)
+					return;
+
+			$order_id = $order->get_id();
+			$items = $order->get_items();
+			$membership_id = 0;
+			try{
+					$member_due_id = civicrm_api3('FinancialType', 'getvalue', [
+							'return' => "id",
+							'id' => 2,
+					]);
+					$magazine_subscription_id = civicrm_api3('FinancialType', 'getvalue', [
+							'return' => "id",
+							'id' => 5,
+					]);
+			}
+			catch( Exception $e ){
+					$member_due_id = false;
+					$magazine_subscription_id = false;
+			}
+
+
+			foreach( $items as $item ){
+					$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
+					$membership_type_id = false;
+					$start_date = date('Y-m-d'); // put order date from the order object
+					if($custom_contribution_type === $member_due_id){
+							$membership_type_id = __('Groups', 'helios');
+							$end_date = date('Y').'-12-31'; // $start_date + period for roll
+					}
+					if($custom_contribution_type === $magazine_subscription_id){
+							$membership_type_id = __('Magazine Subscription', 'helios');
+							$end_date = date('Y-m-d', strtotime('+3 months'));
+					}
+					if(!$membership_type_id)
+							continue;
+
+					// If Contribution Type is of type MemberShip
+					// create Membership and Membership Payment
+					// also add an Order Note
+					$result = civicrm_api3('Membership', 'create', [
+							'membership_type_id' => $membership_type_id, // String
+							'contact_id' => $cid, // Integer
+							'start_date' => $start_date,
+							'end_date' => $end_date,
+							'campaign_id' => get_post_meta($order_id, '_woocommerce_civicrm_campaign_id', true), // String
+							'source' => $this->get_order_source($order_id), // String
+							'status_id' => "Current", // ["Current","New","Grace","Expired","Pending","Cancelled","Deceased"]
+					]);
+					if($result && $result['id']){
+							$membership_id = $result['id'];
+							$order->add_order_note(sprintf(__('Membership %s has been created in CiviCRM', 'helios'),
+									'<a href="' .add_query_arg(
+											array(
+													'page' => 'CiviCRM',
+													'q' => 'civicrm/contact/view/membership',
+													'reset' => '1',
+													'id' => $membership_id,
+													'cid' => $cid,
+													'action' => 'view',
+													'context' => 'dashboard',
+													'selectedChild' => 'member'
+											),
+											admin_url('admin.php')
+									). '">' . $membership_id . '</a>')
+							);
+							$params = array(
+						'invoice_id' => WCI()->manager->get_invoice_id($order_id),
+						'return' => 'id'
+					);
+
+					try {
+									$contribution = civicrm_api3( 'Contribution', 'getsingle', $params );
+									civicrm_api3('MembershipPayment', 'create', [
+											'membership_id' => $membership_id,
+											'contribution_id' => $contribution['contribution_id'],
+									]);
+					} catch ( Exception $e ) {
+						CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+					}
+							break;
+					}
+			}
+
+			update_post_meta($order_id, $this->metaname_membership_sync, $membership_id);
 	}
 }

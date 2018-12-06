@@ -72,11 +72,7 @@ class Woocommerce_CiviCRM_Manager {
 			$this->action_order( $post_id , $data, new WC_Order($post_id));
 		}
 
-		$membership_id = get_post_meta($post_id, '_civicrm_membership', true);
-		// In Front context, let action_order() make the stuff
-		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
-				$this->check_membership($post_id);
-		}
+
 
 	}
 
@@ -98,6 +94,12 @@ class Woocommerce_CiviCRM_Manager {
 		if ( $cid === FALSE ) {
 				$order->add_order_note(  __( 'CiviCRM Contact could not be found or created', 'woocommerce-civicrm' ) );
 				return;
+		}
+
+		$membership_id = get_post_meta($order_id, '_civicrm_membership', true);
+		// In Front context, let action_order() make the stuff
+		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
+				$this->check_membership($order);
 		}
 
 		// Add the contribution record.

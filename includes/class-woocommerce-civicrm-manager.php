@@ -952,35 +952,57 @@ class Woocommerce_CiviCRM_Manager {
 			$order_id = $order->get_id();
 			$items = $order->get_items();
 			$membership_id = 0;
-			try{
-					$member_due_id = civicrm_api3('FinancialType', 'getvalue', [
-							'return' => "id",
-							'id' => 2,
-					]);
-					$magazine_subscription_id = civicrm_api3('FinancialType', 'getvalue', [
-							'return' => "id",
-							'id' => 5,
-					]);
-			}
-			catch( Exception $e ){
-					$member_due_id = false;
-					$magazine_subscription_id = false;
-			}
+
+			$membership_types = WCI()->helper->membership_types;
 
 
 			foreach( $items as $item ){
 					$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
 					$membership_type_id = false;
-					$start_date = date('Y-m-d'); // put order date from the order object
-					if($custom_contribution_type === $member_due_id){
-							$membership_type_id = __('Groups', 'helios');
-							$end_date = date('Y').'-12-31'; // $start_date + period for roll
+					$start_date = false;
+					$end_date = false;
+					$order_date = $order->get_date_paid();
+					$order_timestamp = strtotime($order_date);
+
+					if(isset($membership_types['by_financial_type_id'][$custom_contribution_type])){
+
+						$item_membershipType = $membership_types['by_financial_type_id'][$custom_contribution_type];
+						$membership_type_id = $item_membershipType['name'];
+						$duration_unit = $item_membershipType['duration_unit'];
+						$duration_interval = $item_membershipType['duration_interval'];
+						$start_date = $order_date;
+
+						if($item_membershipType['period_type']=='fixed'){
+							$current_year = date('Y', $order_timestamp);
+
+							$fixed_period_start_day = $item_membershipType['fixed_period_start_day'];
+							$fixed_period_rollover_day = $item_membershipType['fixed_period_rollover_day'];
+
+							$current_year_period_start_timestamp = strtotime($current_year.'-'.substr($fixed_period_start_day,0, -2).'-'.substr($fixed_period_start_day, -2));
+							$current_year_period_rollover_timestamp = strtotime($current_year.'-'.substr($fixed_period_rollover_day,0, -2).'-'.substr($fixed_period_rollover_day, -2));
+
+							if($fixed_period_start_timestamp < $order_timestamp){ // the order is completed after the start date of this year
+								if($fixed_period_start_timestamp < $fixed_period_rollover_timestamp && $fixed_period_rollover_timestamp < $order_timestamp){ // If the rollover is after the start date and before the order
+									$start_date = date('Y-m-d', strtotime('+1 year',$current_year_period_start_timestamp)); // start next year
+								}else{
+									$start_date = date('Y-m-d', $fixed_period_start_timestamp); // start this year
+								}
+							}else{ // the order is completed before the start date of this year
+								if($fixed_period_rollover_timestamp < $fixed_period_start_timestamp && $fixed_period_rollover_timestamp < $order_timestamp){ // if the order is between rollover and this year start in this order
+									$start_date = date('Y-m-d', $fixed_period_start_timestamp); // start this year (which is next period)
+								}else{
+									$start_date = date('Y-m-d', strtotime('-1 year',$current_year_period_start_timestamp)); // start this period (which started last year)
+								}
+							}
+						}
+						// What if there is already a running membership ? TODO
+						// joined date ? first membership ... TODO
+						$end_date = date('Y-m-d', strtotime('+'.$duration_interval.' '.$duration_unit, strtotime($start_date)));
+					}else{
+						continue;
 					}
-					if($custom_contribution_type === $magazine_subscription_id){
-							$membership_type_id = __('Magazine Subscription', 'helios');
-							$end_date = date('Y-m-d', strtotime('+3 months'));
-					}
-					if(!$membership_type_id)
+
+					if(!$membership_type_id || !$start_date || !$end_date)
 							continue;
 
 					// If Contribution Type is of type MemberShip

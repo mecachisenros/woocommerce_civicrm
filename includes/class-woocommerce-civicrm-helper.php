@@ -28,6 +28,16 @@
 	 */
 	public $membership_types;
 
+  /**
+	 * optionvalue_membership_signup.
+	 *
+	 * integer Value
+	 * @since 2.0
+	 * @access public
+	 * @var array $financial_types The Membership types
+	 */
+	public $optionvalue_membership_signup;
+
 	/**
 	 * The Address Location Type.
 	 *
@@ -86,12 +96,12 @@
 		if(!WCI()->boot_civi())
       return;
 		$this->financial_types = $this->get_financial_types();
-    $this->membership_types = $this->civicrm_get_membership_types();
+    $this->membership_types = $this->get_civicrm_membership_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();
         $this->campaigns = $this->get_campaigns();
 		$this->mapped_location_types = $this->set_mapped_location_types();
-
+    $this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
 	}
 
  	/**
@@ -427,10 +437,10 @@
  	 *
  	 * @since 2.0
  	 */
- 	public function civicrm_get_membership_types( ){
+ 	public function get_civicrm_membership_types( ){
 
 
-    if ( isset( $this->$membership_types ) ) return $this->$membership_types;
+    if ( isset( $this->membership_types ) ) return $this->membership_types;
 
 		$params = array(
 			'sequential' => 1,
@@ -447,15 +457,28 @@
 
 		$membershipTypes = array();
 		foreach( $membershipTypesResult['values'] as $key => $value ) {
-			$membershipTypes[$value['id']] = $value['name'];
+			$membershipTypes['by_membership_type_id'][$value['id']] = $value;
+      $membershipTypes['by_financial_type_id'][$value['financial_type_id']] = $value;
 		}
 
-		return $membershipTypes;
-
+		return apply_filters( 'woocommerce_civicrm_membership_types' , $membershipTypes, $membershipTypesResult);
 
   }
 
+  /**
+ 	 * Get CiviCRM OptionValue Membership Signup.
+ 	 *
+ 	 * @since 2.0
+ 	 */
+ 	public function get_civicrm_optionvalue_membership_signup( ){
 
+    $result = civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'return' => ["value"],
+      'name' => "Membership Signup",
+    ]);
+    return $result['values'][0]['value'];
+  }
 	/**
 	 * Function to check whether a value is (string) 'yes'.
 	 *

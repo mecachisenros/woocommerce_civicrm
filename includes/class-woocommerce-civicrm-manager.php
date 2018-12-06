@@ -1035,7 +1035,7 @@ class Woocommerce_CiviCRM_Manager {
 									). '">' . $membership_id . '</a>')
 							);
 							$params = array(
-						'invoice_id' => WCI()->manager->get_invoice_id($order_id),
+						'invoice_id' => $this->get_invoice_id($order_id),
 						'return' => 'id'
 					);
 
@@ -1052,6 +1052,6 @@ class Woocommerce_CiviCRM_Manager {
 					}
 			}
 
-			update_post_meta($order_id, $this->metaname_membership_sync, $membership_id);
+			update_post_meta($order_id, '_civicrm_membership', $membership_id);
 	}
 }

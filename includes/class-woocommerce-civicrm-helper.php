@@ -18,6 +18,26 @@
 	 */
 	public $financial_types;
 
+  /**
+	 * The active Membership Types.
+	 *
+	 * Array of key/value pairs holding the active Membership types.
+	 * @since 2.0
+	 * @access public
+	 * @var array $financial_types The Membership types
+	 */
+	public $membership_types;
+
+  /**
+	 * optionvalue_membership_signup.
+	 *
+	 * integer Value
+	 * @since 2.0
+	 * @access public
+	 * @var array $financial_types The Membership types
+	 */
+	public $optionvalue_membership_signup;
+
 	/**
 	 * The Address Location Type.
 	 *
@@ -76,11 +96,12 @@
 		if(!WCI()->boot_civi())
       return;
 		$this->financial_types = $this->get_financial_types();
+    $this->membership_types = $this->get_civicrm_membership_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();
         $this->campaigns = $this->get_campaigns();
 		$this->mapped_location_types = $this->set_mapped_location_types();
-
+    $this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
 	}
 
  	/**
@@ -411,6 +432,53 @@
 
 	}
 
+  /**
+ 	 * Get CiviCRM Membership Types.
+ 	 *
+ 	 * @since 2.0
+ 	 */
+ 	public function get_civicrm_membership_types( ){
+
+
+    if ( isset( $this->membership_types ) ) return $this->membership_types;
+
+		$params = array(
+			'sequential' => 1,
+			'is_active' => 1,
+		);
+
+		/**
+		 * Filter Financial type params before calling the Civi's API.
+		 *
+		 * @since 2.0
+		 * @param array $params The params to be passsed to the API
+		 */
+		$membershipTypesResult = civicrm_api3( 'MembershipType', 'get', apply_filters( 'woocommerce_civicrm_membership_types_params', $params ) );
+
+		$membershipTypes = array();
+		foreach( $membershipTypesResult['values'] as $key => $value ) {
+			$membershipTypes['by_membership_type_id'][$value['id']] = $value;
+      $membershipTypes['by_financial_type_id'][$value['financial_type_id']] = $value;
+		}
+
+		return apply_filters( 'woocommerce_civicrm_membership_types' , $membershipTypes, $membershipTypesResult);
+
+  }
+
+  /**
+ 	 * Get CiviCRM OptionValue Membership Signup.
+ 	 *
+ 	 * @since 2.0
+ 	 */
+ 	public function get_civicrm_optionvalue_membership_signup( ){
+
+    $result = civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'return' => ["value"],
+      'name' => "Membership Signup",
+    ]);
+    return $result['values'][0]['value'];
+  }
 	/**
 	 * Function to check whether a value is (string) 'yes'.
 	 *

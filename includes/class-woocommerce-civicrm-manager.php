@@ -73,6 +73,7 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 
+
 	}
 
 	/**
@@ -93,6 +94,12 @@ class Woocommerce_CiviCRM_Manager {
 		if ( $cid === FALSE ) {
 				$order->add_order_note(  __( 'CiviCRM Contact could not be found or created', 'woocommerce-civicrm' ) );
 				return;
+		}
+
+		$membership_id = get_post_meta($order_id, '_civicrm_membership', true);
+		// In Front context, let action_order() make the stuff
+		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
+				$this->check_membership($order);
 		}
 
 		// Add the contribution record.
@@ -924,5 +931,136 @@ class Woocommerce_CiviCRM_Manager {
 		setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'woocommerce_civicrm_utm_source_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'woocommerce_civicrm_utm_medium_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
+	}
+
+	/**
+	 * Check if the order contains a Membership Due item and create a Membership if needed
+	 *
+	 * @param  WC_Order $order The order
+	 * @return void
+	 */
+	private function check_membership($order, $cid=null){
+			if(!$cid){
+					if(!function_exists('WCI'))
+							return;
+
+					$cid = WCI()->helper->civicrm_get_cid( $order );
+			}
+			if(!$cid)
+					return;
+
+			$order_id = $order->get_id();
+			$items = $order->get_items();
+			$membership_id = 0;
+
+			$membership_types = WCI()->helper->membership_types;
+
+
+			foreach( $items as $item ){
+					$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
+					$membership_type_id = false;
+					$start_date = false;
+					$end_date = false;
+					$order_date = $order->get_date_paid();
+					$order_timestamp = strtotime($order_date);
+
+					if(isset($membership_types['by_financial_type_id'][$custom_contribution_type])){
+
+						$item_membershipType = $membership_types['by_financial_type_id'][$custom_contribution_type];
+						$membership_type_id = $item_membershipType['name'];
+						$duration_unit = $item_membershipType['duration_unit'];
+						$duration_interval = $item_membershipType['duration_interval'];
+						$start_date = $order_date;
+
+						if($item_membershipType['period_type']=='fixed'){
+							$current_year = date('Y', $order_timestamp);
+
+							$fixed_period_start_day = $item_membershipType['fixed_period_start_day'];
+							$fixed_period_rollover_day = $item_membershipType['fixed_period_rollover_day'];
+
+							$current_year_period_start_timestamp = strtotime($current_year.'-'.substr($fixed_period_start_day,0, -2).'-'.substr($fixed_period_start_day, -2));
+							$current_year_period_rollover_timestamp = strtotime($current_year.'-'.substr($fixed_period_rollover_day,0, -2).'-'.substr($fixed_period_rollover_day, -2));
+
+							if($fixed_period_start_timestamp < $order_timestamp){ // the order is completed after the start date of this year
+								if($fixed_period_start_timestamp < $fixed_period_rollover_timestamp && $fixed_period_rollover_timestamp < $order_timestamp){ // If the rollover is after the start date and before the order
+									$start_date = date('Y-m-d', strtotime('+1 year',$current_year_period_start_timestamp)); // start next year
+								}else{
+									$start_date = date('Y-m-d', $fixed_period_start_timestamp); // start this year
+								}
+							}else{ // the order is completed before the start date of this year
+								if($fixed_period_rollover_timestamp < $fixed_period_start_timestamp && $fixed_period_rollover_timestamp < $order_timestamp){ // if the order is between rollover and this year start in this order
+									$start_date = date('Y-m-d', $fixed_period_start_timestamp); // start this year (which is next period)
+								}else{
+									$start_date = date('Y-m-d', strtotime('-1 year',$current_year_period_start_timestamp)); // start this period (which started last year)
+								}
+							}
+						}
+						// What if there is already a running membership ? TODO
+						// joined date ? first membership ... TODO
+						$end_date = date('Y-m-d', strtotime('+'.$duration_interval.' '.$duration_unit, strtotime($start_date)));
+					}else{
+						continue;
+					}
+
+					if(!$membership_type_id || !$start_date || !$end_date)
+							continue;
+
+					// If Contribution Type is of type MemberShip
+					// create Membership and Membership Payment
+					// also add an Order Note
+					$result = civicrm_api3('Membership', 'create', [
+							'membership_type_id' => $membership_type_id, // String
+							'contact_id' => $cid, // Integer
+							'join_date' => $start_date,
+							'start_date' => $start_date,
+							'end_date' => $end_date,
+							'campaign_id' => get_post_meta($order_id, '_woocommerce_civicrm_campaign_id', true), // String
+							'source' => get_post_meta($order_id, '_order_source', true), // String
+							'status_id' => "Current", // ["Current","New","Grace","Expired","Pending","Cancelled","Deceased"]
+					]);
+					if($result && $result['id']){
+							global $wpdb;
+							global $db_name;
+							$membership_id = $result['id'];
+							$activity_type_id = WCI()->helper->optionvalue_membership_signup;
+							$query = sprintf('UPDATE `%4$s`.`civicrm_%1$s` SET `activity_date_time` = "%2$s" WHERE `%4$s`.`civicrm_%1$s`.`source_record_id` = %3$d AND `%4$s`.`civicrm_%1$s`.`activity_type_id` = %5$d ', 'activity', $start_date, $membership_id, $db_name, $activity_type_id);
+							$results = $wpdb->query($query);
+			        if ($wpdb->last_error) {
+			            $this->addError( $target.' creation date not updated.', $wpdb->last_error);
+			        }
+							$order->add_order_note(sprintf(__('Membership %s has been created in CiviCRM', 'helios'),
+									'<a href="' .add_query_arg(
+											array(
+													'page' => 'CiviCRM',
+													'q' => 'civicrm/contact/view/membership',
+													'reset' => '1',
+													'id' => $membership_id,
+													'cid' => $cid,
+													'action' => 'view',
+													'context' => 'dashboard',
+													'selectedChild' => 'member'
+											),
+											admin_url('admin.php')
+									). '">' . $membership_id . '</a>')
+							);
+							$params = array(
+						'invoice_id' => $this->get_invoice_id($order_id),
+						'return' => 'id'
+					);
+
+					try {
+									$contribution = civicrm_api3( 'Contribution', 'getsingle', $params );
+									civicrm_api3('MembershipPayment', 'create', [
+											'membership_id' => $membership_id,
+											'contribution_id' => $contribution['contribution_id'],
+									]);
+					} catch ( Exception $e ) {
+						CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+					}
+							break;
+					}
+			}
+
+			update_post_meta($order_id, '_civicrm_membership', $membership_id);
 	}
 }

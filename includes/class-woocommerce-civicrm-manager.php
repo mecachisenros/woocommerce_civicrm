@@ -1011,14 +1011,23 @@ class Woocommerce_CiviCRM_Manager {
 					$result = civicrm_api3('Membership', 'create', [
 							'membership_type_id' => $membership_type_id, // String
 							'contact_id' => $cid, // Integer
+							'join_date' => $start_date,
 							'start_date' => $start_date,
 							'end_date' => $end_date,
 							'campaign_id' => get_post_meta($order_id, '_woocommerce_civicrm_campaign_id', true), // String
-							'source' => $this->get_order_source($order_id), // String
+							'source' => get_post_meta($order_id, '_order_source', true), // String
 							'status_id' => "Current", // ["Current","New","Grace","Expired","Pending","Cancelled","Deceased"]
 					]);
 					if($result && $result['id']){
+							global $wpdb;
+							global $db_name;
 							$membership_id = $result['id'];
+							$activity_type_id = WCI()->helper->optionvalue_membership_signup;
+							$query = sprintf('UPDATE `%4$s`.`civicrm_%1$s` SET `activity_date_time` = "%2$s" WHERE `%4$s`.`civicrm_%1$s`.`source_record_id` = %3$d AND `%4$s`.`civicrm_%1$s`.`activity_type_id` = %5$d ', 'activity', $start_date, $membership_id, $db_name, $activity_type_id);
+							$results = $wpdb->query($query);
+			        if ($wpdb->last_error) {
+			            $this->addError( $target.' creation date not updated.', $wpdb->last_error);
+			        }
 							$order->add_order_note(sprintf(__('Membership %s has been created in CiviCRM', 'helios'),
 									'<a href="' .add_query_arg(
 											array(

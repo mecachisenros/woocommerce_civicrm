@@ -5,7 +5,7 @@
  * Plugin URI: http://www.vedaconsulting.co.uk
  * Description: Plugin for intergrating Woocommerce with CiviCRM
  * Author: Veda NFP Consulting Ltd
- * Version: 2.2
+ * Version: 2.3
  * Author URI: http://www.vedaconsulting.co.uk
  * Text Domain: woocommerce-civicrm
  * Domain path: /languages

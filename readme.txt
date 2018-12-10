@@ -41,6 +41,9 @@ Install this Wordpress plugin as usual. More information about installing plugin
 
 == Changelog ==
 
+= 2.3 =
+* Added Campaign support for membership
+
 = 2.2 =
 * Added Campaign support for contributions
 * UTM support (utm_campaign, utm_source and utm_medium)

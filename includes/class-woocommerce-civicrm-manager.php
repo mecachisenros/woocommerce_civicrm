@@ -236,7 +236,7 @@ class Woocommerce_CiviCRM_Manager {
 			try {
 				$params = array(
 					'contact_id' => $cid,
-					'return' => array( 'id', 'source', 'first_name', 'last_name' ),
+					'return' => array( 'id', 'contact_source', 'first_name', 'last_name' , 'contact_type'),
 				);
 				$contact = civicrm_api3( 'contact', 'getsingle', $params );
 			} catch ( CiviCRM_API3_Exception $e ){
@@ -253,36 +253,39 @@ class Woocommerce_CiviCRM_Manager {
 		$lname = $order->get_billing_last_name();
 
 		// Try to get contact Id using dedupe
-		$contact['first_name'] = $fname;
-		$contact['last_name'] = $lname;
+		if($fname != ""){
+			$contact['first_name'] = $fname;
+		}else{
+			unset($contact['first_name']);
+		}
+		if($fname != ""){
+			$contact['last_name'] = $lname;
+		}else{
+			unset($contact['last_name']);
+		}
+
 		$contact['email'] = $email;
-		$dedupeParams = CRM_Dedupe_Finder::formatParams( $contact, 'Individual' );
+		$dedupeParams = CRM_Dedupe_Finder::formatParams( $contact, $contact['contact_type'] );
 		$dedupeParams['check_permission'] = FALSE;
-		$ids = CRM_Dedupe_Finder::dupesByParams( $dedupeParams, 'Individual', 'Unsupervised' );
+		$ids = CRM_Dedupe_Finder::dupesByParams( $dedupeParams, $contact['contact_type'], 'Unsupervised' );
 
 		if( $ids ){
 			$cid = $ids['0'];
 			$action = 'update';
 		}
-
-		$contact['display_name'] = "{$fname} {$lname}";
-		if( ! $cid ){
-			$contact['contact_type'] = 'Individual';
+		if(trim("{$fname} {$lname}") != ""){
+			$contact['display_name'] = "{$fname} {$lname}";
 		}
 
-		if( isset( $contact['contact_subtype'] ) ){
-			unset( $contact['contact_subtype'] );
-		}
-		if( empty( $contact['source'] ) ){
-			$contact['source'] = __( 'Woocommerce purchase', 'woocommerce-civicrm' );
+		if( empty( $contact['contact_source'] ) ){
+			$contact['contact_source'] = __( 'Woocommerce purchase', 'woocommerce-civicrm' );
 		}
 
 		// Create contact or update existing contact.
 		try {
 			$result = civicrm_api3( 'Contact', 'create', $contact );
 			$cid = $result['id'];
-			$name = trim( $contact['display_name'] );
-			$name = ! empty( $name ) ? $contact['display_name'] : $cid;
+
 			$contact_url = "<a href='" . get_admin_url() . "admin.php?page=CiviCRM&q=civicrm/contact/view&reset=1&cid=" . $cid . "'>" . __( 'View', 'woocommerce-civicrm' ) . "</a>";
 
 			// Add order note

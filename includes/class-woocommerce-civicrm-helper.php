@@ -136,15 +136,30 @@
         $email = $order->get_billing_email();
       }
     }
+    if($email == ""){
+      $wp_user_id =  $order->get_user_id();
+      try{
+  			$uf_match = civicrm_api3('UFMatch', 'get', [
+          'sequential' => 1,
+          'uf_id' => $wp_user_id,
+        ]);
+        if($uf_match["count"] == 1){
+          return $uf_match['values'][0]['contact_id'];
+        }
+  		}
+  		catch ( Exception $e ) {
+  			return FALSE;
+  		}
+    }else{
+      // The customer is anonymous.  Look in the CiviCRM contacts table for a
+  		// contact that matches the billing email.
+  		$params = array(
+  			'email' => $email,
+  			'return.contact_id' => TRUE,
+  			'sequential' => 1,
+  		);
+    }
 
-
-		// The customer is anonymous.  Look in the CiviCRM contacts table for a
-		// contact that matches the billing email.
-		$params = array(
-			'email' => $email,
-			'return.contact_id' => TRUE,
-			'sequential' => 1,
-		);
 
 		try{
 			$contact = civicrm_api3( 'Contact', 'get', $params );

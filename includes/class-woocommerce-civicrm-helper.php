@@ -119,7 +119,9 @@
     $this->membership_types = $this->get_civicrm_membership_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();
+        $this->campaigns_status = $this->get_campaigns_status();
         $this->campaigns = $this->get_campaigns();
+        $this->all_campaigns = $this->get_all_campaigns();
 		$this->mapped_location_types = $this->set_mapped_location_types();
     $this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
 	}
@@ -403,6 +405,43 @@
 		return $civicrm_campaigns;
 	}
 
+  /**
+	 * Get CiviCRM all campaigns with status.
+	 *
+	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) )
+	 * @since 2.2
+	 */
+	private function get_all_campaigns(){
+
+		if( ! empty( $this->all_campaigns ) ) return $this->all_campaigns;
+    if( ! empty( $this->campaigns_status ) ) $this->campaigns_status = $this->get_campaigns_status();
+		$params = array(
+			'sequential' => 1,
+			'return' => array("id", "name","status_id"),
+			'options' => array('sort' => 'name', 'limit' => 0),
+		);
+
+		/**
+		 * Filter Campaigns params before calling the Civi's API.
+		 *
+		 * @since 2.2
+		 * @param array $params The params to be passsed to the API
+		 */
+		$all_campaignsResult = civicrm_api3( 'Campaign', 'get', apply_filters( 'woocommerce_civicrm_campaigns_params', $params ) );
+
+		$all_campaigns = array(
+			__('None', 'woocommerce-civicrm')
+		);
+		foreach( $all_campaignsResult['values'] as $key => $value ) {
+      //var_dump($value);
+      $status = "";
+      if(isset($value['status_id']) && isset($this->campaigns_status[$value['status_id']])){
+        $status = " - ".$this->campaigns_status[$value['status_id']];
+      }
+			$all_campaigns[$value['id']] = $value['name'].$status;
+		}
+		return $all_campaigns;
+	}
 
   /**
 	 * Get CiviCRM all campaigns with status.
@@ -439,6 +478,8 @@
       return false;
     }
 	}
+
+
 
 	/**
 	 * Set Woocommerce CiviCRM mapped location types.

@@ -77,6 +77,26 @@
 	 */
 	public $campaigns = array();
 
+
+  /**
+	 * CiviCRM campaigns.
+	 *
+	 * @since 2.2
+	 * @access public
+	 * @var array $campaigns The CiviCRM campaigns
+	 */
+	public $all_campaigns = array();
+
+  /**
+   * CiviCRM campaigns status.
+   *
+   * @since 2.2
+   * @access public
+   * @var array $campaigns The CiviCRM campaigns
+   */
+  public $campaigns_status = array();
+
+
 	/**
 	 * Initialises this object.
 	 *
@@ -381,6 +401,43 @@
 			$civicrm_campaigns[$value['id']] = $value['name'];
 		}
 		return $civicrm_campaigns;
+	}
+
+
+  /**
+	 * Get CiviCRM all campaigns with status.
+	 *
+	 * Build multidimentional array of CiviCRM campaigns | array( 'status_id' => array( 'name', 'id', 'parent_id' ) )
+	 * @since 2.2
+	 */
+	private function get_campaigns_status(){
+
+		if( ! empty( $this->campaigns_status ) ) return $this->campaigns_status;
+
+		$params = array(
+      'sequential' => 1,
+       'option_group_id' => "campaign_status",
+		);
+		/**
+		 * Filter Campaigns params before calling the Civi's API.
+		 *
+		 * @since 2.2
+		 * @param array $params The params to be passsed to the API
+		 */
+
+    $civicrm_campaigns_status = array();
+		$statusResult = civicrm_api3( 'OptionValue', 'get', apply_filters( 'woocommerce_civicrm_status_params', $params ) );
+
+    if($statusResult["is_error"]==0 && $statusResult["count"] > 0){
+
+      foreach( $statusResult['values'] as $key => $value ) {
+  			$civicrm_campaigns_status[$value['value']] = __($value['name'] ,'woocommerce-civicrm');
+  		}
+
+      return $civicrm_campaigns_status;
+    } else {
+      return false;
+    }
 	}
 
 	/**

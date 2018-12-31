@@ -418,9 +418,8 @@
 		$params = array(
 			'sequential' => 1,
 			'return' => array("id", "name","status_id"),
-			'options' => array('sort' => 'name', 'limit' => 0),
+			'options' => array('sort' => 'status_id', 'limit' => 0),
 		);
-
 		/**
 		 * Filter Campaigns params before calling the Civi's API.
 		 *

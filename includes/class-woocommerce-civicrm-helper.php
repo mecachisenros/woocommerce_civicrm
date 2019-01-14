@@ -158,8 +158,9 @@
         $email = $order->get_billing_email();
       }
     }
-    if($email == ""){
-      $wp_user_id =  $order->get_user_id();
+
+    $wp_user_id =  $order->get_user_id();
+    if($wp_user_id != 0){
       try{
   			$uf_match = civicrm_api3('UFMatch', 'get', [
           'sequential' => 1,
@@ -172,7 +173,7 @@
   		catch ( Exception $e ) {
   			return FALSE;
   		}
-    }else{
+    }elseif($email != ""){
       // The customer is anonymous.  Look in the CiviCRM contacts table for a
   		// contact that matches the billing email.
   		$params = array(
@@ -181,7 +182,9 @@
   			'sequential' => 1,
   		);
     }
-
+    if(!isset($params)){
+      return FALSE;
+    }
 
 		try{
 			$contact = civicrm_api3( 'Contact', 'get', $params );

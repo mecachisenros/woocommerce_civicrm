@@ -126,82 +126,82 @@
     $this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
 	}
 
- 	/**
- 	 * Get CiviCRM contact_id.
- 	 *
- 	 * @since 2.0
- 	 * @param object $order The order object
- 	 * @return int $cid The contact_id
- 	 */
- 	public function civicrm_get_cid( $order ){
-    $email = "";
-		if ( is_user_logged_in() && !is_admin() ) { // if user is logged in but not in the admin (not a manual order)
-			$current_user = wp_get_current_user();
-			//$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-			//	$current_user,
-			//	$current_user->ID,
-			$email =	$current_user->user_email;
-			//	'WordPress', FALSE, 'Individual'
-			//);
+  /**
+  * Get CiviCRM contact_id.
+  *
+  * @since 2.0
+  * @param object $order The order object
+  * @return int $cid The contact_id
+  */
+ public function civicrm_get_cid( $order ){
+   $email = "";
+   if ( is_user_logged_in() && !is_admin() ) { // if user is logged in but not in the admin (not a manual order)
+     $current_user = wp_get_current_user();
+     //$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
+     //	$current_user,
+     //	$current_user->ID,
+     $email =	$current_user->user_email;
+     //	'WordPress', FALSE, 'Individual'
+     //);
 
-			//if ( is_object( $match ) ) {
-			//	return $match->contact_id;
-			//}
-		}else{
-      if(filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT)){ // if there was a fiel customer user in form (manual order)
-        $cu_id = filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT);
+     //if ( is_object( $match ) ) {
+     //	return $match->contact_id;
+     //}
+   }else{
+     if(filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT)){ // if there was a fiel customer user in form (manual order)
+       $cu_id = filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT);
 
-        $user_info = get_userdata($cu_id);
-        $email = $user_info->user_email;
+       $user_info = get_userdata($cu_id);
+       $email = $user_info->user_email;
 
-      }else{
-        $email = $order->get_billing_email();
-      }
-    }
+     }else{
+       $email = $order->get_billing_email();
+     }
+   }
 
-    $wp_user_id =  $order->get_user_id();
-    if($wp_user_id != 0){
-      try{
-  			$uf_match = civicrm_api3('UFMatch', 'get', [
-          'sequential' => 1,
-          'uf_id' => $wp_user_id,
-        ]);
-        if($uf_match["count"] == 1){
-          return $uf_match['values'][0]['contact_id'];
-        }
-  		}
-  		catch ( Exception $e ) {
-  			return FALSE;
-  		}
-    }elseif($email != ""){
-      // The customer is anonymous.  Look in the CiviCRM contacts table for a
-  		// contact that matches the billing email.
-  		$params = array(
-  			'email' => $email,
-  			'return.contact_id' => TRUE,
-  			'sequential' => 1,
-  		);
-    }
-    if(!isset($params)){
-      return FALSE;
-    }
+   $wp_user_id =  $order->get_user_id();
+   if($wp_user_id != 0){
+     try{
+       $uf_match = civicrm_api3('UFMatch', 'get', [
+         'sequential' => 1,
+         'uf_id' => $wp_user_id,
+       ]);
+       if($uf_match["count"] == 1){
+         return $uf_match['values'][0]['contact_id'];
+       }
+     }
+     catch ( Exception $e ) {
+       return FALSE;
+     }
+   }elseif($email != ""){
+     // The customer is anonymous.  Look in the CiviCRM contacts table for a
+     // contact that matches the billing email.
+     $params = array(
+       'email' => $email,
+       'return.contact_id' => TRUE,
+       'sequential' => 1,
+     );
+   }
+   if(!isset($params)){
+     return FALSE;
+   }
 
-		try{
-			$contact = civicrm_api3( 'Contact', 'get', $params );
-		}
-		catch ( Exception $e ) {
-			return FALSE;
-		}
+   try{
+     $contact = civicrm_api3( 'Contact', 'get', $params );
+   }
+   catch ( Exception $e ) {
+     return FALSE;
+   }
 
-		// No matches found, so we will need to create a contact.
-		if ( count( $contact ) == 0 ) {
-			return 0;
-		}
-		$cid = isset($contact['values'][0]['id']) ? $contact['values'][0]['id'] : 0;
+   // No matches found, so we will need to create a contact.
+   if ( count( $contact ) == 0 ) {
+     return 0;
+   }
+   $cid = isset($contact['values'][0]['id']) ? $contact['values'][0]['id'] : 0;
 
-		return $cid;
+   return $cid;
 
-	}
+ }
 
 	/**
 	 * Get CiviCRM UFMatch.

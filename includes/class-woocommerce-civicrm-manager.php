@@ -835,14 +835,19 @@ class Woocommerce_CiviCRM_Manager {
 		if($order_campaign==""||$order_campaign===false){// if there is no campaign selected, select the default one (set up in WC -> settings -> CiviCRM)
 			$order_campaign = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
 		}
-
+		$campaign_array = apply_filters( 'woocommerce_civicrm_campaign_list', 'campaigns' );
+		if($campaign_array == 'campaigns'){
+			$campaign_list = WCI()->helper->campaigns;
+		}else {
+			$campaign_list = WCI()->helper->all_campaigns;
+		}
 		?>
 		<p class="form-field form-field-wide wc-civicrmcampaign">
 			<label for="order_civicrmcampaign"><?php _e('CiviCRM Campaign', 'woocommerce-civicrm'); ?></label>
 
 			<select id="order_civicrmcampaign" name="order_civicrmcampaign" data-placeholder="<?php esc_attr(__('CiviCRM Campaign', 'woocommerce-civicrm')); ?>">
 				<option value=""></option>
-				<?php foreach (WCI()->helper->campaigns as $campaign_id => $campaign_name): ?>
+				<?php foreach ($campaign_list as $campaign_id => $campaign_name): ?>
 				<option value="<?php esc_attr_e($campaign_id); ?>" <?php selected($campaign_id, $order_campaign, true); ?>><?php echo $campaign_name; ?></option>
 				<?php endforeach; ?>
 			</select>

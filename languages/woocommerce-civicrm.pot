@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CiviCRM\n"
-"POT-Creation-Date: 2018-05-18 11:17+0200\n"
+"POT-Creation-Date: 2019-01-25 14:44+0100\n"
 "PO-Revision-Date: 2015-10-23 18:44+0100\n"
 "Last-Translator: Bastien Ho <bastien@avecnous.eu>\n"
 "Language-Team: Bastien Ho <bastien@avecnous.eu>\n"
@@ -10,7 +10,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.6\n"
+"X-Generator: Poedit 2.1.1\n"
 "X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
 "esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e\n"
@@ -46,115 +46,203 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-helper.php:329
+#: custom_php/CRM/Contact/Page/View/Purchases.php:20
+msgid ""
+"This contact is not linked to any WordPress user or WooCommerce "
+"Customer"
+msgstr ""
+
+#: custom_php/CRM/Contact/Page/View/Purchases.php:21
+msgid "Orders"
+msgstr ""
+
+#: custom_php/CRM/Contact/Page/View/Purchases.php:22
+msgid "Add Order"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-helper.php:400
+#: includes/class-woocommerce-civicrm-helper.php:432
 msgid "None"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:129
+#: includes/class-woocommerce-civicrm-manager.php:89
+msgid "CiviCRM Contact could not be fetched"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:95
+msgid "CiviCRM Contact could not be found or created"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:153
+#: includes/class-woocommerce-civicrm-manager.php:216
 msgid "Not able to update contribution"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:156
+#: includes/class-woocommerce-civicrm-manager.php:183
+#: includes/class-woocommerce-civicrm-manager.php:492
+#: includes/class-woocommerce-civicrm-manager.php:900
+msgid "Not able to fetch campaign"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:243
 msgid "Not able to find contact"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:190
+#: includes/class-woocommerce-civicrm-manager.php:281
 msgid "Woocommerce purchase"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:199
+#: includes/class-woocommerce-civicrm-manager.php:289
 msgid "View"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:203
+#: includes/class-woocommerce-civicrm-manager.php:293
 msgid "CiviCRM Contact Updated - "
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:205
+#: includes/class-woocommerce-civicrm-manager.php:295
 msgid "Created new CiviCRM Contact - "
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:209
+#: includes/class-woocommerce-civicrm-manager.php:299
 msgid "Not able to create/update contact"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:245
-msgid "Created new CiviCRM Phone of type %$1s: %2$s"
+#: includes/class-woocommerce-civicrm-manager.php:335
+#, php-format
+msgid "Created new CiviCRM Phone of type %1$s: %2$s"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:269
-msgid "Created new CiviCRM Email of type %$1s: %2$s"
+#: includes/class-woocommerce-civicrm-manager.php:359
+#, php-format
+msgid "Created new CiviCRM Email of type %1$s: %2$s"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:309
+#: includes/class-woocommerce-civicrm-manager.php:400
 #, php-format
 msgid "Created new CiviCRM Address of type %1$s: %2$s"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:315
+#: includes/class-woocommerce-civicrm-manager.php:406
 msgid "Not able to add/update address or phone"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:331
+#: includes/class-woocommerce-civicrm-manager.php:424
 msgid "Woocommerce Order - "
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:373
-#: includes/class-woocommerce-civicrm-manager.php:680
-msgid "Not able to fetch campaign"
+#: includes/class-woocommerce-civicrm-manager.php:451
+msgid "Not able to fetch monetary settings"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:434
+#: includes/class-woocommerce-civicrm-manager.php:585
 #, php-format
 msgid "Contribution %s has been created in CiviCRM"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:583
+#: includes/class-woocommerce-civicrm-manager.php:604
+msgid "Not able to add contribution"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:608
+msgid "CiviCRM Contribution could not be created"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:741
+msgid "Not able to get custom group"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:758
 msgid "Not able to create custom group"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-manager.php:630
-#: includes/class-woocommerce-civicrm-manager.php:631
+#: includes/class-woocommerce-civicrm-manager.php:774
+#: includes/class-woocommerce-civicrm-manager.php:802
+msgid "Not able to get custom field"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-manager.php:846
+#: includes/class-woocommerce-civicrm-manager.php:848
+#: includes/class-woocommerce-civicrm-pos.php:107
+#: includes/class-woocommerce-civicrm-pos.php:114
 msgid "CiviCRM Campaign"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:144
+#: includes/class-woocommerce-civicrm-manager.php:1039
+#, php-format
+msgid "Membership %s has been created in CiviCRM"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:137
 msgid "Woocommerce Orders"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:160
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:153
 msgctxt "Order status"
 msgid "Pending payment"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:161
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:154
 msgctxt "Order status"
 msgid "Processing"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:162
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:155
 msgctxt "Order status"
 msgid "On hold"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:163
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:156
 msgctxt "Order status"
 msgid "Completed"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:164
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:157
 msgctxt "Order status"
 msgid "Cancelled"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:165
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:158
 msgctxt "Order status"
 msgid "Refunded"
 msgstr ""
 
-#: includes/class-woocommerce-civicrm-orders-contact-tab.php:166
+#: includes/class-woocommerce-civicrm-orders-contact-tab.php:159
 msgctxt "Order status"
 msgid "Failed"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:44
+#, php-format
+msgid "%s (Default)"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:45
+#: includes/class-woocommerce-civicrm-products.php:63
+msgid "unset"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:62
+#, php-format
+msgid "Default (%s)"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:68
+#: includes/class-woocommerce-civicrm-products.php:112
+msgid "Exclude"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:76
+#: includes/class-woocommerce-civicrm-products.php:93
+msgid "Contribution type"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:78
+msgid "Custom contribution type for this product"
+msgstr ""
+
+#: includes/class-woocommerce-civicrm-products.php:107
+msgid "— No change —"
 msgstr ""
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:49
@@ -251,10 +339,10 @@ msgid ""
 msgstr ""
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:243
-#: woocommerce-civicrm.php:171
+#: woocommerce-civicrm.php:180
 msgid "Woocommerce CiviCRM settings"
 msgstr ""
 
-#: woocommerce-civicrm.php:323
+#: woocommerce-civicrm.php:346
 msgid "Settings"
 msgstr ""

@@ -547,6 +547,7 @@ class Woocommerce_CiviCRM_Manager {
 		 if(count($items)){
 				$financial_types = array();
 				$params['api.line_item.create'] = array();
+			  $params['skipLineItem'] = 1;
 				foreach( $items as $item ){
 		 			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
 		 			if($custom_contribution_type === 'exclude')

@@ -545,6 +545,7 @@ class Woocommerce_CiviCRM_Manager {
 		 */
 
 		 if(count($items)){
+				$financial_types = array();
 				$params['api.line_item.create'] = array();
 				foreach( $items as $item ){
 		 			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
@@ -567,7 +568,11 @@ class Woocommerce_CiviCRM_Manager {
 		 				'label' => $item['name'],
 		 				'financial_type_id' => $custom_contribution_type,
 		 			);
+					$financial_types[$custom_contribution_type] = $custom_contribution_type;
 		 		}
+				if(count($financial_types)==1){
+					$params['contribution_type_id'] = $custom_contribution_type;
+				}
 		 }
 
 		// Flush UTM cookies

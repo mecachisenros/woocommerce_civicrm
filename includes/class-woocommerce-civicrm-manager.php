@@ -226,9 +226,13 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param int $cid The contact_id
 	 * @param object $order The order object
 	 * @return int $cid The contact_id
+	 * @filter woocommerce_civicrm_bypass_add_update_contact
 	 */
 	public function add_update_contact( $cid, $order ){
-
+		// Allow to bypass contact update
+		if(true === apply_filters('woocommerce_civicrm_bypass_add_update_contact', false, $cid, $order)){
+			return $cid;
+		}
 		$action = 'create';
 
 		$contact = array();

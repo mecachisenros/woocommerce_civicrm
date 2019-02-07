@@ -119,11 +119,11 @@
     $this->membership_types = $this->get_civicrm_membership_types();
 		$this->location_types = $this->get_address_location_types();
 		$this->civicrm_states = $this->get_civicrm_states();
-        $this->campaigns_status = $this->get_campaigns_status();
-        $this->campaigns = $this->get_campaigns();
-        $this->all_campaigns = $this->get_all_campaigns();
+		$this->campaigns_status = $this->get_campaigns_status();
+		$this->campaigns = $this->get_campaigns();
+		$this->all_campaigns = $this->get_all_campaigns();
 		$this->mapped_location_types = $this->set_mapped_location_types();
-    $this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
+		$this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
 	}
 
   /**

@@ -25,12 +25,26 @@ class Woocommerce_CiviCRM_Products {
 
 				add_action( 'bulk_edit_custom_box', array(&$this, 'add_contribution_to_quick_edit'), 10, 2 );
 
+				add_action('manage_product_posts_custom_column', array($this, 'columns_content'), 90, 2);
 
 				// Bulk / quick edit.
 				add_action( 'save_post', array( $this, 'bulk_and_quick_edit_hook' ), 10, 2 );
 				add_action( 'contributions_product_bulk_and_quick_edit', array( $this, 'bulk_and_quick_edit_save_post' ), 10, 2 );
 
 
+    }
+
+
+    function columns_content($column_name, $post_id) {
+        if ($column_name == 'product_cat') {
+            $contribution_type = get_post_meta($post_id, '_civicrm_contribution_type', true);
+						$default_contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
+		        $contributions_types = WCI()->helper->financial_types;
+            echo '<br>'.(($contribution_type != null && isset($contributions_types[$contribution_type])) ? $contributions_types[$contribution_type] : sprintf(
+								__('%s (Default)', 'woocommerce-civicrm'),
+								isset($contributions_types[$default_contribution_type_id]) ? $contributions_types[$default_contribution_type_id] : __('unset', 'woocommerce-civicrm')
+						));
+        }
     }
 
     // Contribution fields for products

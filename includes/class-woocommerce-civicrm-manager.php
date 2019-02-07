@@ -1044,7 +1044,8 @@ class Woocommerce_CiviCRM_Manager {
 							$query = sprintf('UPDATE `%4$s`.`civicrm_%1$s` SET `activity_date_time` = "%2$s" WHERE `%4$s`.`civicrm_%1$s`.`source_record_id` = %3$d AND `%4$s`.`civicrm_%1$s`.`activity_type_id` = %5$d ', 'activity', $start_date, $membership_id, $db_name, $activity_type_id);
 							$results = $wpdb->query($query);
 			        if ($wpdb->last_error) {
-			            $this->addError( $target.' creation date not updated.', $wpdb->last_error);
+								CRM_Core_Error::debug_log_message( $target.' creation date not updated.', $wpdb->last_error);
+			            //$this->addError( $target.' creation date not updated.', $wpdb->last_error);
 			        }
 							$order->add_order_note(sprintf(__('Membership %s has been created in CiviCRM', 'helios'),
 									'<a href="' .add_query_arg(

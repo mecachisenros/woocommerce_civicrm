@@ -72,7 +72,11 @@ class Woocommerce_CiviCRM_Manager {
 			$this->action_order( $post_id , $data, new WC_Order($post_id));
 		}
 
-
+		$membership_id = get_post_meta($order_id, '_civicrm_membership', true);
+		// In Front context, let action_order() make the stuff
+		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
+				$this->check_membership($order);
+		}
 
 	}
 
@@ -122,6 +126,12 @@ class Woocommerce_CiviCRM_Manager {
 	public function update_order_status( $order_id, $old_status, $new_status ){
 
 		$order = new WC_Order( $order_id );
+
+		$membership_id = get_post_meta($order_id, '_civicrm_membership', true);
+		// In Front context, let action_order() make the stuff
+		if('' === $membership_id || '0' === $membership_id){
+				$this->check_membership($order);
+		}
 
 		$params = array(
 			'invoice_id' => $this->get_invoice_id($order_id),

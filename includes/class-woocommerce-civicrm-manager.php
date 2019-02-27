@@ -61,18 +61,24 @@ class Woocommerce_CiviCRM_Manager {
 		// Add the campaign ID to order
 
 		$current_campaign_id = get_post_meta( $post_id, '_woocommerce_civicrm_campaign_id', true);
-		if((false !== $new_campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $new_campaign_id != $current_campaign_id ){
+		if((false != $new_campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $new_campaign_id != $current_campaign_id ){
 			$this->update_campaign($post_id,$current_campaign_id,$new_campaign_id);
 			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $new_campaign_id ));
 		}
 
+		// Add the source to order
+		$current_civicrmsource = get_post_meta( $post_id, '_order_source', true);
+		if((false != $new_civicrmsource = filter_input(INPUT_POST, 'order_civicrmsource', FILTER_SANITIZE_STRING)) && $new_civicrmsource != $current_civicrmsource ){
+			$this->update_source($post_id,$new_civicrmsource);
+			update_post_meta($post_id, '_order_source', esc_attr( $new_civicrmsource ));
+		}
 		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new') || (filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT)===NULL && get_post_meta( $post_id, '_pos', true)) ) {
 
 
 			$this->action_order( $post_id , $data, new WC_Order($post_id));
 		}
 
-		$membership_id = get_post_meta($order_id, '_civicrm_membership', true);
+		$membership_id = get_post_meta($post_id, '_civicrm_membership', true);
 		// In Front context, let action_order() make the stuff
 		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
 				$this->check_membership($order);
@@ -105,10 +111,11 @@ class Woocommerce_CiviCRM_Manager {
 		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
 				$this->check_membership($order);
 		}
-
+		$source = $this->generate_source($order);
+		$this->update_source($order_id,$source);
+		update_post_meta($order_id, '_order_source', $source);
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );
-
 		do_action('woocommerce_civicrm_action_order', $order, $cid);
 
 		return $order_id;
@@ -229,6 +236,51 @@ class Woocommerce_CiviCRM_Manager {
 
 	}
 
+	/**
+	 * Update Source.
+	 *
+	 * @since 2.0
+	 * @param int $order_id The order id
+	 * @param string $old_campaign_id The old campaign
+	 * @param string $new_campaign_id The new campaign
+	 */
+	public function update_source( $order_id, $new_source ){
+
+		$order = new WC_Order( $order_id );
+
+		$params = array(
+			'invoice_id' => $this->get_invoice_id($order_id),
+			'return' => 'id'
+		);
+
+		try {
+
+			/**
+			 * Filter Contribution params before calling the Civi's API.
+			 *
+			 * @since 2.0
+			 * @param array $params The params to be passsed to the API
+			 */
+			$contribution = civicrm_api3( 'Contribution', 'getsingle', apply_filters( 'woocommerce_civicrm_contribution_update_params', $params ) );
+
+		} catch ( Exception $e ) {
+			CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+			return;
+		}
+
+		// Update contribution
+		try {
+			$params = array(
+				'source' => $new_source,
+				'id' => $contribution['id'],
+			);
+			$result = civicrm_api3( 'Contribution', 'create', $params );
+		} catch ( Exception $e ){
+			CRM_Core_Error::debug_log_message( __( 'Not able to update contribution', 'woocommerce-civicrm' ) );
+			return;
+		}
+
+	}
 	/**
 	 * Create or update contact.
 	 *
@@ -717,7 +769,8 @@ class Woocommerce_CiviCRM_Manager {
 	public function generate_source( $order ){
 		// Default is the order Type
 		// Until 2.2, contribution source was exactly the same as contribution note.
-		$source = $order->get_type();
+		$source = "";
+		//$source = $order->get_type();
 
 		if(get_post_meta( $order->get_id(), '_order_source', true)==="pos"){
 			$source = "pos";
@@ -730,6 +783,15 @@ class Woocommerce_CiviCRM_Manager {
 			if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ] ) {
 				$source .=  ' / '.esc_attr($_COOKIE[ 'woocommerce_civicrm_utm_medium_' . COOKIEHASH ]);
 			}
+		}
+
+		$order_source = get_post_meta($order->get_id(), '_order_source', true);
+		if($order_source===false){
+			$order_source = "";
+		}
+
+		if($source == ""){
+			$source = __( 'shop', 'woocommerce-civicrm' );
 		}
 
 		return $source;
@@ -873,6 +935,42 @@ class Woocommerce_CiviCRM_Manager {
 			</select>
 		</p>
 		<?php
+
+		$order_source = get_post_meta($order->get_id(), '_order_source', true);
+		if($order_source===false){
+			$order_source = "";
+		}
+
+		?>
+		<p class="form-field form-field-wide wc-civicrmsource">
+			<label for="order_civicrmsource"><?php _e('CiviCRM Source', 'woocommerce-civicrm'); ?></label>
+			<input type='text' id="order_civicrmsource" name="order_civicrmsource" data-placeholder="<?php esc_attr(__('CiviCRM Source', 'woocommerce-civicrm')); ?>" value="<?php echo $order_source; ?>">
+		</p>
+		<?php
+			$cid = WCI()->helper->civicrm_get_cid( $order );
+			if($cid){
+				?>
+				<div class="form-field form-field-wide wc-civicrmsource">
+					<h3>
+				<?php
+				echo sprintf(__('View %s in CiviCRM', 'helios'),
+						'<a href="' .add_query_arg(
+								array(
+										'page' => 'CiviCRM',
+										'q' => 'civicrm/contact/view/',
+										'cid' => $cid,
+										'action' => 'view',
+										'context' => 'dashboard'
+								),
+								admin_url('admin.php')
+						). '">Contact </a>')
+				;
+				?>
+					</h3>
+				</div>
+				<?php
+			}
+
 	}
 
 	/**

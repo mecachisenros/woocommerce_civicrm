@@ -81,7 +81,8 @@ class Woocommerce_CiviCRM_Manager {
 		$membership_id = get_post_meta($post_id, '_civicrm_membership', true);
 		// In Front context, let action_order() make the stuff
 		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
-				$this->check_membership($order);
+			$order = new WC_Order( $post_id );
+			$this->check_membership($order);
 		}
 
 	}
@@ -1074,7 +1075,10 @@ class Woocommerce_CiviCRM_Manager {
 			}
 			if(!$cid)
 					return;
-
+			$order_date = $order->get_date_paid();
+			if($order_date == NULL){
+				return;
+			}
 			$order_id = $order->get_id();
 			$items = $order->get_items();
 			$membership_id = 0;
@@ -1083,11 +1087,11 @@ class Woocommerce_CiviCRM_Manager {
 
 
 			foreach( $items as $item ){
+
 					$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
 					$membership_type_id = false;
 					$start_date = false;
 					$end_date = false;
-					$order_date = $order->get_date_paid();
 					$order_timestamp = strtotime($order_date);
 
 					if(isset($membership_types['by_financial_type_id'][$custom_contribution_type])){

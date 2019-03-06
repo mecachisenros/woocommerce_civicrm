@@ -748,6 +748,13 @@ class Woocommerce_CiviCRM_Manager {
 			'wc-processing' => 5,
 			'wc-on-hold'    => 5,
 			'wc-refunded'   => 7,
+			'completed'  => 1,
+			'pending'    => 2,
+			'cancelled'  => 3,
+			'failed'     => 4,
+			'processing' => 5,
+			'on-hold'    => 5,
+			'refunded'   => 7,
 		);
 
 		if ( array_key_exists( $order_status, $map ) ) {

@@ -135,7 +135,16 @@ class Woocommerce_CiviCRM_Manager {
 
 		$order = new WC_Order( $order_id );
 
+		$cid = WCI()->helper->civicrm_get_cid( $order );
+		if ( $cid === FALSE ) {
+				$order->add_order_note(  __( 'CiviCRM Contact could not be fetched', 'woocommerce-civicrm' ) );
+				return;
+		}
+
+
+		$this->add_contribution($cid,$order);
 		$membership_id = get_post_meta($order_id, '_civicrm_membership', true);
+
 		// In Front context, let action_order() make the stuff
 		if('' === $membership_id || '0' === $membership_id){
 				$this->check_membership($order);
@@ -143,7 +152,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		$params = array(
 			'invoice_id' => $this->get_invoice_id($order_id),
-			'return' => 'id'
+			'return' => array('id','financial_type_id','receive_date','total_amount','contact_id'),
 		);
 
 		try {
@@ -162,9 +171,14 @@ class Woocommerce_CiviCRM_Manager {
 
 		// Update contribution
 		try {
+
 			$params = array(
 				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
 				'id' => $contribution['id'],
+				'financial_type_id' => $contribution['financial_type_id'],
+				'receive_date' => $contribution['receive_date'],
+				'total_amount' => $contribution['total_amount'],
+				'contact_id' => $contribution['contact_id'],
 			);
 			$result = civicrm_api3( 'Contribution', 'create', $params );
 		} catch ( Exception $e ){
@@ -486,6 +500,17 @@ class Woocommerce_CiviCRM_Manager {
 	 */
 	public function add_contribution( $cid, &$order ) {
 		$debug['cid']=$cid;
+		$order_id = $order->get_id();
+		$order_date = $order->get_date_paid();
+		if(!$order_date){
+			return;
+		}
+		$contrib_id = get_post_meta($order_id, '_woocommerce_civicrm_contribution_id', true);
+		if($contrib_id != NULL && $contrib_id != 0 && $contrib_id != FALSE){
+			return;
+		}
+		$order_paid_date = $order_date->date('Y-m-d H:i:s');
+
 
 		$order_id = $order->get_id();
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
@@ -562,20 +587,10 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 		$contribution_status_id = $this->map_contribution_status($order->get_status());
-
 		// Get order paid date
 		// In case of post treatment
-		$order_paid_date = 'now';
-		$order_date = $order->get_date_paid();
-		if(!$order_date){
-			$order_date = $order->get_date_completed();
-		}
-		if(!$order_date){
-			$order_date = $order->get_date_created();
-		}
-		if($order_date){
-			$order_paid_date = $order_date->date('Y-m-d H:i:s');
-		}
+
+
 
 		$items = $order->get_items();
 
@@ -670,6 +685,7 @@ class Woocommerce_CiviCRM_Manager {
 						admin_url('admin.php')
 					). '">' . $contribution['id'] . '</a>')
 				);
+				update_post_meta($order_id, '_woocommerce_civicrm_contribution_id',  $contribution['id']);
 				return $contribution;
 			}
 		} catch ( CiviCRM_API3_Exception $e ) {
@@ -1138,7 +1154,6 @@ class Woocommerce_CiviCRM_Manager {
 					}else{
 						continue;
 					}
-
 					if(!$membership_type_id || !$start_date || !$end_date)
 							continue;
 

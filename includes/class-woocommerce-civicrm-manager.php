@@ -1171,7 +1171,7 @@ class Woocommerce_CiviCRM_Manager {
 						'source' => get_post_meta($order_id, '_order_source', true), // String
 						'status_id' => "Current", // ["Current","New","Grace","Expired","Pending","Cancelled","Deceased"]
 					);
-					$result = civicrm_api3('Membership', 'create', apply_filters( 'woocommerce_civicrm_membership_create_params', $params,$order ));
+					$result = civicrm_api3('Membership', 'create', apply_filters( 'woocommerce_civicrm_membership_create_params', $params,$item, $order ));
 					if($result && $result['id']){
 							global $wpdb;
 							global $db_name;

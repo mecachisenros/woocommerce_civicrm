@@ -1160,16 +1160,18 @@ class Woocommerce_CiviCRM_Manager {
 					// If Contribution Type is of type MemberShip
 					// create Membership and Membership Payment
 					// also add an Order Note
-					$result = civicrm_api3('Membership', 'create', [
-							'membership_type_id' => $membership_type_id, // String
-							'contact_id' => $cid, // Integer
-							'join_date' => $start_date,
-							'start_date' => $start_date,
-							'end_date' => $end_date,
-							'campaign_id' => get_post_meta($order_id, '_woocommerce_civicrm_campaign_id', true), // String
-							'source' => get_post_meta($order_id, '_order_source', true), // String
-							'status_id' => "Current", // ["Current","New","Grace","Expired","Pending","Cancelled","Deceased"]
-					]);
+
+					$params = array(
+						'membership_type_id' => $membership_type_id, // String
+						'contact_id' => $cid, // Integer
+						'join_date' => $start_date,
+						'start_date' => $start_date,
+						'end_date' => $end_date,
+						'campaign_id' => get_post_meta($order_id, '_woocommerce_civicrm_campaign_id', true), // String
+						'source' => get_post_meta($order_id, '_order_source', true), // String
+						'status_id' => "Current", // ["Current","New","Grace","Expired","Pending","Cancelled","Deceased"]
+					);
+					$result = civicrm_api3('Membership', 'create', apply_filters( 'woocommerce_civicrm_membership_create_params', $params,$order );
 					if($result && $result['id']){
 							global $wpdb;
 							global $db_name;

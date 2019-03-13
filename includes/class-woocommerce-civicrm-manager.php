@@ -1134,15 +1134,15 @@ class Woocommerce_CiviCRM_Manager {
 							$current_year_period_start_timestamp = strtotime($current_year.'-'.substr($fixed_period_start_day,0, -2).'-'.substr($fixed_period_start_day, -2));
 							$current_year_period_rollover_timestamp = strtotime($current_year.'-'.substr($fixed_period_rollover_day,0, -2).'-'.substr($fixed_period_rollover_day, -2));
 
-							if($fixed_period_start_timestamp < $order_timestamp){ // the order is completed after the start date of this year
-								if($fixed_period_start_timestamp < $fixed_period_rollover_timestamp && $fixed_period_rollover_timestamp < $order_timestamp){ // If the rollover is after the start date and before the order
+							if($current_year_period_start_timestamp < $order_timestamp){ // the order is completed after the start date of this year
+								if($current_year_period_start_timestamp < $current_year_period_rollover_timestamp && $current_year_period_rollover_timestamp < $order_timestamp){ // If the rollover is after the start date and before the order
 									$start_date = date('Y-m-d', strtotime('+1 year',$current_year_period_start_timestamp)); // start next year
 								}else{
-									$start_date = date('Y-m-d', $fixed_period_start_timestamp); // start this year
+									$start_date = date('Y-m-d', $current_year_period_start_timestamp); // start this year
 								}
 							}else{ // the order is completed before the start date of this year
-								if($fixed_period_rollover_timestamp < $fixed_period_start_timestamp && $fixed_period_rollover_timestamp < $order_timestamp){ // if the order is between rollover and this year start in this order
-									$start_date = date('Y-m-d', $fixed_period_start_timestamp); // start this year (which is next period)
+								if($current_year_period_rollover_timestamp < $current_year_period_start_timestamp && $current_year_period_rollover_timestamp < $order_timestamp){ // if the order is between rollover and this year start in this order
+									$start_date = date('Y-m-d', $current_year_period_start_timestamp); // start this year (which is next period)
 								}else{
 									$start_date = date('Y-m-d', strtotime('-1 year',$current_year_period_start_timestamp)); // start this period (which started last year)
 								}

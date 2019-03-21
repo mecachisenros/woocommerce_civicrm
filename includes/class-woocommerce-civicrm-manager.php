@@ -968,7 +968,23 @@ class Woocommerce_CiviCRM_Manager {
 		?>
 		<p class="form-field form-field-wide wc-civicrmsource">
 			<label for="order_civicrmsource"><?php _e('CiviCRM Source', 'woocommerce-civicrm'); ?></label>
-			<input type='text' id="order_civicrmsource" name="order_civicrmsource" data-placeholder="<?php esc_attr(__('CiviCRM Source', 'woocommerce-civicrm')); ?>" value="<?php echo $order_source; ?>">
+			<input type='text' list="sources" id="order_civicrmsource" name="order_civicrmsource" data-placeholder="<?php esc_attr(__('CiviCRM Source', 'woocommerce-civicrm')); ?>" value="<?php echo $order_source; ?>">
+			<datalist id="sources">
+
+
+				<?php
+					global $wpdb;
+					// Interrogation de la base de données
+					$results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postsmeta WHERE meta_key = '_order_source'");
+					// Parcours des resultats obtenus
+					if(count($results)>0){
+						foreach ($results as $meta) {
+						 echo '<option value="'.$meta->meta_value.'">' ;
+						}
+					}
+				?>
+			</datalist>
+
 		</p>
 		<?php
 			$cid = WCI()->helper->civicrm_get_cid( $order );

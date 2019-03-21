@@ -975,7 +975,7 @@ class Woocommerce_CiviCRM_Manager {
 				<?php
 					global $wpdb;
 					// Interrogation de la base de données
-					$results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postsmeta WHERE meta_key = '_order_source'");
+					$results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
 					// Parcours des resultats obtenus
 					if(count($results)>0){
 						foreach ($results as $meta) {

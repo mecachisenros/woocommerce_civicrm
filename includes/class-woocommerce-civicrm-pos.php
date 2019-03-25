@@ -118,7 +118,7 @@ class Woocommerce_CiviCRM_POS {
 			';
 
 			echo $render;
-		wp_die(); // this is required to terminate immediately and return a proper response
+		exit(); // this is required to terminate immediately and return a proper response
 	}
 
 

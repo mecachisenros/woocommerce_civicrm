@@ -993,7 +993,7 @@ class Woocommerce_CiviCRM_Manager {
 				<div class="form-field form-field-wide wc-civicrmsource">
 					<h3>
 				<?php
-				echo sprintf(__('View %s in CiviCRM', 'helios'),
+				printf(__('View %s in CiviCRM', 'woocommerce-civicrm'),
 						'<a href="' .add_query_arg(
 								array(
 										'page' => 'CiviCRM',
@@ -1003,7 +1003,7 @@ class Woocommerce_CiviCRM_Manager {
 										'context' => 'dashboard'
 								),
 								admin_url('admin.php')
-						). '">Contact </a>')
+						). '" target="_blank"> '.__('Contact', 'woocommerce-civicrm').'</a>')
 				;
 				?>
 					</h3>

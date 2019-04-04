@@ -246,6 +246,8 @@ class Woocommerce_CiviCRM {
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-states.php';
 		// Include Products functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-products.php';
+		// Include Orders functionality class
+		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-orders.php';
 
 		// Include POS functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-pos.php';
@@ -274,6 +276,8 @@ class Woocommerce_CiviCRM {
 		$this->sync = new Woocommerce_CiviCRM_Sync;
 		// init products
 		$this->products = new Woocommerce_CiviCRM_Products;
+		// init orders
+		$this->products = new Woocommerce_CiviCRM_Orders;
 		// init POS
 		$this->pos = new Woocommerce_CiviCRM_POS;
 

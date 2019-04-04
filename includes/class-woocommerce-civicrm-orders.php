@@ -87,48 +87,48 @@ class Woocommerce_CiviCRM_Orders {
             <?php
         }
 
-				global $wpdb;
-				$results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
-				if(count($results)>0){
-					$selected = filter_input(INPUT_GET, 'shop_order_source');
-					?>
-					<select name='shop_order_source' id='dropdown_shop_order_source'>
-						<option value=""><?php _e('All sources', 'woocommerce-civicrm'); ?></option>
-						<?php foreach ($results as $meta): ?>
-							<option value="<?php echo esc_attr($meta->meta_value); ?>" <?php selected($selected, $meta->meta_value); ?>>
-								<?php echo esc_attr($meta->meta_value); ?>
-							</option>
-						<?php endforeach; ?>
-					</select>
-					<?php
-				}
+        global $wpdb;
+        $results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
+        if(count($results)>0){
+          $selected = filter_input(INPUT_GET, 'shop_order_source');
+          ?>
+          <select name='shop_order_source' id='dropdown_shop_order_source'>
+            <option value=""><?php _e('All sources', 'woocommerce-civicrm'); ?></option>
+            <?php foreach ($results as $meta): ?>
+              <option value="<?php echo esc_attr($meta->meta_value); ?>" <?php selected($selected, $meta->meta_value); ?>>
+                <?php echo esc_attr($meta->meta_value); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <?php
+        }
 
     }
 
     public static function pre_get_posts($query)
     {
       global $typenow;
-			$campaign_id = filter_input(INPUT_GET, 'shop_order_campaign_id', FILTER_VALIDATE_INT);
-			$source = filter_input(INPUT_GET, 'shop_order_source');
+      $campaign_id = filter_input(INPUT_GET, 'shop_order_campaign_id', FILTER_VALIDATE_INT);
+      $source = filter_input(INPUT_GET, 'shop_order_source');
       if ( $typenow == 'shop_order' && ($campaign_id || $source) ) {
         $meta_query = (false != $mq = $query->get('meta_query')) ? array(
           'relation' => 'AND',
           $mq,
         ) : array();
-				if($campaign_id){
-	        $meta_query['campaign_clause'] = array(
-	            'key' => '_woocommerce_civicrm_campaign_id',
-	            'value' => $campaign_id,
-	            'compare' => '==',
-	        );
-				}
-				if($source){
-	        $meta_query['source_clause'] = array(
-	            'key' => '_order_source',
-	            'value' => $source,
-	            'compare' => '==',
-	        );
-				}
+        if($campaign_id){
+          $meta_query['campaign_clause'] = array(
+              'key' => '_woocommerce_civicrm_campaign_id',
+              'value' => $campaign_id,
+              'compare' => '==',
+          );
+        }
+        if($source){
+          $meta_query['source_clause'] = array(
+              'key' => '_order_source',
+              'value' => $source,
+              'compare' => '==',
+          );
+        }
         $query->set( 'meta_query', $meta_query );
       }
       return $query;

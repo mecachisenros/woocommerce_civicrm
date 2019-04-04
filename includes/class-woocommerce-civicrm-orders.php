@@ -34,9 +34,15 @@ class Woocommerce_CiviCRM_Orders {
    * @return array
    */
     public function columns_head($defaults) {
-      $defaults['campaign'] = __('Campaign', 'woocommerce-civicrm');
-      $defaults['source'] = __('Source', 'woocommerce-civicrm');
-      return $defaults;
+      $nb_cols = count($defaults);
+      $new_cols = array(
+        'campaign' => __('Campaign', 'woocommerce-civicrm'),
+        'source' => __('Source', 'woocommerce-civicrm'),
+      );
+      $columns = array_slice($defaults, 0, $nb_cols-2, true) +
+      $new_cols +
+      array_slice($defaults, $nb_cols-2, $nb_cols, true) ;
+      return $columns;
     }
 
     /**

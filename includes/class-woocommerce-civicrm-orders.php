@@ -23,6 +23,8 @@ class Woocommerce_CiviCRM_Orders {
 
     add_filter('manage_shop_order_posts_columns', array(&$this, 'columns_head'), 11);
     add_action('manage_shop_order_posts_custom_column', array(&$this, 'columns_content'), 10, 2);
+    add_action('restrict_manage_posts', array($this, 'restrict_manage_orders'), 5);
+    add_filter( 'pre_get_posts', array($this , 'pre_get_posts' ), 100);
 
   }
 
@@ -65,8 +67,44 @@ class Woocommerce_CiviCRM_Orders {
       }
     }
 
+    function restrict_manage_orders($value = ''){
+        global $woocommerce, $typenow;
+        if ('shop_order' != $typenow) {
+            return;
+        }
+        $campaign_list = WCI()->helper->campaigns;
+        if ($campaign_list && !empty($campaign_list) && is_array($campaign_list)) {
+            $selected = filter_input(INPUT_GET, 'shop_order_campaign_id', FILTER_VALIDATE_INT);
+            ?>
+            <select name='shop_order_campaign_id' id='dropdown_shop_order_campaign_id'>
+                <option value=""><?php _e('All campaigns', 'woocommerce-civicrm'); ?></option>
+                <?php foreach ($campaign_list as $campaign_id => $campaign_name): ?>
+                <option value="<?php echo $campaign_id; ?>" <?php selected($selected, $campaign_id); ?>>
+                  <?php echo esc_attr($campaign_name); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+            <?php
+        }
+
+    }
+
+    public static function pre_get_posts($query)
+    {
+      global $typenow;
+      if ( $typenow == 'shop_order' && (false != $campaign_id = filter_input(INPUT_GET, 'shop_order_campaign_id', FILTER_VALIDATE_INT)) ) {
+        $meta_query = (false != $mq = $query->get('meta_query')) ? array(
+          'relation' => 'AND',
+          $mq,
+        ) : array();
+        $meta_query['campaign_clause'] = array(
+            'key' => '_woocommerce_civicrm_campaign_id',
+            'value' => $campaign_id,
+            'compare' => '==',
+        );
+        $query->set( 'meta_query', $meta_query );
+      }
+      return $query;
+    }
+
 }
-
-
-
-?>

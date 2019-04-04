@@ -24,7 +24,7 @@ class Woocommerce_CiviCRM_Orders {
     add_filter('manage_shop_order_posts_columns', array(&$this, 'columns_head'), 11);
     add_action('manage_shop_order_posts_custom_column', array(&$this, 'columns_content'), 10, 2);
     add_action('restrict_manage_posts', array($this, 'restrict_manage_orders'), 5);
-    add_filter( 'pre_get_posts', array($this , 'pre_get_posts' ), 100);
+    add_filter( 'pre_get_posts', array($this , 'pre_get_posts_campaign' ), 100);
 
   }
 
@@ -89,7 +89,7 @@ class Woocommerce_CiviCRM_Orders {
 
     }
 
-    public static function pre_get_posts($query)
+    public static function pre_get_posts_campaign($query)
     {
       global $typenow;
       if ( $typenow == 'shop_order' && (false != $campaign_id = filter_input(INPUT_GET, 'shop_order_campaign_id', FILTER_VALIDATE_INT)) ) {

@@ -1003,7 +1003,7 @@ class Woocommerce_CiviCRM_Manager {
 										'context' => 'dashboard'
 								),
 								admin_url('admin.php')
-						). '" target="_blank"> '.__('Contact', 'woocommerce-civicrm').'</a>')
+						). '" target="_blank"> '._x('Contact', 'in: View Contact in CiviCRM', 'woocommerce-civicrm').'</a>')
 				;
 				?>
 					</h3>

@@ -1,10 +1,9 @@
-#page.two-column #main .wc-civicrmcampaign{
+#page.two-column #main > div.wc-civicrmcampaign{
   height: auto;
-  display: block;
-  width: 50%;
-  position: absolute;
-  right: 0;
-  top: 5px;
+  padding-right: 2px;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
 }
 #page.two-column #main .wc-civicrmcampaign select{
   padding: 7px;
@@ -14,8 +13,28 @@
   border-top: 2px solid #dbdbdb;
   margin:0 0.3rem ;
   color: #ffffff;
+  width: 100%;
 }
+@media (min-width: 800px) and (max-width: 1024px) {
+  #page.two-column #main > div.wc-civicrmcampaign{
+    flex-wrap: nowrap;
+  }
+  #page.two-column #main .wc-civicrmcampaign .list-row{
+    width: 50%;
+  }
 
-#page.two-column #main #right{
-  padding: 55px 0 0 0;
+}
+@media (min-width: 1024px) {
+  #page.two-column #main .wc-civicrmcampaign{
+    height: auto;
+    display: block;
+    width: 50%;
+    position: absolute;
+    right: 0;
+    top: 5px;
+  }
+
+  #page.two-column #main #right{
+    padding: 106px 0 0 0;
+  }
 }

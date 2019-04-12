@@ -20,14 +20,14 @@ jQuery( document ).ready(function(){
 function addCampaignList(){
 
   var data = {
-		'action': 'get_campaign',
+		'action': 'woocommerce_civicrm_get_datas_for_pos',
     'nonce' : POS.options.nonce
 	};
 
 	jQuery.post(POS.options.ajaxurl, data, function(response) { // Ajax to get the campaign list back
 		jQuery("#page.two-column #main").prepend(response);
     changeCampaign(); // set the campaign list for this user
-    $( "#order_civicrmcampaign").change(function(){
+    $( "#order_civicrmcampaign, #order_civicrmsource").change(function(){
       changeCampaign();
     });
 
@@ -41,10 +41,12 @@ function addCampaignList(){
 */
 function changeCampaign(){
   campaign_id = $( "#order_civicrmcampaign").val();
+  source = $( "#order_civicrmsource").val();
 
   var data = {
-		'action': 'set_campaign',
+		'action': 'woocommerce_civicrm_set_datas_from_pos',
     'campaign_id' :campaign_id,
+    'source' :source,
     'nonce' : POS.options.nonce
 	};
 

@@ -32,11 +32,11 @@ class Woocommerce_CiviCRM_POS {
 		// add the filters | Chosen filters are not ideal , but there are the only few you can access when on a POS page
 
 		// persist the campaign for this user in the data base
-		add_action( 'wp_ajax_set_campaign', array( $this,'set_campaign') );
+		add_action( 'wp_ajax_woocommerce_civicrm_set_datas_from_pos', array( $this,'pos_set_datas') );
     add_action( 'wp_ajax_nopriv_set_campaign', array( $this,'set_campaign') );
 
 		// get the campaign list from civicrm
-		add_action( 'wp_ajax_get_campaign', array( $this,'get_campaign') );
+		add_action( 'wp_ajax_woocommerce_civicrm_get_datas_for_pos', array( $this,'pos_get_datas') );
     add_action( 'wp_ajax_nopriv_get_campaign', array( $this,'get_campaign') );
 
 		// Enqueue JS and CSS for the campaign list
@@ -63,7 +63,7 @@ class Woocommerce_CiviCRM_POS {
 	/**
 	 *
 	 * Add JS and CSS to the POS page
-	 * 
+	 *
 	 */
 	function wc_pos_campaign_js($js) {
 		wp_nonce_field('woocommerce_civicrm_order_new', 'woocommerce_civicrm_order_new');
@@ -82,8 +82,16 @@ class Woocommerce_CiviCRM_POS {
 	 * Triggered onload and when the user changes the campaign, it save the campaign in the meta, for this user
 	 *
 	 */
-	function set_campaign() {
-		update_user_meta(get_current_user_id(),"pos_campaign_id",  $_POST['campaign_id']);
+	function pos_set_datas() {
+		$campaign_id = esc_attr($_POST['campaign_id']);
+		$source = esc_attr($_POST['source']);
+		update_user_meta(get_current_user_id(),"pos_campaign_id", $campaign_id);
+		update_user_meta(get_current_user_id(),"pos_source",  $source);
+		wp_send_json(array(
+			'campaign_id'=>$campaign_id,
+			'source'=>$source,
+		));
+		exit;
 	}
 
 	/**
@@ -91,7 +99,7 @@ class Woocommerce_CiviCRM_POS {
 	 * Triggered onload, serves the list of campaigns
 	 *
 	 */
-	function get_campaign() {
+	function pos_get_datas() {
 		$order_campaign = get_user_meta(get_current_user_id(),"pos_campaign_id", true);
 		if(!$order_campaign){ // if there is no campaign for this user, try the default from WP
 			$order_campaign = get_option( 'woocommerce_civicrm_campaign_id', false);
@@ -100,11 +108,16 @@ class Woocommerce_CiviCRM_POS {
 			}
 			add_user_meta(get_current_user_id(),"pos_campaign_id", $order_campaign); // there was no meta for the user at this point so create one because we will need it
 		}
+		$order_source = get_user_meta(get_current_user_id(),"pos_source", true);
+		if(!$order_source){
+			$order_source = '';
+			add_user_meta(get_current_user_id(),"pos_source", $order_source);
+		}
 		$render = '
 			<div class="wc-civicrmcampaign">
 				<div class="list-row">
 					<div>
-						<select id="order_civicrmcampaign" name="order_civicrmcampaign" data-placeholder="'. __('CiviCRM Campaign', 'woocommerce-civicrm') .'">';
+						<select id="order_civicrmcampaign" name="order_civicrmcampaign" placeholder="'. __('CiviCRM Campaign', 'woocommerce-civicrm') .'">';
 						foreach (WCI()->helper->campaigns as $campaign_id => $campaign_name){
 							$render .= '<option value="'. $campaign_id .'" '.selected($campaign_id, $order_campaign, false).'>'. $campaign_name.'</option>'; // select by default the $order_camapaign
 						}
@@ -112,6 +125,23 @@ class Woocommerce_CiviCRM_POS {
 					</div>
 					<div>
 						<label for="order_civicrmcampaign">'. __('CiviCRM Campaign', 'woocommerce-civicrm').'</label>
+					</div>
+				</div>
+				<div class="list-row">
+					<div>
+						<input type="text" list="sources" id="order_civicrmsource" name="order_civicrmsource" placeholder="'.__('CiviCRM Source', 'woocommerce-civicrm').'" value="'.$order_source.'">
+						<datalist id="sources">';
+						global $wpdb;
+						$results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
+						if(count($results)>0){
+							foreach ($results as $meta) {
+							 $render .= '<option value="'.$meta->meta_value.'">' ;
+							}
+						}
+						$render .= '</datalist>
+					</div>
+					<div>
+						<label for="order_civicrmsource">'. __('CiviCRM Source', 'woocommerce-civicrm').'</label>
 					</div>
 				</div>
 			</div>

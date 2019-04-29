@@ -1138,8 +1138,8 @@ class Woocommerce_CiviCRM_Manager {
 						$item_membershipType = $membership_types['by_financial_type_id'][$custom_contribution_type];
 						$membership_type_id = $item_membershipType['name'];
 						$duration_unit = $item_membershipType['duration_unit'];
-						$duration_interval = $item_membershipType['duration_interval'];
-						$start_date = $order_date;
+						$duration_interval = apply_filters( 'woocommerce_civicrm_membership_duration', $item['product_id'],$item_membershipType['duration_unit']);
+						$start_date = apply_filters( 'woocommerce_civicrm_membership_start_date', $order_date, $membership_type_id);
 
 						if($item_membershipType['period_type']=='fixed'){
 							$current_year = date('Y', $order_timestamp);

@@ -936,6 +936,7 @@ class Woocommerce_CiviCRM_Manager {
 		else{
 			wp_nonce_field('woocommerce_civicrm_order_edit', 'woocommerce_civicrm_order_edit');
 		}
+		wp_enqueue_script( "wccivi_admin_order", WOOCOMMERCE_CIVICRM_URL . 'js/admin_order.js', 'jquery', '1.0', true );
 		$order_campaign = get_post_meta($order->get_id(), '_woocommerce_civicrm_campaign_id', true);
 
 		if($order_campaign==""||$order_campaign===false){// if there is no campaign selected, select the default one (set up in WC -> settings -> CiviCRM)

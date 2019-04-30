@@ -418,8 +418,9 @@
 		$params = array(
 			'sequential' => 1,
 			'return' => array("id", "name","status_id"),
-			'options' => array('sort' => 'status_id', 'limit' => 0),
+			'options' => array('sort' => 'status_id ASC , created_date DESC , name ASC', 'limit' => 0),
 		);
+
 		/**
 		 * Filter Campaigns params before calling the Civi's API.
 		 *
@@ -432,10 +433,11 @@
 			__('None', 'woocommerce-civicrm')
 		);
 		foreach( $all_campaignsResult['values'] as $key => $value ) {
-      //var_dump($value);
+
       $status = "";
       if(isset($value['status_id']) && isset($this->campaigns_status[$value['status_id']])){
-        $status = " - ".$this->campaigns_status[$value['status_id']];
+
+        $status = " - ".__($this->campaigns_status[$value['status_id']], 'woocommerce-civicrm');
       }
 			$all_campaigns[$value['id']] = $value['name'].$status;
 		}
@@ -469,7 +471,7 @@
     if($statusResult["is_error"]==0 && $statusResult["count"] > 0){
 
       foreach( $statusResult['values'] as $key => $value ) {
-  			$civicrm_campaigns_status[$value['value']] = __($value['name'] ,'woocommerce-civicrm');
+  			$civicrm_campaigns_status[$value['value']] = __($value['label'] ,'woocommerce-civicrm');
   		}
 
       return $civicrm_campaigns_status;

@@ -1116,6 +1116,7 @@ class Woocommerce_CiviCRM_Manager {
 			if(!$cid)
 					return;
 			$order_date = $order->get_date_paid();
+
 			if($order_date == NULL){
 				return;
 			}
@@ -1137,10 +1138,10 @@ class Woocommerce_CiviCRM_Manager {
 					if(isset($membership_types['by_financial_type_id'][$custom_contribution_type])){
 
 						$item_membershipType = $membership_types['by_financial_type_id'][$custom_contribution_type];
-						$membership_type_id = $item_membershipType['name'];
-						$duration_unit = $item_membershipType['duration_unit'];
-						$duration_interval = apply_filters( 'woocommerce_civicrm_membership_duration', $item_membershipType['duration_interval'],$item['product_id']);
-						$start_date = apply_filters( 'woocommerce_civicrm_membership_start_date', $order_date, $membership_type_id);
+						$membership_type_name = $item_membershipType['name'];
+						$duration_unit = apply_filters( 'woocommerce_civicrm_membership_duration_unit', $item_membershipType['duration_unit'],$item['sku']);
+						$duration_interval = apply_filters( 'woocommerce_civicrm_membership_duration_interval', $item_membershipType['duration_interval'],$item['sku']);
+						$start_date = apply_filters( 'woocommerce_civicrm_membership_start_date', $order_date, $item_membershipType['id'],$order);
 
 						if($item_membershipType['period_type']=='fixed'){
 							$current_year = date('Y', $order_timestamp);
@@ -1172,7 +1173,7 @@ class Woocommerce_CiviCRM_Manager {
 					}else{
 						continue;
 					}
-					if(!$membership_type_id || !$start_date || !$end_date)
+					if(!$membership_type_name || !$start_date || !$end_date)
 							continue;
 
 					// If Contribution Type is of type MemberShip
@@ -1180,7 +1181,7 @@ class Woocommerce_CiviCRM_Manager {
 					// also add an Order Note
 
 					$params = array(
-						'membership_type_id' => $membership_type_id, // String
+						'membership_type_id' => $membership_type_name, // String
 						'contact_id' => $cid, // Integer
 						'join_date' => $start_date,
 						'start_date' => $start_date,
@@ -1191,48 +1192,53 @@ class Woocommerce_CiviCRM_Manager {
 					);
 					$result = civicrm_api3('Membership', 'create', apply_filters( 'woocommerce_civicrm_membership_create_params', $params,$item, $order ));
 					if($result && $result['id']){
-							global $wpdb;
-							global $db_name;
-							$membership_id = $result['id'];
-							$activity_type_id = WCI()->helper->optionvalue_membership_signup;
-							$query = sprintf('UPDATE `%4$s`.`civicrm_%1$s` SET `activity_date_time` = "%2$s" WHERE `%4$s`.`civicrm_%1$s`.`source_record_id` = %3$d AND `%4$s`.`civicrm_%1$s`.`activity_type_id` = %5$d ', 'activity', $start_date, $membership_id, $db_name, $activity_type_id);
-							$results = $wpdb->query($query);
-			        if ($wpdb->last_error) {
-								CRM_Core_Error::debug_log_message( $target.' creation date not updated.', $wpdb->last_error);
-			            //$this->addError( $target.' creation date not updated.', $wpdb->last_error);
-			        }
-							$order->add_order_note(sprintf(__('Membership %s has been created in CiviCRM', 'helios'),
-									'<a href="' .add_query_arg(
-											array(
-													'page' => 'CiviCRM',
-													'q' => 'civicrm/contact/view/membership',
-													'reset' => '1',
-													'id' => $membership_id,
-													'cid' => $cid,
-													'action' => 'view',
-													'context' => 'dashboard',
-													'selectedChild' => 'member'
-											),
-											admin_url('admin.php')
-									). '">' . $membership_id . '</a>')
-							);
-							$params = array(
-						'invoice_id' => $this->get_invoice_id($order_id),
-						'return' => 'id'
-					);
+						global $wpdb;
+						global $db_name;
+						$membership_id = $result['id'];
+						$activity_type_id = WCI()->helper->optionvalue_membership_signup;
+						$query = sprintf('UPDATE `%4$s`.`civicrm_%1$s` SET `activity_date_time` = "%2$s" WHERE `%4$s`.`civicrm_%1$s`.`source_record_id` = %3$d AND `%4$s`.`civicrm_%1$s`.`activity_type_id` = %5$d ', 'activity', $start_date, $membership_id, $db_name, $activity_type_id);
+						$results = $wpdb->query($query);
+		        if ($wpdb->last_error) {
+							CRM_Core_Error::debug_log_message( $target.' creation date not updated.', $wpdb->last_error);
+		            //$this->addError( $target.' creation date not updated.', $wpdb->last_error);
+		        }
+						$order->add_order_note(sprintf(__('Membership %s has been created in CiviCRM', 'helios'),
+								'<a href="' .add_query_arg(
+										array(
+												'page' => 'CiviCRM',
+												'q' => 'civicrm/contact/view/membership',
+												'reset' => '1',
+												'id' => $membership_id,
+												'cid' => $cid,
+												'action' => 'view',
+												'context' => 'dashboard',
+												'selectedChild' => 'member'
+										),
+										admin_url('admin.php')
+								). '">' . $membership_id . '</a>')
+						);
 
-					try {
-									$contribution = civicrm_api3( 'Contribution', 'getsingle', $params );
-									civicrm_api3('MembershipPayment', 'create', [
-											'membership_id' => $membership_id,
-											'contribution_id' => $contribution['contribution_id'],
-									]);
-					} catch ( Exception $e ) {
-						CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
-					}
+						do_action('woocommerce_civicrm_new_membership_created',$params, $result['id'], $order);
+
+						$params = array(
+							'invoice_id' => $this->get_invoice_id($order_id),
+							'return' => 'id'
+						);
+
+						try
+						{
+										$contribution = civicrm_api3( 'Contribution', 'getsingle', $params );
+										civicrm_api3('MembershipPayment', 'create', [
+												'membership_id' => $membership_id,
+												'contribution_id' => $contribution['contribution_id'],
+										]);
+						} catch ( Exception $e )
+						{
+							CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
+						}
 							break;
 					}
-			}
+				}
 
 			update_post_meta($order_id, '_civicrm_membership', $membership_id);
 	}

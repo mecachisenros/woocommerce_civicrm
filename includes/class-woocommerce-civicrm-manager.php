@@ -115,6 +115,8 @@ class Woocommerce_CiviCRM_Manager {
 		$source = $this->generate_source($order);
 		$this->update_source($order_id,$source);
 		update_post_meta($order_id, '_order_source', $source);
+
+		$this->utm_to_order( $order->get_id() );
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );
 		do_action('woocommerce_civicrm_action_order', $order, $cid);
@@ -516,7 +518,7 @@ class Woocommerce_CiviCRM_Manager {
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
 		$invoice_id = $this->get_invoice_id($order_id);
 		$this->create_custom_contribution_fields();
-		$this->utm_to_order( $order->get_id() );
+
 
 		$sales_tax_field_id = 'custom_' . get_option( 'woocommerce_civicrm_sales_tax_field_id' );
 		$shipping_cost_field_id = 'custom_' . get_option( 'woocommerce_civicrm_shipping_cost_field_id' );
@@ -1081,6 +1083,9 @@ class Woocommerce_CiviCRM_Manager {
 		if ( isset( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) && $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ) {
 			update_post_meta($order_id, '_woocommerce_civicrm_campaign_id', esc_attr( $_COOKIE[ 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH ] ));
 			setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
+		}else{
+			$order_campaign = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID
+			update_post_meta($order_id, '_woocommerce_civicrm_campaign_id', $order_campaign);
 		}
 	}
 

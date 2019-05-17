@@ -23,7 +23,7 @@ class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 		) );
 		$this->assign( 'orders', $orders );
 		$this->assign( 'uid', $uid );
-		$this->assign( 'newOrderUrl', apply_filters('helios_woocommerce_add_order_pos_url', add_query_arg(array(	'post_type' => 'shop_order',
+		$this->assign( 'newOrderUrl', apply_filters('woocommerce_civicrm_add_order_url', add_query_arg(array(	'post_type' => 'shop_order',
 																																																							'user_id' => $uid,
 																																																						),admin_url('post-new.php')) ,$uid ));
 		parent::run();

@@ -1,21 +1,21 @@
-<h3>Orders</h3>
-
+{if $uid}
+<h3>{ts}{$i18n.orders}{/ts} <a class="button-new_order button" href="{$newOrderUrl}">{ts}{$i18n.addOrder}{/ts}</a></h3>
 <table class="selector row-highlight">
 <thead class="sticky">
 <tr>
- <th scope="col">{ts}Order Number{/ts}</th>
- <th scope="col">{ts}Date{/ts}</th>
- <th scope="col">{ts}Billing Name{/ts}</th>
- <th scope="col">{ts}Shipping Name{/ts}</th>
- <th scope="col">{ts}Item count{/ts}</th>
- <th scope="col">{ts}Amount{/ts}</th>
- <th scope="col">{ts}Actions{/ts}</th>
+ <th scope="col">{ts}{$i18n.orderNumber}{/ts}</th>
+ <th scope="col">{ts}{$i18n.date}{/ts}</th>
+ <th scope="col">{ts}{$i18n.billingName}{/ts}</th>
+ <th scope="col">{ts}{$i18n.shippingName}{/ts}</th>
+ <th scope="col">{ts}{$i18n.itemCount}{/ts}</th>
+ <th scope="col">{ts}{$i18n.amount}{/ts}</th>
+ <th scope="col">{ts}{$i18n.actions}{/ts}</th>
 </tr>
 </thead>
 <tbody>
 {foreach from=$orders item=row}
 {assign var=id value=$row.order_number}
-<tr>
+<tr class="{$row.order_status}">
   <td>{$row.order_number}</td>
   <td>{$row.order_date}</td>
   <td>{$row.order_billing_name}</td>
@@ -32,3 +32,9 @@
 {/literal}
 </tbody>
 </table>
+{else}
+<div class="messages status no-popup">
+    <div class="icon inform-icon"></div>
+        {ts}{$i18n.emptyUid}{/ts}
+   </div>
+{/if}

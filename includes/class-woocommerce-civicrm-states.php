@@ -54,8 +54,9 @@ class Woocommerce_CiviCRM_States {
 	 * @since 2.0
 	 */
 	public function inited() {
+		if(!WCI()->boot_civi())
+      return;
 		$this->replace = WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
-		WCI()->boot_civi();
 		$this->civicrm_countries = $this->get_civicrm_countries();
 	}
 

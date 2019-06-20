@@ -226,6 +226,12 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'desc' => __( 'If enabled, this option will not create contributions for orders with a total of 0, i.e. free products (using a coupon).', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_ignore_0_amount_orders'
 			),
+			'woocommerce_civicrm_hide_orders_tab_for_non_customers' => array(
+				'name' => __( 'Hide orders tab for non customers', 'woocommerce-civicrm' ),
+				'type' => 'checkbox',
+				'desc' => __( 'If enabled, this option will remove the WooCommerce Orders tab in the contact summary page for non customers contacts.', 'woocommerce-civicrm' ),
+				'id'   => 'woocommerce_civicrm_hide_orders_tab_for_non_customers'
+			),
 			'section_end' => array(
 				'type' => 'sectionend',
 				'id' => 'woocommerce_civicrm_section_end'

@@ -130,6 +130,10 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	public function add_orders_contact_tab( $tabsetName, &$tabs, $context ) {
 		$uid = abs(CRM_Core_BAO_UFMatch::getUFId( $context['contact_id'] ));
 
+		// bail if contact has no orders and hide order is enabled
+		if ( WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_hide_orders_tab_for_non_customers', false ) ) && ! $this->count_orders( $uid ) )
+			return;
+
 		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid&no_redirect=1");
 
 		$tabs[] = array( 'id'    => 'woocommerce-orders',

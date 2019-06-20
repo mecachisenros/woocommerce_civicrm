@@ -501,6 +501,11 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param object $order The order object
 	 */
 	public function add_contribution( $cid, &$order ) {
+
+		// bail if order is 'free' (0 amount) and 0 amount setting is enabled
+		if ( WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_ignore_0_amount_orders', false ) ) && $order->get_total() == 0 )
+			return false;
+
 		$debug['cid']=$cid;
 		$order_id = $order->get_id();
 		$order_date = $order->get_date_paid();

@@ -9,15 +9,6 @@
  class Woocommerce_CiviCRM_Helper {
 
 	/**
-	 * The class instance.
-	 *
-	 * @since 2.0
-	 * @access private
-	 * @var object $instance The class instance
-	 */
-	public static $instance;
-
-	/**
 	 * The active Financial Types.
 	 *
 	 * Array of key/value pairs holding the active financial types.
@@ -26,6 +17,26 @@
 	 * @var array $financial_types The financial types
 	 */
 	public $financial_types;
+
+  /**
+	 * The active Membership Types.
+	 *
+	 * Array of key/value pairs holding the active Membership types.
+	 * @since 2.0
+	 * @access public
+	 * @var array $financial_types The Membership types
+	 */
+	public $membership_types;
+
+  /**
+	 * optionvalue_membership_signup.
+	 *
+	 * integer Value
+	 * @since 2.0
+	 * @access public
+	 * @var array $financial_types The Membership types
+	 */
+	public $optionvalue_membership_signup;
 
 	/**
 	 * The Address Location Type.
@@ -56,88 +67,141 @@
 	 */
 	public $civicrm_states = array();
 
+
+	/**
+	 * CiviCRM campaigns.
+	 *
+	 * @since 2.2
+	 * @access public
+	 * @var array $campaigns The CiviCRM campaigns
+	 */
+	public $campaigns = array();
+
+
+  /**
+	 * CiviCRM campaigns.
+	 *
+	 * @since 2.2
+	 * @access public
+	 * @var array $campaigns The CiviCRM campaigns
+	 */
+	public $all_campaigns = array();
+
+  /**
+   * CiviCRM campaigns status.
+   *
+   * @since 2.2
+   * @access public
+   * @var array $campaigns The CiviCRM campaigns
+   */
+  public $campaigns_status = array();
+
+
 	/**
 	 * Initialises this object.
 	 *
 	 * @since 2.0
 	 */
 	public function __construct(){
-
-		$this->financial_types = $this->get_financial_types();
-		$this->location_types = $this->get_address_location_types();
-		$this->civicrm_states = $this->get_civicrm_states();
-		$this->mapped_location_types = $this->set_mapped_location_types();
-
+		$this->inited();
 	}
 
 	/**
-	 * Returns a single instance of this object when called.
+	 * CiviCRM inited.
 	 *
 	 * @since 2.0
-	 * @return object $instance Woocommerce_CiviCRM_Helper instance
 	 */
-	public static function instance() {
+	public function inited() {
 
-		if ( ! isset( self::$instance ) ) {
-			// instantiate
-			self::$instance = new Woocommerce_CiviCRM_Helper;
-			if ( is_null( self::$instance ) ) {
-				self::$instance = new self();
-			}
-		}
-		// always return instance
-		return self::$instance;
+		if(!WCI()->boot_civi())
+      return;
+		$this->financial_types = $this->get_financial_types();
+    $this->membership_types = $this->get_civicrm_membership_types();
+		$this->location_types = $this->get_address_location_types();
+		$this->civicrm_states = $this->get_civicrm_states();
+		$this->campaigns_status = $this->get_campaigns_status();
+		$this->campaigns = $this->get_campaigns();
+		$this->all_campaigns = $this->get_all_campaigns();
+		$this->mapped_location_types = $this->set_mapped_location_types();
+		$this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
 	}
 
- 	/**
- 	 * Get CiviCRM contact_id.
- 	 *
- 	 * @since 2.0
- 	 * @param object $order The order object
- 	 * @return int $cid The contact_id
- 	 */
- 	public function civicrm_get_cid( $order ){
+  /**
+  * Get CiviCRM contact_id.
+  *
+  * @since 2.0
+  * @param object $order The order object
+  * @return int $cid The contact_id
+  */
+ public function civicrm_get_cid( $order ){
+   $email = "";
+   if ( is_user_logged_in() && !is_admin() ) { // if user is logged in but not in the admin (not a manual order)
+     $current_user = wp_get_current_user();
+     //$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
+     //	$current_user,
+     //	$current_user->ID,
+     $email =	$current_user->user_email;
+     //	'WordPress', FALSE, 'Individual'
+     //);
 
-		if ( is_user_logged_in() ) {
-			$current_user = wp_get_current_user();
-			$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-				$current_user,
-				$current_user->ID,
-				$current_user->user_email,
-				'WordPress', FALSE, 'Individual'
-			);
+     //if ( is_object( $match ) ) {
+     //	return $match->contact_id;
+     //}
+   }else{
+     if(filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT)){ // if there was a fiel customer user in form (manual order)
+       $cu_id = filter_input(INPUT_POST, 'customer_user', FILTER_VALIDATE_INT);
 
-			if ( ! is_object( $match ) ) {
-				return FALSE;
-			}
+       $user_info = get_userdata($cu_id);
+       $email = $user_info->user_email;
 
-			return $match->contact_id;
-		}
+     }else{
+       $email = $order->get_billing_email();
+     }
+   }
 
-		// The customer is anonymous.  Look in the CiviCRM contacts table for a
-		// contact that matches the billing email.
-		$params = array(
-			'email' => $order->get_billing_email(),
-			'return.contact_id' => TRUE,
-			'sequential' => 1,
-		);
+   $wp_user_id =  $order->get_user_id();
+   if($wp_user_id != 0){
+     try{
+       $uf_match = civicrm_api3('UFMatch', 'get', [
+         'sequential' => 1,
+         'uf_id' => $wp_user_id,
+       ]);
+       if($uf_match["count"] == 1){
+         return $uf_match['values'][0]['contact_id'];
+       }
+     }
+     catch ( Exception $e ) {
+       return FALSE;
+     }
+   }elseif($email != ""){
+     // The customer is anonymous.  Look in the CiviCRM contacts table for a
+     // contact that matches the billing email.
+     $params = array(
+       'email' => $email,
+       'return.contact_id' => TRUE,
+       'sequential' => 1,
+     );
+   }
+   if(!isset($params)){
+     return FALSE;
+   }
 
-		try{
-			$contact = civicrm_api3( 'Contact', 'get', $params );
-		}
-		catch ( Exception $e ) {
-			return FALSE;
-		}
+   try{
+     $contact = civicrm_api3( 'Contact', 'get', $params );
+   }
+   catch ( Exception $e ) {
+     return FALSE;
+   }
 
-		// No matches found, so we will need to create a contact.
-		if ( count( $contact ) == 0 ) {
-			return 0;
-		}
-		$cid = $contact['values'][0]['id'];
+   // No matches found, so we will need to create a contact.
+   if ( count( $contact ) == 0 ) {
+     return 0;
+   }
+   $cid = isset($contact['values'][0]['id']) ? $contact['values'][0]['id'] : 0;
 
-		return $cid;
+   return $cid;
 
-	}
+ }
 
 	/**
 	 * Get CiviCRM UFMatch.
@@ -151,12 +215,12 @@
 	public function get_civicrm_ufmatch( $id, $property ){
 
 	if( ! in_array( $property, array( 'contact_id', 'uf_id' ) ) ) return;
-    
+
 		try {
 			$uf_match = civicrm_api3( 'UFMatch', 'getsingle', array(
 				'sequential' => 1,
 				$property => $id,
-			)); 
+			));
 		} catch ( Exception $e ) {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
@@ -250,7 +314,7 @@
 			$found = array_search( $civi_state['name'], $states );
 			if( ! empty( $states ) && $found ) return $found;
 		}
-    
+
 		return $civi_state['name'];
 	}
 
@@ -302,9 +366,121 @@
 				'country_id' => $dao->country_id
 			);
 		}
-    
+
 		return $civicrm_states;
 	}
+
+	/**
+	 * Get CiviCRM campaigns.
+	 *
+	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) )
+	 * @since 2.2
+	 */
+	private function get_campaigns(){
+
+		if( ! empty( $this->civicrm_campaigns ) ) return $this->civicrm_campaigns;
+
+		$params = array(
+			'sequential' => 1,
+			'return' => array("id", "name"),
+			'is_active' => 1,
+			'status_id' => array('NOT IN' => array("Completed", "Cancelled")),
+			'options' => array('sort' => 'name', 'limit' => 0),
+		);
+
+		/**
+		 * Filter Campaigns params before calling the Civi's API.
+		 *
+		 * @since 2.2
+		 * @param array $params The params to be passsed to the API
+		 */
+		$campaignsResult = civicrm_api3( 'Campaign', 'get', apply_filters( 'woocommerce_civicrm_campaigns_params', $params ) );
+
+		$civicrm_campaigns = array(
+			__('None', 'woocommerce-civicrm')
+		);
+		foreach( $campaignsResult['values'] as $key => $value ) {
+			$civicrm_campaigns[$value['id']] = $value['name'];
+		}
+		return $civicrm_campaigns;
+	}
+
+  /**
+	 * Get CiviCRM all campaigns with status.
+	 *
+	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) )
+	 * @since 2.2
+	 */
+	private function get_all_campaigns(){
+
+		if( ! empty( $this->all_campaigns ) ) return $this->all_campaigns;
+    if( ! empty( $this->campaigns_status ) ) $this->campaigns_status = $this->get_campaigns_status();
+		$params = array(
+			'sequential' => 1,
+			'return' => array("id", "name","status_id"),
+			'options' => array('sort' => 'status_id ASC , created_date DESC , name ASC', 'limit' => 0),
+		);
+
+		/**
+		 * Filter Campaigns params before calling the Civi's API.
+		 *
+		 * @since 2.2
+		 * @param array $params The params to be passsed to the API
+		 */
+		$all_campaignsResult = civicrm_api3( 'Campaign', 'get', apply_filters( 'woocommerce_civicrm_campaigns_params', $params ) );
+
+		$all_campaigns = array(
+			__('None', 'woocommerce-civicrm')
+		);
+		foreach( $all_campaignsResult['values'] as $key => $value ) {
+
+      $status = "";
+      if(isset($value['status_id']) && isset($this->campaigns_status[$value['status_id']])){
+
+        $status = " - ".__($this->campaigns_status[$value['status_id']], 'woocommerce-civicrm');
+      }
+			$all_campaigns[$value['id']] = $value['name'].$status;
+		}
+		return $all_campaigns;
+	}
+
+  /**
+	 * Get CiviCRM all campaigns with status.
+	 *
+	 * Build multidimentional array of CiviCRM campaigns | array( 'status_id' => array( 'name', 'id', 'parent_id' ) )
+	 * @since 2.2
+	 */
+	private function get_campaigns_status(){
+
+		if( ! empty( $this->campaigns_status ) ) return $this->campaigns_status;
+
+		$params = array(
+      'sequential' => 1,
+       'option_group_id' => "campaign_status",
+		);
+		/**
+		 * Filter Campaigns params before calling the Civi's API.
+		 *
+		 * @since 2.2
+		 * @param array $params The params to be passsed to the API
+		 */
+
+    $civicrm_campaigns_status = array();
+		$statusResult = civicrm_api3( 'OptionValue', 'get', apply_filters( 'woocommerce_civicrm_status_params', $params ) );
+
+    if($statusResult["is_error"]==0 && $statusResult["count"] > 0){
+
+      foreach( $statusResult['values'] as $key => $value ) {
+  			$civicrm_campaigns_status[$value['value']] = __($value['label'] ,'woocommerce-civicrm');
+  		}
+
+      return $civicrm_campaigns_status;
+    } else {
+      return false;
+    }
+	}
+
+
 
 	/**
 	 * Set Woocommerce CiviCRM mapped location types.
@@ -328,7 +504,7 @@
 
 	/**
 	 * Get CiviCRM Financial Types.
-	 * 
+	 *
 	 * @since 2.0
 	 * @return array $financialTypes The financial types
 	 */
@@ -357,10 +533,10 @@
 		return $financialTypes;
 
 	}
-  
+
 	/**
 	 * Get CiviCRM Address Location Types.
-	 * 
+	 *
 	 * @since 2.0
 	 * @return array $addressTypes The address location types
 	 */
@@ -372,15 +548,80 @@
 		return $addressTypesResult['values'];
 
 	}
-  
+
+  /**
+ 	 * Get CiviCRM Membership Types.
+ 	 *
+ 	 * @since 2.0
+ 	 */
+ 	public function get_civicrm_membership_types( ){
+
+
+    if ( isset( $this->membership_types ) ) return $this->membership_types;
+
+		$params = array(
+			'sequential' => 1,
+			'is_active' => 1,
+		);
+
+		/**
+		 * Filter Financial type params before calling the Civi's API.
+		 *
+		 * @since 2.0
+		 * @param array $params The params to be passsed to the API
+		 */
+		$membershipTypesResult = civicrm_api3( 'MembershipType', 'get', apply_filters( 'woocommerce_civicrm_membership_types_params', $params ) );
+
+		$membershipTypes = array();
+		foreach( $membershipTypesResult['values'] as $key => $value ) {
+			$membershipTypes['by_membership_type_id'][$value['id']] = $value;
+      $membershipTypes['by_financial_type_id'][$value['financial_type_id']] = $value;
+		}
+
+		return apply_filters( 'woocommerce_civicrm_membership_types' , $membershipTypes, $membershipTypesResult);
+
+  }
+
+  /**
+ 	 * Get CiviCRM OptionValue Membership Signup.
+ 	 *
+ 	 * @since 2.0
+ 	 */
+ 	public function get_civicrm_optionvalue_membership_signup( ){
+
+    $result = civicrm_api3('OptionValue', 'get', [
+      'sequential' => 1,
+      'return' => ["value"],
+      'name' => "Membership Signup",
+    ]);
+    return $result['values'][0]['value'];
+  }
 	/**
 	 * Function to check whether a value is (string) 'yes'.
-	 * 
+	 *
 	 * @param  string $value
 	 * @return bool true | false
 	 */
 	public function check_yes_no_value( $value ){
 		if( $value == 'yes' ) return true;
 		return false;
+	}
+
+	/**
+	 * Get WordPress sites on a multisite Installation
+	 *
+	 * @return array $sites [$site_id: $site_name]
+	 */
+	public function get_sites(){
+		$sites = array('');
+		if(is_multisite()){
+			$wp_sites = get_sites(array(
+				'orderby' => 'domain',
+			));
+			foreach ($wp_sites as $site) {
+				$sites[$site->blog_id] = $site->domain;
+			}
+		}
+		return $sites;
 	}
 }

@@ -1,12 +1,11 @@
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CiviCRM\n"
 "POT-Creation-Date: 2019-04-05 15:58+0200\n"
-"PO-Revision-Date: 2015-10-23 18:44+0100\n"
-"Last-Translator: Bastien Ho <bastien@avecnous.eu>\n"
+"PO-Revision-Date: 2019-04-05 15:58+0200\n"
+"Last-Translator: Bastien Ho <b@stienho.fr>\n"
 "Language-Team: Bastien Ho <bastien@avecnous.eu>\n"
-"Language: en\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,372 +14,396 @@ msgstr ""
 "_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;"
 "esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e\n"
 "X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: .\n"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:13
 msgid "Order Number"
-msgstr ""
+msgstr "Numéro de commande"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:14
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:15
 msgid "Billing Name"
-msgstr ""
+msgstr "Nom de factutation"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:16
 msgid "Shipping Name"
-msgstr ""
+msgstr "Nom de livraison"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:17
 msgid "Item count"
-msgstr ""
+msgstr "Nombre d’articles"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:18
 msgid "Amount"
-msgstr ""
+msgstr "Montant"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:19
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:20
 msgid ""
-"This contact is not linked to any WordPress user or WooCommerce "
-"Customer"
+"This contact is not linked to any WordPress user or WooCommerce Customer"
 msgstr ""
+"Ce contact n’est lié à aucun utilisateur WordPress ou client WooCommerce"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:21
 msgid "Orders"
-msgstr ""
+msgstr "Commandes"
 
 #: custom_php/CRM/Contact/Page/View/Purchases.php:22
 msgid "Add Order"
-msgstr ""
+msgstr "Ajouter une commande"
 
 #: includes/class-woocommerce-civicrm-helper.php:400
 #: includes/class-woocommerce-civicrm-helper.php:432
 msgid "None"
-msgstr ""
+msgstr "Aucun"
 
 #: includes/class-woocommerce-civicrm-manager.php:100
 #: includes/class-woocommerce-civicrm-manager.php:140
 msgid "CiviCRM Contact could not be fetched"
-msgstr ""
+msgstr "Le contact CiviCRM n’a pu être récupéré"
 
 #: includes/class-woocommerce-civicrm-manager.php:106
 msgid "CiviCRM Contact could not be found or created"
-msgstr ""
+msgstr "Le contact CiviCRM n’a pas pu être créé"
 
 #: includes/class-woocommerce-civicrm-manager.php:185
 #: includes/class-woocommerce-civicrm-manager.php:248
 #: includes/class-woocommerce-civicrm-manager.php:294
 msgid "Not able to update contribution"
-msgstr ""
+msgstr "Impossible de mettre à jour la contribution"
 
 #: includes/class-woocommerce-civicrm-manager.php:215
 #: includes/class-woocommerce-civicrm-manager.php:584
 #: includes/class-woocommerce-civicrm-manager.php:1058
 #: includes/class-woocommerce-civicrm-orders.php:67
 msgid "Not able to fetch campaign"
-msgstr ""
+msgstr "Impossible de récupérer la campagne"
 
 #: includes/class-woocommerce-civicrm-manager.php:324
 msgid "Not able to find contact"
-msgstr ""
+msgstr "Impossible de trouver le contact"
 
 #: includes/class-woocommerce-civicrm-manager.php:362
 msgid "Woocommerce purchase"
-msgstr ""
+msgstr "Commande Woocommerce"
 
 #: includes/class-woocommerce-civicrm-manager.php:370
 msgid "View"
-msgstr ""
+msgstr "Afficher"
 
 #: includes/class-woocommerce-civicrm-manager.php:374
 msgid "CiviCRM Contact Updated - "
-msgstr ""
+msgstr "Contact CiviCRM mis à jour - "
 
 #: includes/class-woocommerce-civicrm-manager.php:376
 msgid "Created new CiviCRM Contact - "
-msgstr ""
+msgstr "Nouveau contact CiviCRM créé - "
 
 #: includes/class-woocommerce-civicrm-manager.php:380
 msgid "Not able to create/update contact"
-msgstr ""
+msgstr "Impossible de créer/mettre à jour le contact"
 
 #: includes/class-woocommerce-civicrm-manager.php:416
 #, php-format
 msgid "Created new CiviCRM Phone of type %1$s: %2$s"
-msgstr ""
+msgstr "Création d’un nouveau numéro de téléphone CiviCRM de type %1$s : %2$s"
 
 #: includes/class-woocommerce-civicrm-manager.php:440
 #, php-format
 msgid "Created new CiviCRM Email of type %1$s: %2$s"
 msgstr ""
+"Création d’une nouvelle adresse de messagerie CiviCRM de type %1$s : %2$s"
 
 #: includes/class-woocommerce-civicrm-manager.php:481
 #, php-format
 msgid "Created new CiviCRM Address of type %1$s: %2$s"
-msgstr ""
+msgstr "Création d’une nouvelle adresse CiviCRM de type %1$s : %2$s"
 
 #: includes/class-woocommerce-civicrm-manager.php:487
 msgid "Not able to add/update address or phone"
-msgstr ""
+msgstr "Impossible de créer/mettre à jour l’adresse ou le téléphone"
 
 #: includes/class-woocommerce-civicrm-manager.php:516
 msgid "Woocommerce Order - "
-msgstr ""
+msgstr "Commande Woocommerce - "
 
 #: includes/class-woocommerce-civicrm-manager.php:543
 msgid "Not able to fetch monetary settings"
-msgstr ""
+msgstr "Impossible de récupérer les réglages de devise"
 
 #: includes/class-woocommerce-civicrm-manager.php:673
 #, php-format
 msgid "Contribution %s has been created in CiviCRM"
-msgstr ""
+msgstr "La contribution %s a été créée dans CiviCRM"
 
 #: includes/class-woocommerce-civicrm-manager.php:693
 msgid "Not able to add contribution"
-msgstr ""
+msgstr "Impossible d’ajouter la contribution"
 
 #: includes/class-woocommerce-civicrm-manager.php:697
 msgid "CiviCRM Contribution could not be created"
-msgstr ""
+msgstr "La contribution CiviCRM n’a pu être créée"
 
 #: includes/class-woocommerce-civicrm-manager.php:818
 msgid "shop"
-msgstr ""
+msgstr "boutique"
 
 #: includes/class-woocommerce-civicrm-manager.php:847
 msgid "Not able to get custom group"
-msgstr ""
+msgstr "Impossible de récupérer un groupe personnalisé"
 
 #: includes/class-woocommerce-civicrm-manager.php:864
 msgid "Not able to create custom group"
-msgstr ""
+msgstr "Impossible de créer un groupe personnalisé"
 
 #: includes/class-woocommerce-civicrm-manager.php:880
 #: includes/class-woocommerce-civicrm-manager.php:908
 msgid "Not able to get custom field"
-msgstr ""
+msgstr "Impossible de récupérer un champ personnalisé"
 
 #: includes/class-woocommerce-civicrm-manager.php:952
 #: includes/class-woocommerce-civicrm-manager.php:954
 #: includes/class-woocommerce-civicrm-pos.php:107
 #: includes/class-woocommerce-civicrm-pos.php:114
 msgid "CiviCRM Campaign"
-msgstr ""
+msgstr "Campagne CiviCRM"
 
 #: includes/class-woocommerce-civicrm-manager.php:970
 #: includes/class-woocommerce-civicrm-manager.php:971
 msgid "CiviCRM Source"
-msgstr ""
+msgstr "Source CiviCRM"
 
 #: includes/class-woocommerce-civicrm-manager.php:996
 #, php-format
 msgid "View %s in CiviCRM"
-msgstr ""
+msgstr "Voir  %s dans CIVICRM"
 
 #: includes/class-woocommerce-civicrm-manager.php:1006
 msgctxt "in: View Contact in CiviCRM"
 msgid "Contact"
-msgstr ""
+msgstr "le contact"
 
 #: includes/class-woocommerce-civicrm-manager.php:1202
 #, php-format
 msgid "Membership %s has been created in CiviCRM"
-msgstr ""
+msgstr "L’adhésion %s a été créée dans CiviCRM"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:137
 msgid "Woocommerce Orders"
-msgstr ""
+msgstr "Commandes Woocommerce"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:153
 msgctxt "Order status"
 msgid "Pending payment"
-msgstr ""
+msgstr "Attente paiement"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:154
 msgctxt "Order status"
 msgid "Processing"
-msgstr ""
+msgstr "En cours"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:155
 msgctxt "Order status"
 msgid "On hold"
-msgstr ""
+msgstr "En attente"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:156
 msgctxt "Order status"
 msgid "Completed"
-msgstr ""
+msgstr "Terminée"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:157
 msgctxt "Order status"
 msgid "Cancelled"
-msgstr ""
+msgstr "Annnulée"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:158
 msgctxt "Order status"
 msgid "Refunded"
-msgstr ""
+msgstr "Remboursée"
 
 #: includes/class-woocommerce-civicrm-orders-contact-tab.php:159
 msgctxt "Order status"
 msgid "Failed"
-msgstr ""
+msgstr "Échouée"
 
 #: includes/class-woocommerce-civicrm-orders.php:39
 msgid "Campaign"
-msgstr ""
+msgstr "Campagne"
 
 #: includes/class-woocommerce-civicrm-orders.php:40
 msgid "Source"
-msgstr ""
+msgstr "Source"
 
 #: includes/class-woocommerce-civicrm-orders.php:86
 msgid "All campaigns"
-msgstr ""
+msgstr "Toutes les campagnes"
 
 #: includes/class-woocommerce-civicrm-orders.php:102
 msgid "All sources"
-msgstr ""
+msgstr "Toutes les sources"
 
 #: includes/class-woocommerce-civicrm-products.php:44
 #, php-format
 msgid "%s (Default)"
-msgstr ""
+msgstr "%s (par défaut)"
 
 #: includes/class-woocommerce-civicrm-products.php:45
 #: includes/class-woocommerce-civicrm-products.php:63
 msgid "unset"
-msgstr ""
+msgstr "non défini"
 
 #: includes/class-woocommerce-civicrm-products.php:62
 #, php-format
 msgid "Default (%s)"
-msgstr ""
+msgstr "Par défaut (%s)"
 
 #: includes/class-woocommerce-civicrm-products.php:68
 #: includes/class-woocommerce-civicrm-products.php:112
 msgid "Exclude"
-msgstr ""
+msgstr "Exclure"
 
 #: includes/class-woocommerce-civicrm-products.php:76
 #: includes/class-woocommerce-civicrm-products.php:93
 msgid "Contribution type"
-msgstr ""
+msgstr "Type de contribution"
 
 #: includes/class-woocommerce-civicrm-products.php:78
 msgid "Custom contribution type for this product"
-msgstr ""
+msgstr "Type de contribution personnalisé pour ce produit"
 
 #: includes/class-woocommerce-civicrm-products.php:107
 msgid "— No change —"
-msgstr ""
+msgstr "— Aucun changement —"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:49
 msgid "General settings"
-msgstr ""
+msgstr "Réglages généraux"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:56
 msgid "Main Woocommerce blog ID"
-msgstr ""
+msgstr "ID du blog Woocommerce"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:60
 msgid "The shop on a multisite network"
-msgstr ""
+msgstr "La boutique sur un réseau multisite"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:105
 msgid "Cheating uh?"
-msgstr ""
+msgstr "Alors, on triche ?"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:132
 msgid "CiviCRM"
-msgstr ""
+msgstr "CiviCRM"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:164
 msgid "CiviCRM Settings"
-msgstr ""
+msgstr "Réglages CiviCRM"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:166
 msgid ""
-"Below are the values used when creating contribution/address in "
-"CiviCRM."
+"Below are the values used when creating contribution/address in CiviCRM."
 msgstr ""
+"Ci dessous, les valeurs utilisées pour créer un contribution/adresse dans "
+"CiviCRM."
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:170
 msgid "Contribution Type"
-msgstr ""
+msgstr "Type de contribution"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:176
 msgid "Default campaign"
-msgstr ""
+msgstr "Campagne par défaut"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:182
 msgid "Contribution Type VAT (Tax)"
-msgstr ""
+msgstr "Type de contribution TVA (taxe)"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:188
 msgid "Billing Location Type"
-msgstr ""
+msgstr "Type d’adresse de facturation"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:194
 msgid "Shipping Location Type"
-msgstr ""
+msgstr "Type d’adresse de livraison"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:200
 msgid "Sync Contact address"
-msgstr ""
+msgstr "Synchroniser l’adresse de contact"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:202
 msgid ""
 "If enabled, this option will synchronize Woocommerce user address with "
 "CiviCRM's contact address and viceversa."
 msgstr ""
+"Si activée, cette option synchronisera l’adresse d’utilisateur Woocommerce "
+"avec l’adresse de contact CiviCRM et viceversa."
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:206
 msgid "Sync Contact billing phone"
-msgstr ""
+msgstr "Synchroniser le téléphone de facturation"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:208
 msgid ""
-"If enabled, this option will synchronize Woocommerce user's billing "
-"phone with CiviCRM's contact billing phone and viceversa."
+"If enabled, this option will synchronize Woocommerce user's billing phone "
+"with CiviCRM's contact billing phone and viceversa."
 msgstr ""
+"Si activée, cette option synchronisera le téléphone de facturation de "
+"l’utilisateur Woocommerce avec le téléphone de facturation du contact "
+"CiviCRM et viceversa."
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:212
 msgid "Sync Contact billing email"
-msgstr ""
+msgstr "Synchroniser l’adresse de messagerie de facturation"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:214
 msgid ""
-"If enabled, this option will synchronize Woocommerce user's billing "
-"email with CiviCRM's contact billing email and viceversa."
+"If enabled, this option will synchronize Woocommerce user's billing email "
+"with CiviCRM's contact billing email and viceversa."
 msgstr ""
+"Si activée, cette option synchronisera l’adresse de facturation de "
+"l’utilisateur Woocommerce avec l’adresse de facturation du contact CiviCRM "
+"et viceversa."
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:218
 msgid "Replace Woocommerce States"
-msgstr ""
+msgstr "Remplace les pays / états Woocommerce"
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:220
 msgid ""
-"WARNING, DATA LOSS!! If enabled, this option will replace "
-"Woocommerce's States/Countries with CiviCRM's States/Provinces, you "
-"WILL lose any existing State/Country data for existing Customers. Any "
-"Woocommerce Settings that relay on State/Country will have to be "
-"reconfigured."
+"WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce's "
+"States/Countries with CiviCRM's States/Provinces, you WILL lose any existing "
+"State/Country data for existing Customers. Any Woocommerce Settings that "
+"relay on State/Country will have to be reconfigured."
 msgstr ""
+"ATTENTION, PERTE DE DONNÉES ! Si activée, cette option remplacera les "
+"pays / états de Woocommerce par les régions/états de CiviCRM, vous ALLEZ "
+"perdre tout pays / état existant pour les clients existants. Tout réglage "
+"Woocommerce en relation avec les pays / états devra être reconfiguré."
 
 #: includes/class-woocommerce-civicrm-settings-tab.php:243
 #: woocommerce-civicrm.php:180
 msgid "Woocommerce CiviCRM settings"
-msgstr ""
+msgstr "Réglages Woocommerce CiviCRM"
 
 #: woocommerce-civicrm.php:350
 msgid "Settings"
-msgstr ""
+msgstr "Réglages"
+
+#~ msgid ""
+#~ "WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce's "
+#~ "States/Counties with CiviCRM's States/Provinces, you WILL lose any "
+#~ "existing State/County data for existing Customers. Any Woocommerce "
+#~ "Settings that relay on State/County will have te be reconfigured."
+#~ msgstr ""
+#~ "ATTENTION, PERTE DE DONNÉES ! Si activée, cette option remplacera les "
+#~ "pays/états de Woocommerce par les régions/états de CiviCRM, vous ALLEZ "
+#~ "perdre tout pays/état existant pour les clients existants. "

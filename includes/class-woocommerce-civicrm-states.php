@@ -34,8 +34,6 @@ class Woocommerce_CiviCRM_States {
 	 * @since 2.0
 	 */
 	public function __construct() {
-		$this->replace = Woocommerce_CiviCRM_Helper::$instance->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
-		$this->civicrm_countries = $this->get_civicrm_countries();
 		$this->register_hooks();
 	}
 
@@ -47,6 +45,19 @@ class Woocommerce_CiviCRM_States {
 	public function register_hooks() {
 		// Add Civicrm settings tab
 		add_filter( 'woocommerce_states', array( $this, 'replace_woocommerce_states' ), 10, 1 );
+		$this->inited();
+	}
+
+	/**
+	 * CiviCRM inited.
+	 *
+	 * @since 2.0
+	 */
+	public function inited() {
+		if(!WCI()->boot_civi())
+      return;
+		$this->replace = WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
+		$this->civicrm_countries = $this->get_civicrm_countries();
 	}
 
 	/**
@@ -60,15 +71,15 @@ class Woocommerce_CiviCRM_States {
 	public function replace_woocommerce_states( $states ) {
 		// abort if replace is not enabled
 		if( ! $this->replace ) return $states;
-    
+
 		$new_states = array();
-		foreach ( Woocommerce_CiviCRM_Helper::$instance->civicrm_states as $state_id => $state ) {
+		foreach ( WCI()->helper->civicrm_states as $state_id => $state ) {
 			$new_states[ $this->civicrm_countries[ $state['country_id'] ] ][ $state['abbreviation'] ] = $state['name'];
 		}
-    
+
 		return $new_states;
 	}
-	
+
 	/**
 	 * Function to get CiviCRM countries.
 	 *
@@ -77,7 +88,7 @@ class Woocommerce_CiviCRM_States {
 	 */
 	public function get_civicrm_countries(){
 		if( ! empty( $this->civicrm_countries ) ) return $this->civicrm_countries;
-		
+
 			$countries = civicrm_api3( 'Country', 'get', array(
 				'sequential' => 1,
 				'options' => array( 'limit' => 0 ),
@@ -85,9 +96,9 @@ class Woocommerce_CiviCRM_States {
 
 			$civicrm_countries = array();
 			foreach( $countries['values'] as $key => $country ){
-				$civicrm_countries[$country['id']] = $country['iso_code']; 
+				$civicrm_countries[$country['id']] = $country['iso_code'];
 			}
-		
+
 			return $civicrm_countries;
 	}
 }

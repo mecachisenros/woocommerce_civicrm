@@ -15,6 +15,9 @@ class Woocommerce_CiviCRM_Settings_Tab {
 	 */
 	public function __construct() {
 		$this->register_hooks();
+		if(WCI()->is_network_installed){
+			$this->register_settings();
+		}
 	}
 
 	/**
@@ -29,7 +32,93 @@ class Woocommerce_CiviCRM_Settings_Tab {
 		add_action( 'woocommerce_settings_woocommerce_civicrm', array( $this, 'add_settings_fields' ), 10 );
 		// Update Woocommerce Civicrm settings
 		add_action( 'woocommerce_update_options_woocommerce_civicrm', array( $this, 'update_settings_fields' ) );
+		// Update network settings
+		add_action('network_admin_edit_woocommerce_civicrm_network_settings', array($this, 'trigger_network_settings') );
 	}
+
+	public function register_settings(){
+		register_setting( 'woocommerce_civicrm_network_settings', 'woocommerce_civicrm_network_settings' );
+
+		// Makes sure functions exists
+        if ( ! function_exists( 'add_settings_field' ) ) {
+            require_once( ABSPATH . '/wp-admin/includes/template.php' );
+        }
+
+		add_settings_section(
+            'woocommerce-civicrm-settings-network-general',
+                __('General settings', 'woocommerce-civicrm'),
+                array($this, 'settings_section_callback'),
+                'woocommerce-civicrm-settings-network'
+            );
+
+        add_settings_field(
+                'woocommerce_civicrm_shop_blog_id',
+                __('Main Woocommerce blog ID', 'woocommerce-civicrm'),
+                array( $this, 'settings_field_select'),
+                'woocommerce-civicrm-settings-network',
+                'woocommerce-civicrm-settings-network-general',
+                array( 'name' => 'wc_blog_id', 'network'=>true, 'description'=>__('The shop on a multisite network', 'woocommerce-civicrm') , 'options'=>WCI()->helper->get_sites())
+        );
+	}
+
+	public function settings_section_callback(){
+
+	}
+
+	public function settings_field_text($args){
+        $option = 'woocommerce_civicrm_network_settings';
+		$options = get_site_option($option);
+        ?>
+        <input
+			name="<?php echo $option; ?>[<?php echo $args['name']; ?>]"
+			id="<?php echo $args['name']; ?>"
+			value="<?php echo (isset($options[$args['name']]) ? $options[$args['name']] : ''); ?>"
+			class="regular-text"/>
+        <?php if(isset($args['description']) && $args['description']): ?>
+        <div class="description"><?php echo $args['description']; ?></div>
+        <?php endif; ?>
+        <?php
+    }
+
+	public function settings_field_select($args){
+        $option = 'woocommerce_civicrm_network_settings';
+		$options = get_site_option($option);
+        ?>
+        <select
+			name="<?php echo $option; ?>[<?php echo $args['name']; ?>]"
+			id="<?php echo $args['name']; ?>"
+			class="regular-select">
+			<?php foreach((array) $args['options'] as $key=>$option): ?>
+				<option value="<?php esc_attr_e($key); ?>" <?php selected($key, isset($options[$args['name']]) ? $options[$args['name']] : '', true); ?>>
+					<?php esc_attr_e($option); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+        <?php if(isset($args['description']) && $args['description']): ?>
+        <div class="description"><?php echo $args['description']; ?></div>
+        <?php endif; ?>
+        <?php
+    }
+
+	function trigger_network_settings(){
+        if (!wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce-civicrm-settings', FILTER_SANITIZE_STRING), 'woocommerce-civicrm-settings')) {
+            wp_die(__('Cheating uh?', 'woocommerce-civicrm'));
+	    }
+        $settings = array(
+            'wc_blog_id'=>esc_attr($_POST['woocommerce_civicrm_network_settings']['wc_blog_id'])
+        );
+        $update = update_site_option( 'woocommerce_civicrm_network_settings', $settings);
+        wp_redirect(
+            add_query_arg(
+                array(
+					'page' => 'woocommerce-civicrm-settings',
+					'confirm' => 'success'
+				),
+                (network_admin_url( 'settings.php' ))
+            )
+        );
+        exit;
+    }
 
 	/**
 	 * Add CiviCRM tab to the settings page.
@@ -80,25 +169,31 @@ class Woocommerce_CiviCRM_Settings_Tab {
 			'woocommerce_civicrm_financial_type_id' => array(
 				'name' => __( 'Contribution Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
+				'options' => WCI()->helper->financial_types,
 				'id'   => 'woocommerce_civicrm_financial_type_id'
+				),
+			'woocommerce_civicrm_campaign_id' => array(
+				'name' => __( 'Default campaign', 'woocommerce-civicrm' ),
+				'type' => 'select',
+				'options' => WCI()->helper->campaigns,
+				'id'   => 'woocommerce_civicrm_campaign_id'
 				),
 			'woocommerce_civicrm_financial_type_vat_id' => array(
 				'name' => __( 'Contribution Type VAT (Tax)', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->financial_types,
+				'options' => WCI()->helper->financial_types,
 				'id'   => 'woocommerce_civicrm_financial_type_vat_id'
 			),
 			'woocommerce_civicrm_billing_location_type_id' => array(
 				'name' => __( 'Billing Location Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
+				'options' => WCI()->helper->location_types,
 				'id'   => 'woocommerce_civicrm_billing_location_type_id'
 			),
 			'woocommerce_civicrm_shipping_location_type_id' => array(
 				'name' => __( 'Shipping Location Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
-				'options' => Woocommerce_CiviCRM_Helper::$instance->location_types,
+				'options' => WCI()->helper->location_types,
 				'id'   => 'woocommerce_civicrm_shipping_location_type_id'
 			),
 			'woocommerce_civicrm_sync_contact_address' => array(
@@ -122,7 +217,7 @@ class Woocommerce_CiviCRM_Settings_Tab {
 			'woocommerce_civicrm_replace_woocommerce_states' => array(
 				'name' => __( 'Replace Woocommerce States', 'woocommerce-civicrm' ),
 				'type' => 'checkbox',
-				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Counties with CiviCRM\'s States/Provinces, you WILL lose any existing State/County data for existing Customers. Any Woocommerce Settings that relay on State/County will have te be reconfigured.', 'woocommerce-civicrm' ),
+				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Countries with CiviCRM\'s States/Provinces, you WILL lose any existing State/Country data for existing Customers. Any Woocommerce Settings that relay on State/Country will have to be reconfigured.', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_replace_woocommerce_states'
       ),
 			'section_end' => array(
@@ -140,4 +235,21 @@ class Woocommerce_CiviCRM_Settings_Tab {
 		return apply_filters( 'woocommerce_civicrm_admin_settings_fields', $options );
 
 	}
+
+
+	public function network_settings(){
+        ?>
+    <div class="wrap">
+        <h2><?php _e('Woocommerce CiviCRM settings', 'woocommerce-civicrm' ); ?></h2>
+        <?php settings_errors(); ?>
+        <form action="edit.php?action=woocommerce_civicrm_network_settings" method="post">
+        <?php wp_nonce_field('woocommerce-civicrm-settings', 'woocommerce-civicrm-settings'); ?>
+        <?php settings_fields( 'woocommerce-civicrm-settings-network' ); ?>
+        <?php do_settings_sections('woocommerce-civicrm-settings-network'); ?>
+        <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+
+    }
 }

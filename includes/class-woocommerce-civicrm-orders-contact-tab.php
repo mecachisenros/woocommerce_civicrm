@@ -128,6 +128,10 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @return array $setting_tabs The setting tabs array
 	 */
 	public function add_orders_contact_tab( $tabsetName, &$tabs, $context ) {
+
+		// bail if not on contact summary screen
+		if ( $tabsetName != 'civicrm/contact/view' ) return;
+
 		$uid = abs(CRM_Core_BAO_UFMatch::getUFId( $context['contact_id'] ));
 
 		// bail if contact has no orders and hide order is enabled

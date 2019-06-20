@@ -219,7 +219,13 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'type' => 'checkbox',
 				'desc' => __( 'WARNING, DATA LOSS!! If enabled, this option will replace Woocommerce\'s States/Countries with CiviCRM\'s States/Provinces, you WILL lose any existing State/Country data for existing Customers. Any Woocommerce Settings that relay on State/Country will have to be reconfigured.', 'woocommerce-civicrm' ),
 				'id'   => 'woocommerce_civicrm_replace_woocommerce_states'
-      ),
+			),
+			'woocommerce_civicrm_ignore_0_amount_orders' => array(
+				'name' => __( 'Don\'t create 0 amount contributions', 'woocommerce-civicrm' ),
+				'type' => 'checkbox',
+				'desc' => __( 'If enabled, this option will not create contributions for orders with a total of 0, i.e. free products (using a coupon).', 'woocommerce-civicrm' ),
+				'id'   => 'woocommerce_civicrm_ignore_0_amount_orders'
+			),
 			'section_end' => array(
 				'type' => 'sectionend',
 				'id' => 'woocommerce_civicrm_section_end'

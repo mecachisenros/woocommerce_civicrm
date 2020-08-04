@@ -93,14 +93,13 @@ class Woocommerce_CiviCRM_Orders {
             <?php
         }
 
-        global $wpdb;
-        $results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
+        $metas = WCI()->helper->all_sources;
         if(count($results)>0){
           $selected = filter_input(INPUT_GET, 'shop_order_source');
           ?>
           <select name='shop_order_source' id='dropdown_shop_order_source'>
             <option value=""><?php _e('All sources', 'woocommerce-civicrm'); ?></option>
-            <?php foreach ($results as $meta): ?>
+            <?php foreach ($metas as $meta): ?>
               <option value="<?php echo esc_attr($meta->meta_value); ?>" <?php selected($selected, $meta->meta_value); ?>>
                 <?php echo esc_attr($meta->meta_value); ?>
               </option>

@@ -978,12 +978,10 @@ class Woocommerce_CiviCRM_Manager {
 
 
 				<?php
-					global $wpdb;
-					// Interrogation de la base de données
-					$results = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
+					$metas = WCI()->helper->all_sources;
 					// Parcours des resultats obtenus
-					if(count($results)>0){
-						foreach ($results as $meta) {
+					if(count($metas)>0){
+						foreach ($metas as $meta) {
 						 echo '<option value="'.$meta->meta_value.'">' ;
 						}
 					}

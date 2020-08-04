@@ -96,6 +96,14 @@
    */
   public $campaigns_status = array();
 
+  /**
+   * Sources of orders
+   * @access public
+   * @var array
+   */
+  public $all_sources = array();
+
+
 
 	/**
 	 * Initialises this object.
@@ -124,6 +132,7 @@
 		$this->all_campaigns = $this->get_all_campaigns();
 		$this->mapped_location_types = $this->set_mapped_location_types();
 		$this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
+    $this->all_sources = $this->get_all_sources();
 	}
 
   /**
@@ -624,4 +633,14 @@
 		}
 		return $sites;
 	}
+
+
+  public function get_all_sources(){
+    if(false === $sources = get_transient('woocommerce_civicrm_all_sources')){
+      global $wpdb;
+      $sources = $wpdb->get_results("SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_source'");
+      set_transient('woocommerce_civicrm_all_sources', $sources, 1*HOUR_IN_SECONDS);
+    }
+    return $sources;
+  }
 }

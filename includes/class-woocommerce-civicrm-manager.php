@@ -28,7 +28,7 @@ class Woocommerce_CiviCRM_Manager {
 
 		add_action('init', array( $this, 'check_utm'));
 		add_action('woocommerce_checkout_order_processed', array( $this, 'action_order' ), 10, 3 );
-		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
+		add_action('woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
 		//add_action('save_post', array( $this, 'save_post'), 49);
 		add_action( 'save_post_shop_order', array(&$this,'save_post' ), 55);
@@ -112,11 +112,13 @@ class Woocommerce_CiviCRM_Manager {
 		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
 				$this->check_membership($order);
 		}
-		$source = $this->generate_source($order);
-		$this->update_source($order_id,$source);
-		update_post_meta($order_id, '_order_source', $source);
+		if(filter_input(INPUT_GET, 'wc-ajax')=='checkout'){
+			$this->utm_to_order( $order->get_id() );
+			$source = $this->generate_source($order);
+			$this->update_source($order_id,$source);
+			update_post_meta($order_id, '_order_source', $source);
+		}
 
-		$this->utm_to_order( $order->get_id() );
 		// Add the contribution record.
 		$this->add_contribution( $cid, $order );
 		do_action('woocommerce_civicrm_action_order', $order, $cid);

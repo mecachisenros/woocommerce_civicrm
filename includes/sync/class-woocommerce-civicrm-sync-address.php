@@ -60,32 +60,25 @@ class Woocommerce_CiviCRM_Sync_Address {
 		if ( ! $cms_user ) return;
 
 		// Proceed
+		$address_type = array_search( $objectRef->location_type_id, WCI()->helper->mapped_location_types );
 
-		foreach(WCI()->helper->mapped_location_types as $mapped_location_type_key => $mapped_location_type_value){
-			if($objectRef->location_type_id == $mapped_location_type_value){
-				$address_type = $mapped_location_type_key;
-				foreach ( WCI()->helper->get_mapped_address( $address_type ) as $wc_field => $civi_field ) {
-					if ( ! empty( $objectRef->{$civi_field} ) && ! is_null( $objectRef->{$civi_field} )) {
-						if($objectRef->{$civi_field} == 'null'){
-							$new_value = "";
-						}else{
-							$new_value = $objectRef->{$civi_field};
-						}
-						switch ( $civi_field ) {
-							case 'country_id':
-								update_user_meta( $cms_user['uf_id'], $wc_field, WCI()->helper->get_civi_country_iso_code( $objectRef->{$civi_field} ) );
-								continue 2;
-							case 'state_province_id':
-								update_user_meta( $cms_user['uf_id'], $wc_field, WCI()->helper->get_civi_state_province_name( $objectRef->{$civi_field} ) );
-								continue 2;
-							default:
-								update_user_meta( $cms_user['uf_id'], $wc_field, $new_value );
-								continue 2;
-						}
-					}
+		foreach ( WCI()->helper->get_mapped_address( $address_type ) as $wc_field => $civi_field ) {
+			if ( ! empty( $objectRef->{$civi_field} ) && ! is_null( $objectRef->{$civi_field} ) && $objectRef->{$civi_field} != 'null' ) {
+
+				switch ( $civi_field ) {
+					case 'country_id':
+						update_user_meta( $cms_user['uf_id'], $wc_field, WCI()->helper->get_civi_country_iso_code( $objectRef->{$civi_field} ) );
+						continue 2;
+					case 'state_province_id':
+						update_user_meta( $cms_user['uf_id'], $wc_field, WCI()->helper->get_civi_state_province_name( $objectRef->{$civi_field} ) );
+						continue 2;
+					default:
+						update_user_meta( $cms_user['uf_id'], $wc_field, $objectRef->{$civi_field} );
+						continue 2;
 				}
 			}
 		}
+
 		/**
 		 * Broadcast that a Woocommerce address has been updated for a user.
 		 *
@@ -106,6 +99,7 @@ class Woocommerce_CiviCRM_Sync_Address {
 	 * @param string $load_address The address type 'shipping' | 'billing'
 	 */
 	public function sync_wp_user_woocommerce_address( $user_id, $load_address ){
+
 		// abbort if sync is not enabled
 		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
 

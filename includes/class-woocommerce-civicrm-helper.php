@@ -136,6 +136,52 @@
 	}
 
   /**
+   * Checks if Woocommerce is activated on another blog
+   *
+   * @since 2.2
+   */
+  private function is_remote_wc(){
+    if( false == WCI()->is_network_installed )
+      return false;
+
+    $option = 'woocommerce_civicrm_network_settings';
+    $options = get_site_option($option);
+    if(!$options)
+      return false;
+
+    $wc_site_id = $options['wc_blog_id'];
+    if($wc_site_id == get_current_blog_id())
+      return false;
+
+    return $wc_site_id;
+  }
+
+  /**
+   * Moves to main woocommerce site if multisite installation
+   *
+   * @since 2.2
+   */
+  private function fix_site(){
+    if( false == $wc_site_id = $this->is_remote_wc() ){
+      return;
+    }
+
+    switch_to_blog($wc_site_id);
+  }
+
+  /**
+   * Moves to current site if multisite installation
+   *
+   * @since 2.2
+   */
+  private function unfix_site(){
+    if(!is_multisite())
+      return;
+
+    restore_current_blog();
+  }
+
+  /**
   * Get CiviCRM contact_id.
   *
   * @since 2.0
@@ -505,10 +551,13 @@
 		 * @since 2.0
 		 * @param array $mapped_location_types
 		 */
-		return apply_filters( 'woocommerce_civicrm_mapped_location_types',  array(
+		$this->fix_site();
+    $return = apply_filters( 'woocommerce_civicrm_mapped_location_types',  array(
 			'billing' => get_option( 'woocommerce_civicrm_billing_location_type_id' ),
 			'shipping' => get_option( 'woocommerce_civicrm_shipping_location_type_id' )
 		) );
+    $this->unfix_site();
+		return $return;
 	}
 
 	/**

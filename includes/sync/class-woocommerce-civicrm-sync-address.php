@@ -42,7 +42,9 @@ class Woocommerce_CiviCRM_Sync_Address {
 	public function sync_civi_contact_address( $op, $objectName, $objectId, $objectRef ){
 
 		// abbort if sync is not enabled
+		WCI()->helper->fix_site();
 		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
+		WCI()->helper->unfix_site();
 
 		if ( $op != 'edit' ) return;
 
@@ -107,7 +109,9 @@ class Woocommerce_CiviCRM_Sync_Address {
 	 */
 	public function sync_wp_user_woocommerce_address( $user_id, $load_address ){
 		// abbort if sync is not enabled
+		WCI()->helper->fix_site();
 		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
+		WCI()->helper->unfix_site();
 
 		$customer = new WC_Customer( $user_id );
 

@@ -263,10 +263,10 @@ class Woocommerce_CiviCRM {
 	 */
 	private function setup_objects() {
 
-		// init helper instance
-		$this->helper = new Woocommerce_CiviCRM_Helper;
 		// init orders tab
 		$this->orders_tab = new Woocommerce_CiviCRM_Orders_Contact_Tab;
+		// init helper instance
+		$this->helper = new Woocommerce_CiviCRM_Helper;
 		// init settings page
 		$this->settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
 		// init manager

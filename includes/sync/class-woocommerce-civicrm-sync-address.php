@@ -29,6 +29,52 @@ class Woocommerce_CiviCRM_Sync_Address {
 		add_action( 'woocommerce_customer_save_address', array( $this, 'sync_wp_user_woocommerce_address' ), 10, 2 );
 	}
 
+
+	/**
+	 * Checks if Woocommerce is activated on another blog
+	 *
+	 * @since 2.2
+	 */
+	private function is_remote_wc(){
+		if( false == WCI()->is_network_installed )
+			return false;
+
+		$option = 'woocommerce_civicrm_network_settings';
+		$options = get_site_option($option);
+		if(!$options)
+			return false;
+
+		$wc_site_id = $options['wc_blog_id'];
+		if($wc_site_id == get_current_blog_id())
+			return false;
+
+		return $wc_site_id;
+	}
+
+	/**
+	 * Moves to main woocommerce site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function fix_site(){
+		if( false == $wc_site_id = $this->is_remote_wc() ){
+			return;
+		}
+
+		switch_to_blog($wc_site_id);
+	}
+
+	/**
+	 * Moves to current site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function unfix_site(){
+		if(!is_multisite())
+			return;
+
+		restore_current_blog();
+	}
 	/**
 	 * Sync Civicrm address for contact->user.
 	 *
@@ -42,9 +88,9 @@ class Woocommerce_CiviCRM_Sync_Address {
 	public function sync_civi_contact_address( $op, $objectName, $objectId, $objectRef ){
 
 		// abbort if sync is not enabled
-		WCI()->helper->fix_site();
+		$this->fix_site();
 		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
-		WCI()->helper->unfix_site();
+		$this->unfix_site();
 
 		if ( $op != 'edit' ) return;
 
@@ -108,10 +154,11 @@ class Woocommerce_CiviCRM_Sync_Address {
 	 * @param string $load_address The address type 'shipping' | 'billing'
 	 */
 	public function sync_wp_user_woocommerce_address( $user_id, $load_address ){
+
 		// abbort if sync is not enabled
-		WCI()->helper->fix_site();
+		$this->fix_site();
 		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
-		WCI()->helper->unfix_site();
+		$this->unfix_site();
 
 		$customer = new WC_Customer( $user_id );
 

@@ -31,6 +31,52 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 		// Add Civicrm settings tab
 		add_filter( 'civicrm_tabset', array( $this, 'add_orders_contact_tab' ), 10, 3 );
 	}
+	/**
+	 * Checks if Woocommerce is activated on another blog
+	 *
+	 * @since 2.2
+	 */
+	private function is_remote_wc(){
+		if( false == WCI()->is_network_installed )
+			return false;
+
+		$option = 'woocommerce_civicrm_network_settings';
+		$options = get_site_option($option);
+		if(!$options)
+			return false;
+
+		$wc_site_id = $options['wc_blog_id'];
+		if($wc_site_id == get_current_blog_id())
+			return false;
+
+		return $wc_site_id;
+	}
+
+	/**
+	 * Moves to main woocommerce site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function fix_site(){
+		if( false == $wc_site_id = $this->is_remote_wc() ){
+			return;
+		}
+
+		switch_to_blog($wc_site_id);
+	}
+
+	/**
+	 * Moves to current site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function unfix_site(){
+		if(!is_multisite())
+			return;
+
+		restore_current_blog();
+	}
+
 
 	/**
 	 * Register php directory.
@@ -39,11 +85,11 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param object $config The CiviCRM config object
 	 */
 	public function register_custom_php_directory( &$config ){
-		WCI()->helper->fix_site();
+		$this->fix_site();
 		$custom_path = WOOCOMMERCE_CIVICRM_PATH . 'custom_php';
 		$include_path = $custom_path . PATH_SEPARATOR . get_include_path();
 		set_include_path( $include_path );
-		WCI()->helper->unfix_site();
+		$this->unfix_site();
 	}
 
 	/**
@@ -53,12 +99,12 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param object $config The CiviCRM config object
 	 */
 	public function register_custom_template_directory( &$config ){
-		WCI()->helper->fix_site();
+		$this->fix_site();
 		$custom_path = WOOCOMMERCE_CIVICRM_PATH . 'custom_tpl';
 		$template = CRM_Core_Smarty::singleton()->addTemplateDir( $custom_path );
 		$include_template_path = $custom_path . PATH_SEPARATOR . get_include_path();
 		set_include_path( $include_template_path );
-		WCI()->helper->unfix_site();
+		$this->unfix_site();
 	}
 
   	/**
@@ -68,9 +114,9 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @param array $files The array for files used to build the menu
 	 */
   	public function register_callback( &$files ){
-		WCI()->helper->fix_site();
+		$this->fix_site();
 		$files[] = WOOCOMMERCE_CIVICRM_PATH . 'xml/menu.xml';
-		WCI()->helper->unfix_site();
+		$this->unfix_site();
 	}
 
 	/**
@@ -102,7 +148,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @return array $orders The raw orders
 	 */
 	private function _get_orders( $uid ){
-		WCI()->helper->fix_site();
+		$this->fix_site();
 		$order_statuses = apply_filters( 'wc_order_statuses', array(
 			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -119,7 +165,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			'post_type'   => 'shop_order',
 			'post_status' => array_keys( $order_statuses )
 		) ) );
-		WCI()->helper->unfix_site();
+		$this->unfix_site();
 
 		return $customer_orders;
 	}
@@ -150,8 +196,8 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 		// If woocommerce is in another blog, ftech the order remotely
 		// FIXME: for now, Partial datas
 		// TODO: Fetch real datas
-		if( WCI()->helper->is_remote_wc() ){
-			WCI()->helper->fix_site();
+		if( $this->is_remote_wc() ){
+			$this->fix_site();
 			$site_url = get_site_url();
 			foreach ( $customer_orders as $customer_order ) {
 				$order = $customer_order;
@@ -168,7 +214,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			}
 			return $orders;
 
-			WCI()->helper->unfix_site();
+			$this->unfix_site();
 		}
 
 		// Else continue the main way

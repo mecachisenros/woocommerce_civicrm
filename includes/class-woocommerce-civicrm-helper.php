@@ -280,7 +280,7 @@
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
-		if( isset( $uf_match ) && is_array( $uf_match ) && ! $uf_match['is_error'] ) return $uf_match;
+		if( isset( $uf_match ) && is_array( $uf_match ) &&  isset($uf_match['is_error']) && !$uf_match['is_error'] ) return $uf_match;
 	}
 
 	/**

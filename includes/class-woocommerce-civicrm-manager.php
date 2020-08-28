@@ -832,10 +832,11 @@ class Woocommerce_CiviCRM_Manager {
 	 */
 	public function create_custom_contribution_fields(){
 		$group_id = get_option( 'woocommerce_civicrm_contribution_group_id', FALSE );
-		if( $group_id != FALSE ){
+		$tax_field = get_option( 'woocommerce_civicrm_sales_tax_field_id', FALSE );
+		$shipping_field = get_option( 'woocommerce_civicrm_shipping_cost_field_id', FALSE );
+		if( $group_id != FALSE && $tax_field != FALSE && $shipping_field != FALSE){
 			return;
 		}
-
 		// Let's check if the custom group already exists in CiviCRM
 		$params = array(
 			'name'             => 'Woocommerce_purchases',

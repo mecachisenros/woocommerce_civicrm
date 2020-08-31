@@ -32,6 +32,97 @@ class Woocommerce_CiviCRM_Manager {
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
 		//add_action('save_post', array( $this, 'save_post'), 49);
 		add_action( 'save_post_shop_order', array(&$this,'save_post' ), 55);
+
+		// filter activity params
+		add_action( 'civicrm_post', array( $this, 'filter_activity' ), 10, 4 );
+	}
+
+	/**
+	 * Checks if Woocommerce is activated on another blog
+	 *
+	 * @since 2.2
+	 */
+	private function is_remote_wc(){
+		if( false == WCI()->is_network_installed )
+			return false;
+
+		$option = 'woocommerce_civicrm_network_settings';
+		$options = get_site_option($option);
+		if(!$options)
+			return false;
+
+		$wc_site_id = $options['wc_blog_id'];
+		if($wc_site_id == get_current_blog_id())
+			return false;
+
+		return $wc_site_id;
+	}
+
+	/**
+	 * Moves to main woocommerce site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function fix_site(){
+		if( false == $wc_site_id = $this->is_remote_wc() ){
+			return;
+		}
+
+		switch_to_blog($wc_site_id);
+	}
+
+	/**
+	 * Moves to current site if multisite installation
+	 *
+	 * @since 2.2
+	 */
+	private function unfix_site(){
+		if(!is_multisite())
+			return;
+
+		restore_current_blog();
+	}
+
+	/**
+	 * Sync Civicrm address for contact->user.
+	 *
+	 * Fires when a Civi contact's address is edited.
+	 * @since 2.0
+	 * @param string $op The operation being performed
+	 * @param string $objectName The entity name
+	 * @param int $objectId The entity id
+	 * @param object $objectRef The entity object
+	 */
+	public function filter_activity( $op, $objectName, $objectId, $objectRef ){
+
+		// abbort if sync is not enabled
+		$this->fix_site();
+
+
+		if ( $op != 'create' ) return;
+
+
+		if ( $objectName != 'Activity' && WCI()->helper->activity_types[$objectRef->activity_type_id] != 'Contribution') return;
+
+		$resultActivity = civicrm_api3('Activity', 'get', [
+		  'sequential' => 1,
+		  'id' => $objectRef->id,
+		]);
+
+		if($resultActivity['is_error'] == 0 && $resultActivity['count'] == 1){
+			$params = $resultActivity['values'][0];
+
+			/**
+       * Filter Activity params before calling the Civi's API.
+       *
+       * @since 2.0
+       * @param array $params The params to be passsed to the API
+       */
+			$result = civicrm_api3('Activity', 'create', apply_filters( 'woocommerce_civicrm_contribution_activity_create_params', $params ));
+		}
+
+		$this->unfix_site();
+
 	}
 
 	/**

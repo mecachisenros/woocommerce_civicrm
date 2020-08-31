@@ -103,7 +103,19 @@
    */
   public $all_sources = array();
 
+  /**
+   * activityType
+   * @access public
+   * @var array
+   */
+  public $activity_types = array();
 
+  /**
+   * activityTypeByName
+   * @access public
+   * @var array
+   */
+  public $activity_types_by_name = array();
 
 	/**
 	 * Initialises this object.
@@ -133,6 +145,7 @@
 		$this->mapped_location_types = $this->set_mapped_location_types();
 		$this->optionvalue_membership_signup = $this->get_civicrm_optionvalue_membership_signup();
     $this->all_sources = $this->get_all_sources();
+    $this->activity_types = $this->get_activity_types();
 	}
 
   /**
@@ -589,6 +602,49 @@
 		}
 
 		return $financialTypes;
+
+	}
+
+  /**
+	 * Get CiviCRM Activity Types.
+	 *
+	 * @since 2.0
+	 * @return array $financialTypes The financial types
+	 */
+	private function get_activity_types(){
+
+		if ( isset( $this->activity_types ) && count($this->activity_types) > 0 ) return $this->activity_types;
+
+
+    $resultGroup = civicrm_api3('OptionGroup', 'get', [
+      'sequential' => 1,
+      'name' => "activity_type",
+    ]);
+    if($resultGroup['is_error'] == 0 && $resultGroup['count'] == 1){
+      $params = array(
+  			'sequential' => 1,
+  			'is_active' => 1,
+        'option_group_id' => $resultGroup['values'][0]['id'],
+  		);
+
+
+      /**
+       * Filter Activity type params before calling the Civi's API.
+       *
+       * @since 2.0
+       * @param array $params The params to be passsed to the API
+       */
+      $activityTypesResult = civicrm_api3( 'OptionValue', 'get', apply_filters( 'woocommerce_civicrm_activity_types_params', $params ) );
+
+      $activityTypes = array();
+      foreach( $activityTypesResult['values'] as $key => $value ) {
+        $activityTypes[$value['value']] = $value['name'];
+      }
+
+      return $activityTypes;
+    }
+
+
 
 	}
 

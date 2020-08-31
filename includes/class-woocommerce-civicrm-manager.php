@@ -814,8 +814,10 @@ class Woocommerce_CiviCRM_Manager {
 		}
 
 		$order_source = get_post_meta($order->get_id(), '_order_source', true);
-		if($order_source===false){
+		if($order_source === false){
 			$order_source = "";
+		}else{
+			$source = $order_source;
 		}
 
 		if($source == ""){

@@ -94,7 +94,7 @@ class Woocommerce_CiviCRM_Orders {
         }
 
         $metas = WCI()->helper->all_sources;
-        if(count($results)>0){
+        if(count($metas)>0){
           $selected = filter_input(INPUT_GET, 'shop_order_source');
           ?>
           <select name='shop_order_source' id='dropdown_shop_order_source'>

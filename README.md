@@ -24,6 +24,17 @@ Direct URL: https://example.com/wp-admin/admin.php?page=wc-settings&tab=woocomme
 7. Related contact record link is added to the Woocommerce order as notes.
 8. Option to sync CiviCRM and Woocommerce address, billing phone, and billing email. If a user edits his/hers address, billing phone, or billing email through the Woocommerce Account >> Edit Address page, CiviCRM profile, or through CiviCRM's backoffice, the data will be updated in both CiviCRM and Woocommerce.
 9. Option to replace Woocommerce's States/Counties list with CiviCRM's State/Province list. (**WARNING!!!** Enabling this option in an exiting Woocommerce instance will cause **State/County data loss** for **exiting Customers** and **Woocommerce settings** that relay on those.)
+10. Support for UTM params for contributions
+
+### Usage of UTM
+
+If a visitor comes from an URL containing UTM parameters and make an order, the created contrinution and its activity will be qualified with custom data.
+
+What can you use in UTM parameters:
+
+- **utm_campaign**: _The campaign name from CiviCRM, will be used for activity_
+- **utm_source** and **utm_medium**: _Custom strings, will be both used in activity source_
+
 
 ## Developers
 There are a few hooks available

@@ -327,7 +327,10 @@ class Woocommerce_CiviCRM_Manager {
 				return FALSE;
 			}
 		}
-
+	        else {
+		  $contact['contact_type'] = 'Individual';
+	        }
+		
 		// Create contact
 		// Prepare array to update contact via civi API.
 		$cid = '';

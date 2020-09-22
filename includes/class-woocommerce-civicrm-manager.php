@@ -102,7 +102,9 @@ class Woocommerce_CiviCRM_Manager {
 		if ( $op != 'create' ) return;
 
 
-		if ( $objectName != 'Activity' && WCI()->helper->activity_types[$objectRef->activity_type_id] != 'Contribution') return;
+		if ( $objectName != 'Activity' ) return;
+		if ( !isset(WCI()->helper->activity_types[$objectRef->activity_type_id])) return;
+		if ( WCI()->helper->activity_types[$objectRef->activity_type_id] != 'Contribution') return;
 
 		$resultActivity = civicrm_api3('Activity', 'get', [
 		  'sequential' => 1,

@@ -101,8 +101,6 @@ class Woocommerce_CiviCRM_Manager {
 		if ( !isset(WCI()->helper->activity_types[$objectRef->activity_type_id])) return;
 		if ( WCI()->helper->activity_types[$objectRef->activity_type_id] != 'Contribution') return;
 
-		// abbort if sync is not enabled
-		$this->fix_site();
 
 		$resultActivity = civicrm_api3('Activity', 'get', [
 		  'sequential' => 1,
@@ -110,7 +108,10 @@ class Woocommerce_CiviCRM_Manager {
 		]);
 
 		if($resultActivity['is_error'] == 0 && $resultActivity['count'] == 1){
-			$params = $resultActivity['values'][0];
+			// abbort if sync is not enabled
+			$this->fix_site();
+			$params = apply_filters( 'woocommerce_civicrm_contribution_activity_create_params', $resultActivity['values'][0]);
+			$this->unfix_site();
 
 			/**
        * Filter Activity params before calling the Civi's API.
@@ -118,11 +119,9 @@ class Woocommerce_CiviCRM_Manager {
        * @since 2.0
        * @param array $params The params to be passsed to the API
        */
-			$result = civicrm_api3('Activity', 'create', apply_filters( 'woocommerce_civicrm_contribution_activity_create_params', $params ));
+			$result = civicrm_api3('Activity', 'create', $params);
 		}
-
-		$this->unfix_site();
-
+	
 	}
 
 	/**

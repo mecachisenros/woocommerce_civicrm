@@ -198,6 +198,7 @@ class Woocommerce_CiviCRM_Sync_Address {
 		try {
 			$civi_address = civicrm_api3( 'Address', 'getsingle', $params );
 		} catch ( CiviCRM_API3_Exception $e ) {
+			$this->unfix_site();
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
@@ -209,6 +210,7 @@ class Woocommerce_CiviCRM_Sync_Address {
 			}
 			$create_address = civicrm_api3( 'Address', 'create', $new_params );
 		} catch ( CiviCRM_API3_Exception $e ) {
+			$this->unfix_site();
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
@@ -220,5 +222,6 @@ class Woocommerce_CiviCRM_Sync_Address {
 		 * @param array $address The CiviCRM edited address
 		 */
 		do_action( 'woocommerce_civicrm_civi_address_updated', $civi_contact['contact_id'], $create_address );
+		$this->unfix_site();
 	}
 }

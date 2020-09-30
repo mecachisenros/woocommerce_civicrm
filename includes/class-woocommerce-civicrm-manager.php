@@ -696,7 +696,8 @@ class Woocommerce_CiviCRM_Manager {
 		$source = $this->generate_source( $order );
 		$params = array(
 			'contact_id' => $cid,
-			'total_amount' => $rounded_subtotal,
+			'net_amount' => $rounded_subtotal,
+			'total_amount' => $rounded_total,
 			// Need to be set in admin page
 			'contribution_type_id' => $default_contribution_type_id,
 			'payment_instrument_id' => $payment_instrument,

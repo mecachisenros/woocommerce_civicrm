@@ -95,17 +95,14 @@ class Woocommerce_CiviCRM_Manager {
 	 */
 	public function filter_activity( $op, $objectName, $objectId, $objectRef ){
 
-		// abbort if sync is not enabled
-		$this->fix_site();
-
-
 		if ( $op != 'create' ) return;
-
-
 		if ( $objectName != 'Activity' ) return;
 		if ( !isset($objectRef->activity_type_id)) return;
 		if ( !isset(WCI()->helper->activity_types[$objectRef->activity_type_id])) return;
 		if ( WCI()->helper->activity_types[$objectRef->activity_type_id] != 'Contribution') return;
+
+		// abbort if sync is not enabled
+		$this->fix_site();
 
 		$resultActivity = civicrm_api3('Activity', 'get', [
 		  'sequential' => 1,

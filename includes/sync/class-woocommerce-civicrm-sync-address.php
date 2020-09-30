@@ -160,8 +160,10 @@ class Woocommerce_CiviCRM_Sync_Address {
 
 		// abbort if sync is not enabled
 		$this->fix_site();
-		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
-		$this->unfix_site();
+		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ){
+			$this->unfix_site();
+			return;
+		}
 
 		$customer = new WC_Customer( $user_id );
 

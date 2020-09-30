@@ -87,11 +87,6 @@ class Woocommerce_CiviCRM_Sync_Address {
 	 */
 	public function sync_civi_contact_address( $op, $objectName, $objectId, $objectRef ){
 
-		// abbort if sync is not enabled
-		$this->fix_site();
-		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ) return;
-
-
 		if ( $op != 'edit' ) return;
 
 		if ( $objectName != 'Address' ) return;
@@ -106,6 +101,13 @@ class Woocommerce_CiviCRM_Sync_Address {
 
 		// abort if we don't have a WordPress user_id
 		if ( ! $cms_user ) return;
+
+		// abbort if sync is not enabled
+		$this->fix_site();
+		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_address' ) ) ){
+			$this->unfix_site();
+			return;
+		}
 
 		// Proceed
 

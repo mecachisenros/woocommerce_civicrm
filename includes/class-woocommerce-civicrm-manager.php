@@ -611,7 +611,7 @@ class Woocommerce_CiviCRM_Manager {
 
 
 		$order_id = $order->get_id();
-		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
+		$txn_id = $order_id;
 		$invoice_id = $this->get_invoice_id($order_id);
 		$this->create_custom_contribution_fields();
 

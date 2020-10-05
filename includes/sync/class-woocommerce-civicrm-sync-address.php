@@ -91,12 +91,12 @@ class Woocommerce_CiviCRM_Sync_Address {
 
 		if ( $objectName != 'Address' ) return;
 
+
 		// Abort if the address being edited is not one of the mapped ones
 		if( ! in_array( $objectRef->location_type_id, WCI()->helper->mapped_location_types ) ) return;
 
 		// abort if we don't have a contact_id
 		if ( ! isset( $objectRef->contact_id ) ) return;
-
 		$cms_user = WCI()->helper->get_civicrm_ufmatch( $objectRef->contact_id, 'contact_id' );
 
 		// abort if we don't have a WordPress user_id
@@ -114,6 +114,16 @@ class Woocommerce_CiviCRM_Sync_Address {
 		foreach(WCI()->helper->mapped_location_types as $mapped_location_type_key => $mapped_location_type_value){
 			if($objectRef->location_type_id == $mapped_location_type_value){
 				$address_type = $mapped_location_type_key;
+
+				$contacts = \Civi\Api4\Contact::get()
+					->addSelect('display_name', 'contact_type:name')
+					->addWhere('id', '=', $objectRef->contact_id)
+					->execute();
+				foreach ($contacts as $contact) {
+					if($contact['contact_type:name'] != 'Individual' &&  $contact['contact_type:name'] != 'Household'){
+						update_user_meta( $cms_user['uf_id'], $mapped_location_type_key.'_company',  $contact['display_name']);
+					}
+				}
 				foreach ( WCI()->helper->get_mapped_address( $address_type ) as $wc_field => $civi_field ) {
 					if ( ! empty( $objectRef->{$civi_field} ) && ! is_null( $objectRef->{$civi_field} )) {
 						if($objectRef->{$civi_field} == 'null'){

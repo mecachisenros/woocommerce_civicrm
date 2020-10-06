@@ -25,6 +25,8 @@ class Woocommerce_CiviCRM_Sync_Address {
 	public function register_hooks() {
 		// Sync Woocommerce and Civicrm address for contact/user
 		add_action( 'civicrm_post', array( $this, 'sync_civi_contact_address' ), 10, 4 );
+
+		add_action( 'civicrm_post', array( $this, 'sync_civi_contact_name' ), 10, 4 );
 		// Sync Woocommerce and Civicrm address for user/contact
 		add_action( 'woocommerce_customer_save_address', array( $this, 'sync_wp_user_woocommerce_address' ), 10, 2 );
 	}
@@ -74,6 +76,43 @@ class Woocommerce_CiviCRM_Sync_Address {
 			return;
 
 		restore_current_blog();
+	}
+
+	/**
+	 * Sync Civicrm address for contact->user.
+	 *
+	 * Fires when a Civi contact is edited.
+	 * @since 2.0
+	 * @param string $op The operation being performed
+	 * @param string $objectName The entity name
+	 * @param int $objectId The entity id
+	 * @param object $objectRef The entity object
+	 */
+	public function sync_civi_contact_name( $op, $objectName, $objectId, $objectRef ){
+
+		if ( $op != 'edit' ) return;
+
+		if ( $objectName != 'Contact' ) return;
+
+		$relationships = \Civi\Api4\Relationship::get()
+		 	->addSelect('contact_id_a', 'contact_b.id', 'relationship_type.name_a_b', 'uf_match.uf_id', 'contact_a.first_name', 'contact_a.last_name')
+		  ->setJoin([
+		    ['RelationshipType AS relationship_type', FALSE],
+		    ['UFMatch AS uf_match', FALSE, ['uf_match.contact_id', '=', 'contact_b.id']],
+		  ])
+		  ->addWhere('contact_id_a', '=', 12782)
+		  ->addWhere('relationship_type.name_a_b', '=', 'Contact of')
+		  ->setLimit(25)
+		  ->execute();
+		foreach ($relationships as $relationship) {
+			foreach(WCI()->helper->mapped_location_types as $mapped_location_type_key => $mapped_location_type_value){
+				update_user_meta( $relationship['uf_match.uf_id'], $mapped_location_type_key.'_first_name',  $relationship['contact_a.first_name']);
+				update_user_meta( $relationship['uf_match.uf_id'], $mapped_location_type_key.'_last_name',  $relationship['contact_a.last_name']);
+			}
+
+
+		}
+
 	}
 	/**
 	 * Sync Civicrm address for contact->user.

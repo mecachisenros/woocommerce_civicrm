@@ -92,7 +92,7 @@ class Woocommerce_CiviCRM_Sync_Address {
 
 		if ( $op != 'edit' ) return;
 
-		if ( $objectName != 'Contact' ) return;
+		if ( $objectName != 'Individual' ) return;
 
 		$relationships = \Civi\Api4\Relationship::get()
 		 	->addSelect('contact_id_a', 'contact_b.id', 'relationship_type.name_a_b', 'uf_match.uf_id', 'contact_a.first_name', 'contact_a.last_name')
@@ -100,7 +100,7 @@ class Woocommerce_CiviCRM_Sync_Address {
 		    ['RelationshipType AS relationship_type', FALSE],
 		    ['UFMatch AS uf_match', FALSE, ['uf_match.contact_id', '=', 'contact_b.id']],
 		  ])
-		  ->addWhere('contact_id_a', '=', 12782)
+		  ->addWhere('contact_id_a', '=', $objectId)
 		  ->addWhere('relationship_type.name_a_b', '=', 'Contact of')
 		  ->setLimit(25)
 		  ->execute();

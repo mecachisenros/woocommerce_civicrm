@@ -404,6 +404,7 @@
 		return  apply_filters( 'woocommerce_civicrm_address_map', array(
 			$address_type . '_address_1' => 'street_address',
 			$address_type . '_address_2' => 'supplemental_address_1',
+			$address_type . '_postbox' => 'supplemental_address_3',
 			$address_type . '_city' => 'city',
 			$address_type . '_postcode' => 'postal_code',
 			$address_type . '_country' => 'country_id',

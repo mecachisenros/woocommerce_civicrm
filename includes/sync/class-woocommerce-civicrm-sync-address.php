@@ -174,6 +174,16 @@ class Woocommerce_CiviCRM_Sync_Address {
 							case 'country_id':
 								update_user_meta( $cms_user['uf_id'], $wc_field, WCI()->helper->get_civi_country_iso_code( $objectRef->{$civi_field} ) );
 								continue 2;
+							case 'supplemental_address_1':
+								$address2 = array();
+								if($objectRef->supplemental_address_1 != ""){
+									$address2[] = $objectRef->supplemental_address_1;
+								}
+								if($objectRef->supplemental_address_2 != ""){
+									$address2[] = $objectRef->supplemental_address_2;
+								}
+								update_user_meta( $cms_user['uf_id'], $wc_field, implode(', ',$address2));
+								continue 2;
 							case 'state_province_id':
 								update_user_meta( $cms_user['uf_id'], $wc_field, WCI()->helper->get_civi_state_province_name( $objectRef->{$civi_field} ) );
 								continue 2;

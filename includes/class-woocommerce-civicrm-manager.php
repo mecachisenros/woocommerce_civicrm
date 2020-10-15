@@ -801,18 +801,18 @@ class Woocommerce_CiviCRM_Manager {
 	 * @return int $id CiviCRM payment processor ID
 	 */
 	public function map_payment_instrument( $payment_method ) {
-		$map = array(
+		$map = apply_filters( "woocommerce_civicrm_payment_instrument", array(
 			"paypal" 	=> 1,
 			"cod"  		=> 3,
 			"cheque"  => 4,
 			"bacs" 		=> 5,
-		);
+		) );
 
 		if( array_key_exists( $payment_method, $map ) ){
 			$id = $map[$payment_method];
 		} else {
 			// Another Woocommerce payment method - good chance this is credit.
-			$id = 1;
+			$id = apply_filters( "woocommerce_civicrm_default_payment_instrument",1);
 		}
 
 		return $id;

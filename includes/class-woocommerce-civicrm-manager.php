@@ -119,9 +119,9 @@ class Woocommerce_CiviCRM_Manager {
        * @since 2.0
        * @param array $params The params to be passsed to the API
        */
-      remove_action( 'civicrm_post', array( $this, 'filter_activity' ), 10);
-			$result = civicrm_api3('Activity', 'create', $params);
-			add_action( 'civicrm_post', array( $this, 'filter_activity' ), 10, 4 );
+      //remove_action( 'civicrm_post', array( $this, 'filter_activity' ), 10);
+			$result = civicrm_api4('Activity', 'update', $params);
+			//add_action( 'civicrm_post', array( $this, 'filter_activity' ), 10, 4 );
 		}
 
 	}

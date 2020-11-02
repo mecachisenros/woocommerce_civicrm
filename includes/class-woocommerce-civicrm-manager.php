@@ -111,7 +111,7 @@ class Woocommerce_CiviCRM_Manager {
 		  ],
 		  'limit' => 25,]);
 
-		if($resultActivities['rowCount'] == 1){
+
 			// abbort if sync is not enabled
 			$this->fix_site();
 			foreach ($resultActivities as $resultActivity) {
@@ -129,7 +129,7 @@ class Woocommerce_CiviCRM_Manager {
 
 			}
 			$this->unfix_site();
-		}
+
 
 	}
 

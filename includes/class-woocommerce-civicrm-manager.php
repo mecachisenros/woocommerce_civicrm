@@ -94,7 +94,7 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param object $objectRef The entity object
 	 */
 	public function filter_activity( $op, $objectName, $objectId, $objectRef ){
-
+		remove_action( 'civicrm_post', array( $this, 'filter_activity' ), 10,4);
 		if ( $op != 'create' ) return;
 		if ( $objectName != 'Activity' ) return;
 		if ( !isset($objectRef->activity_type_id)) return;
@@ -102,34 +102,26 @@ class Woocommerce_CiviCRM_Manager {
 		if ( WCI()->helper->activity_types[$objectRef->activity_type_id] != 'Contribution') return;
 
 
-		$resultActivities = civicrm_api4('Activity', 'get', [
-		  'select' => [
-		    '*',
-		  ],
-		  'where' => [
-		    ['id', '=', $objectRef->id],
-		  ],
-		  'limit' => 25,]);
+		$resultActivity = civicrm_api3('Activity', 'get', [
+		  'sequential' => 1,
+		  'id' => $objectRef->id,
+		]);
 
-
+		if($resultActivity['is_error'] == 0 && $resultActivity['count'] == 1){
 			// abbort if sync is not enabled
 			$this->fix_site();
-			foreach ($resultActivities as $resultActivity) {
-				$params = apply_filters( 'woocommerce_civicrm_contribution_activity_create_params',array(), $resultActivity);
-
-				//remove_action( 'civicrm_post', array( $this, 'filter_activity' ), 10);
-				$result = civicrm_api4('Activity', 'update', [
-				  'where' => [
-				    ['id', '=', $objectId],
-				  ],
-				  'values' => $params,
-				  'limit' => 25,
-				]);
-				//add_action( 'civicrm_post', array( $this, 'filter_activity' ), 10, 4 );
-
-			}
+			$params = apply_filters( 'woocommerce_civicrm_contribution_activity_create_params', $resultActivity['values'][0]);
 			$this->unfix_site();
 
+			/**
+       * Filter Activity params before calling the Civi's API.
+       *
+       * @since 2.0
+       * @param array $params The params to be passsed to the API
+       */
+			$result = civicrm_api3('Activity', 'create', $params);
+			add_action( 'civicrm_post', array( $this, 'filter_activity' ), 10, 4 );
+		}
 
 	}
 

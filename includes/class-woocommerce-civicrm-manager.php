@@ -115,10 +115,16 @@ class Woocommerce_CiviCRM_Manager {
 			// abbort if sync is not enabled
 			$this->fix_site();
 			foreach ($resultActivities as $resultActivity) {
-				$params = apply_filters( 'woocommerce_civicrm_contribution_activity_create_params', $resultActivity);
+				$params = apply_filters( 'woocommerce_civicrm_contribution_activity_create_params',array(), $resultActivity);
 
 				//remove_action( 'civicrm_post', array( $this, 'filter_activity' ), 10);
-				$result = civicrm_api4('Activity', 'update', ['values' => $params ]);
+				$result = civicrm_api4('Activity', 'update', [
+				  'where' => [
+				    ['id', '=', $objectId],
+				  ],
+				  'values' => $params,
+				  'limit' => 25,
+				]);
 				//add_action( 'civicrm_post', array( $this, 'filter_activity' ), 10, 4 );
 
 			}

@@ -167,7 +167,8 @@ class Woocommerce_CiviCRM {
 	 */
 	public function init() {
 
-		$this->setup_objects();
+		// only setup objects after Woo has been bootstraped
+		add_action( 'woocommerce_init', [ $this, 'setup_objects' ] );
 		$this->register_hooks();
 		$this->enable_translation();
 

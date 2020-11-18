@@ -132,18 +132,18 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 		// bail if not on contact summary screen
 		if ( $tabsetName != 'civicrm/contact/view' ) return;
 
-		$uid = abs(CRM_Core_BAO_UFMatch::getUFId( $context['contact_id'] ));
+		$cid = $context['contact_id'];
 
 		// bail if contact has no orders and hide order is enabled
-		if ( WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_hide_orders_tab_for_non_customers', false ) ) && ! $this->count_orders( $uid ) )
+		if ( WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_hide_orders_tab_for_non_customers', false ) ) && ! $this->count_orders( $cid ) )
 			return;
 
-		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&uid=$uid&no_redirect=1");
+		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&cid=$cid&no_redirect=1");
 
 		$tabs[] = array( 'id'    => 'woocommerce-orders',
 			'url'   => $url,
 			'title' => __('Woocommerce Orders', 'woocommerce-civicrm'),
-			'count' => $uid ? $this->count_orders($uid) : 0,
+			'count' => $this->count_orders( $cid ),
 			'weight' => 99
 		);
 	}
@@ -152,11 +152,25 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Get Customer raw orders.
 	 *
 	 * @since 2.2
-	 * @param int $uid The User id for a contact (UFMatch)
+	 * @param int $cid The Contact id
 	 * @return array $orders The raw orders
 	 */
-	private function _get_orders( $uid ){
+	private function _get_orders( $cid ){
 		$this->fix_site();
+		$uid = abs(CRM_Core_BAO_UFMatch::getUFId( $cid ));
+		if( ! $uid ) {
+			try {
+				$params = array(
+					'contact_id' => $cid,
+					'return' => array( 'email' ),
+				);
+				$contact = civicrm_api3( 'Contact', 'getsingle', $params );
+			} catch ( CiviCRM_API3_Exception $e ){
+				CRM_Core_Error::debug_log_message( __( 'Not able to find contact', 'woocommerce-civicrm' ) );
+				$this->unfix_site();
+				return array();
+			}
+		}
 		$order_statuses = apply_filters( 'wc_order_statuses', array(
 			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -168,8 +182,8 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 		));
 		$customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_query', array(
 			'numberposts' => -1,
-			'meta_key'    => '_customer_user',
-			'meta_value'  => $uid,
+			'meta_key'    => $uid ? '_customer_user' : '_billing_email',
+			'meta_value'  => $uid ? $uid : $contact['email'],
 			'post_type'   => 'shop_order',
 			'post_status' => array_keys( $order_statuses )
 		) ) );
@@ -182,22 +196,22 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Get Customer orders count.
 	 *
 	 * @since 2.2
-	 * @param int $uid The User id for a contact (UFMatch)
+	 * @param int $cid The Contact id
 	 * @return int $orders_count The number of orders
 	 */
-	public function count_orders( $uid ){
-		return count($this->_get_orders( $uid ));
+	public function count_orders( $cid ){
+		return count($this->_get_orders( $cid ));
 	}
 
 	/**
 	 * Get Customer orders.
 	 *
 	 * @since 2.1
-	 * @param int $uid The User id for a contact (UFMatch)
+	 * @param int $cid The Contact id
 	 * @return array $orders The orders
 	 */
-	public function get_orders( $uid ) {
-		$customer_orders = $this->_get_orders( $uid );
+	public function get_orders( $cid ) {
+		$customer_orders = $this->_get_orders( $cid );
 		$orders = array();
 		$date_format = get_option('date_format').' '.get_option('time_format');
 

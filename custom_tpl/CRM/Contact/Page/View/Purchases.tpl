@@ -1,5 +1,6 @@
-{if $uid}
+{if isset($newOrderUrl)}
 <h3>{ts}{$i18n.orders}{/ts} <a class="button-new_order button" href="{$newOrderUrl}">{ts}{$i18n.addOrder}{/ts}</a></h3>
+{/if}
 <table class="selector row-highlight">
 <thead class="sticky">
 <tr>
@@ -32,9 +33,3 @@
 {/literal}
 </tbody>
 </table>
-{else}
-<div class="messages status no-popup">
-    <div class="icon inform-icon"></div>
-        {ts}{$i18n.emptyUid}{/ts}
-   </div>
-{/if}

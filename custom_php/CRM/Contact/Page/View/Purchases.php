@@ -5,9 +5,9 @@ class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 	function run() {
 		CRM_Utils_System::setTitle( ts( 'Purchases' ) );
 
-		$uid = CRM_Utils_Request::retrieve( 'uid', 'Positive', $this );
+		$cid = CRM_Utils_Request::retrieve( 'cid', 'Positive', $this );
 
-		$orders = $uid ? WCI()->orders_tab->get_orders( $uid ) : array();
+		$orders = WCI()->orders_tab->get_orders( $cid );
 
 		$this->assign( 'i18n', array(
 			'orderNumber' 	=> __('Order Number', 'woocommerce-civicrm'),
@@ -22,14 +22,16 @@ class CRM_Contact_Page_View_Purchases extends CRM_Core_Page {
 				'addOrder' 		=> __('Add Order', 'woocommerce-civicrm'),
 		) );
 		$this->assign( 'orders', $orders );
-		$this->assign( 'uid', $uid );
-		$this->assign(
-			'newOrderUrl',
-			apply_filters('woocommerce_civicrm_add_order_url', add_query_arg(
-				array( 'post_type' => 'shop_order', 'user_id' => $uid ),
-				admin_url('post-new.php')) ,$uid
-			)
-		);
+		$uid = abs(CRM_Core_BAO_UFMatch::getUFId( $cid ));
+		if ( $uid ) {
+			$this->assign(
+				'newOrderUrl',
+				apply_filters('woocommerce_civicrm_add_order_url', add_query_arg(
+					array( 'post_type' => 'shop_order', 'user_id' => $uid ),
+					admin_url('post-new.php')) ,$uid
+				)
+			);
+		}
 		parent::run();
 	}
 }

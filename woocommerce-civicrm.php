@@ -262,7 +262,7 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.0
 	 */
-	private function setup_objects() {
+	public function setup_objects() {
 		// init orders tab
 		$this->orders_tab = new Woocommerce_CiviCRM_Orders_Contact_Tab;
 		// init helper instance

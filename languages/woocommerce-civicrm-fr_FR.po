@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CiviCRM\n"
 "POT-Creation-Date: 2020-08-18 14:36+0200\n"
-"PO-Revision-Date: 2020-12-04 17:31+0100\n"
+"PO-Revision-Date: 2020-12-04 17:33+0100\n"
 "Last-Translator: Bastien Ho <b@stienho.fr>\n"
 "Language-Team: Bastien Ho <bastien@avecnous.eu>\n"
 "Language: fr\n"
@@ -181,7 +181,7 @@ msgstr "Campagne CiviCRM"
 #: includes/class-woocommerce-civicrm-pos.php:132
 #: includes/class-woocommerce-civicrm-pos.php:144
 msgid "CiviCRM Source"
-msgstr "Origine"
+msgstr "Origine CiviCRM"
 
 #: includes/class-woocommerce-civicrm-manager.php:1001
 #, php-format

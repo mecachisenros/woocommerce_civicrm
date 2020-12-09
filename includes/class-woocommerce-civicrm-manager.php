@@ -606,29 +606,26 @@ class Woocommerce_CiviCRM_Manager {
 
 		$payment_instrument = $this->map_payment_instrument( $order->get_payment_method() );
 		$source = $this->generate_source( $order );
-		$params = array(
+		$params = [
 			'contact_id' => $cid,
-			'total_amount' => $rounded_subtotal,
 			// Need to be set in admin page
-			'contribution_type_id' => $default_contribution_type_id,
+			'financial_type_id' => $default_contribution_type_id,
 			'payment_instrument_id' => $payment_instrument,
-			'non_deductible_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator ),
-			'fee_amount' => number_format( 0, 2, $decimal_separator, $thousand_separator ),
 			'trxn_id' => $txn_id,
 			'invoice_id' => $invoice_id,
 			'source' => $source,
 			'receive_date' => $order_paid_date,
-			'contribution_status_id' => $contribution_status_id,
+			// 'contribution_status_id' => $contribution_status_id,
 			'note' => $this->create_detail_string( $items ),
 			"$sales_tax_field_id" => $sales_tax,
 			"$shipping_cost_field_id" => $shipping_cost,
 			'campaign_id' => $campaign_name,
-		);
+		];
 
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){
 			// Need to be set in admin page
-			$params['contribution_type_id'] = $contribution_type_vat_id;
+			$params['financial_type_id'] = $contribution_type_vat_id;
 		}
 
 		/**
@@ -638,8 +635,12 @@ class Woocommerce_CiviCRM_Manager {
 
 		 if(count($items)){
 				$financial_types = array();
-				$params['api.line_item.create'] = array();
-			  $params['skipLineItem'] = 1;
+				$params['line_items'] = [
+                    [
+                        "params" => [],
+                        'line_item' => []
+                    ]
+                ];
 				foreach( $items as $item ){
 		 			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
 		 			if($custom_contribution_type === 'exclude')
@@ -651,10 +652,8 @@ class Woocommerce_CiviCRM_Manager {
 					if ($item['qty'] == 0) {
 						$item['qty'] = 1;
 					}
-		 			$params['api.line_item.create'][] = array(
-		 				'price_field_id' => array(
-		 				  '0' => 3,
-		 				),
+		 			$params['line_items'][0]['line_item'][] = array(
+		 				'price_field_id' => '1',
 		 				'qty' => $item['qty'],
 		 				'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator ),
 		 				'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator ),
@@ -664,7 +663,7 @@ class Woocommerce_CiviCRM_Manager {
 					$financial_types[$custom_contribution_type] = $custom_contribution_type;
 		 		}
 				if(count($financial_types)==1){
-					$params['contribution_type_id'] = $custom_contribution_type;
+					$params['financial_type_id'] = $custom_contribution_type;
 				}
 		 }
 
@@ -677,7 +676,7 @@ class Woocommerce_CiviCRM_Manager {
 		 * @since 2.0
 		 * @param array $params The params to be passsed to the API
 		 */
-			$contribution = civicrm_api3( 'Contribution', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params ) );
+			$contribution = civicrm_api3( 'Order', 'create', apply_filters( 'woocommerce_civicrm_contribution_create_params', $params, $order ) );
 			if(isset($contribution['id']) && $contribution['id']){
 				// Adds order note in reference to the created contribution
 				$order->add_order_note(sprintf(__('Contribution %s has been created in CiviCRM', 'woocommerce-civicrm'),
@@ -701,6 +700,8 @@ class Woocommerce_CiviCRM_Manager {
 		} catch ( CiviCRM_API3_Exception $e ) {
 			// Log the error, but continue.
 			CRM_Core_Error::debug_log_message( __( 'Not able to add contribution', 'woocommerce-civicrm' ) );
+			CRM_Core_Error::debug_log_message( __( $e->getMessage(), 'woocommerce-civicrm' ) );
+			CRM_Core_Error::debug_log_message( __( $e->getTraceAsString(), 'woocommerce-civicrm' ) );
 		}
 
 

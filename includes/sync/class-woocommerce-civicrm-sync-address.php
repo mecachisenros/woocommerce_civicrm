@@ -176,10 +176,10 @@ class Woocommerce_CiviCRM_Sync_Address {
 								continue 2;
 							case 'supplemental_address_1':
 								$address2 = array();
-								if($objectRef->supplemental_address_1 != ""){
+								if($objectRef->supplemental_address_1 != "" && $objectRef->supplemental_address_1 != "null" ){
 									$address2[] = $objectRef->supplemental_address_1;
 								}
-								if($objectRef->supplemental_address_2 != ""){
+								if($objectRef->supplemental_address_2 != "" && $objectRef->supplemental_address_2 != "null"){
 									$address2[] = $objectRef->supplemental_address_2;
 								}
 								update_user_meta( $cms_user['uf_id'], $wc_field, implode(', ',$address2));

@@ -160,7 +160,8 @@
    }
 
    $wp_user_id =  $order->get_user_id();
-   if($wp_user_id != 0){
+   // backend order should not use the logged in user's contact
+   if(!is_admin() && $wp_user_id != 0){
      try{
        $uf_match = civicrm_api3('UFMatch', 'get', [
          'sequential' => 1,
@@ -171,7 +172,8 @@
        }
      }
      catch ( Exception $e ) {
-       return FALSE;
+        CRM_Core_Error::debug_log_message( __( "Failed to get contact from UF table", 'woocommerce-civicrm' ) );
+        CRM_Core_Error::debug_log_message( __( $e->getMessage(), 'woocommerce-civicrm' ) );
      }
    }elseif($email != ""){
      // The customer is anonymous.  Look in the CiviCRM contacts table for a
@@ -183,13 +185,16 @@
      );
    }
    if(!isset($params)){
-     return FALSE;
+	   CRM_Core_Error::debug_log_message( __( "Cannot guess contact without an email", 'woocommerce-civicrm' ) );
+	   return FALSE;
    }
 
    try{
      $contact = civicrm_api3( 'Contact', 'get', $params );
    }
    catch ( Exception $e ) {
+	   CRM_Core_Error::debug_log_message( __( "Failed to get contact by email", 'woocommerce-civicrm' ) );
+	   CRM_Core_Error::debug_log_message( __( $e->getMessage(), 'woocommerce-civicrm' ) );
      return FALSE;
    }
 

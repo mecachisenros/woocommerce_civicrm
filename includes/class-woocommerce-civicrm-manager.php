@@ -31,7 +31,7 @@ class Woocommerce_CiviCRM_Manager {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'update_order_status' ), 99, 3 );
 		add_action('woocommerce_admin_order_data_after_order_details', array( $this, 'order_data_after_order_details'), 30);
 		//add_action('save_post', array( $this, 'save_post'), 49);
-		add_action( 'save_post_shop_order', array(&$this,'save_post' ), 55);
+		add_action( 'woocommerce_new_order', [$this, 'save_order'], 10, 2);
 	}
 
 	/**
@@ -48,40 +48,35 @@ class Woocommerce_CiviCRM_Manager {
 	/**
 	 * Action called when a post is saved
 	 *
-	 * @param int $post_id
+	 * @param int $order_id
+	 *
 	 * @since 2.2
 	 */
-	public function save_post( $post_id, $data='null' ){
-		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
-			return;
-
-		if (get_post_type( $post_id ) !== 'shop_order' )
-			return;
-
+	public function save_order( $order_id, $data='null' ){
 		// Add the campaign ID to order
 
-		$current_campaign_id = get_post_meta( $post_id, '_woocommerce_civicrm_campaign_id', true);
+		$current_campaign_id = get_post_meta( $order_id, '_woocommerce_civicrm_campaign_id', true);
 		if((false != $new_campaign_id = filter_input(INPUT_POST, 'order_civicrmcampaign', FILTER_VALIDATE_INT)) && $new_campaign_id != $current_campaign_id ){
-			$this->update_campaign($post_id,$current_campaign_id,$new_campaign_id);
-			update_post_meta($post_id, '_woocommerce_civicrm_campaign_id', esc_attr( $new_campaign_id ));
+			$this->update_campaign( $order_id,$current_campaign_id,$new_campaign_id);
+			update_post_meta( $order_id, '_woocommerce_civicrm_campaign_id', esc_attr( $new_campaign_id ));
 		}
 
 		// Add the source to order
-		$current_civicrmsource = get_post_meta( $post_id, '_order_source', true);
+		$current_civicrmsource = get_post_meta( $order_id, '_order_source', true);
 		if((false != $new_civicrmsource = filter_input(INPUT_POST, 'order_civicrmsource', FILTER_SANITIZE_STRING)) && $new_civicrmsource != $current_civicrmsource ){
-			$this->update_source($post_id,$new_civicrmsource);
-			update_post_meta($post_id, '_order_source', esc_attr( $new_civicrmsource ));
+			$this->update_source( $order_id,$new_civicrmsource);
+			update_post_meta( $order_id, '_order_source', esc_attr( $new_civicrmsource ));
 		}
-		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new') || (filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT)===NULL && get_post_meta( $post_id, '_pos', true)) ) {
+		if (wp_verify_nonce(\filter_input(INPUT_POST, 'woocommerce_civicrm_order_new', FILTER_SANITIZE_STRING), 'woocommerce_civicrm_order_new') || (filter_input(INPUT_POST, 'post_ID', FILTER_VALIDATE_INT)===NULL && get_post_meta( $order_id, '_pos', true)) ) {
 
 
-			$this->action_order( $post_id , $data, new WC_Order($post_id));
+			$this->action_order( $order_id , null, new WC_Order( $order_id));
 		}
 
-		$membership_id = get_post_meta($post_id, '_civicrm_membership', true);
+		$membership_id = get_post_meta( $order_id, '_civicrm_membership', true);
 		// In Front context, let action_order() make the stuff
 		if('' === $membership_id && filter_input(INPUT_GET, 'wc-ajax')!='checkout'){
-			$order = new WC_Order( $post_id );
+			$order = new WC_Order( $order_id );
 			$this->check_membership($order);
 		}
 

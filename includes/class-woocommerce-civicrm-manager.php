@@ -622,6 +622,26 @@ class Woocommerce_CiviCRM_Manager {
 			'campaign_id' => $campaign_name,
 		];
 
+		// the empty line items
+		$params['line_items'] = [
+			[
+				"params" => [],
+				'line_item' => []
+			]
+		];
+
+        // line item for shipping
+		if (floatval( $shipping_cost) > 0) {
+			$params['line_items'][0]['line_item'][] = array(
+				'price_field_id' => '1',
+				'qty' => 1,
+				'line_total' => $shipping_cost,
+				'unit_price' => $shipping_cost,
+				'label' => "Shipping",
+				'financial_type_id' => 8,
+			);
+		}
+
 		// If the order has VAT (Tax) use VAT Fnancial type
 		if( $sales_tax != 0 ){
 			// Need to be set in admin page
@@ -635,12 +655,6 @@ class Woocommerce_CiviCRM_Manager {
 
 		 if(count($items)){
 				$financial_types = array();
-				$params['line_items'] = [
-                    [
-                        "params" => [],
-                        'line_item' => []
-                    ]
-                ];
 				foreach( $items as $item ){
 		 			$custom_contribution_type = get_post_meta($item['product_id'], '_civicrm_contribution_type', true);
 		 			if($custom_contribution_type === 'exclude')

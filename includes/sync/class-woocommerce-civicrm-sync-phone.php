@@ -5,7 +5,6 @@
  *
  * @since 2.0
  */
-
 class Woocommerce_CiviCRM_Sync_Phone {
 
 	/**
@@ -24,9 +23,9 @@ class Woocommerce_CiviCRM_Sync_Phone {
 	 */
 	public function register_hooks() {
 		// Sync Woocommerce and Civicrm phone for contact/user
-		add_action( 'civicrm_post', array( $this, 'sync_civi_contact_phone' ), 10, 4 );
+		add_action( 'civicrm_post', [ $this, 'sync_civi_contact_phone' ], 10, 4 );
 		// Sync Woocommerce and Civicrm phone for user/contact
-		add_action( 'woocommerce_customer_save_address', array( $this, 'sync_wp_user_woocommerce_phone' ), 10, 2 );
+		add_action( 'woocommerce_customer_save_address', [ $this, 'sync_wp_user_woocommerce_phone' ], 10, 2 );
 	}
 
 	/**
@@ -35,36 +34,49 @@ class Woocommerce_CiviCRM_Sync_Phone {
 	 * Fires when a Civi contact's phone is edited.
 	 * @since 2.0
 	 * @param string $op The operation being performed
-	 * @param string $objectName The entity name
-	 * @param int $objectId The entity id
-	 * @param object $objectRef The entity object
+	 * @param string $object_name The entity name
+	 * @param int $object_id The entity id
+	 * @param object $object_ref The entity object
 	 */
-	public function sync_civi_contact_phone( $op, $objectName, $objectId, $objectRef ){
+	public function sync_civi_contact_phone( $op, $object_name, $object_id, $object_ref ) {
 
 		// abbort if sync is not enabled
-		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_phone' ) ) ) return;
+		if ( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_phone' ) ) ) {
+			return;
+		}
 
-		if ( $op != 'edit' ) return;
+		if ( 'edit' !== $op ) {
+			return;
+		}
 
-		if ( $objectName != 'Phone' ) return;
+		if ( 'Phone' !== $object_name ) {
+			return;
+		}
 
 		// Abort if the phone being edited is not one of the mapped ones
-		if( ! in_array( $objectRef->location_type_id, WCI()->helper->mapped_location_types ) ) return;
+		if ( ! in_array( $object_ref->location_type_id, WCI()->helper->mapped_location_types ) ) {
+			return;
+		}
 
 		// abort if we don't have a contact_id
-		if ( ! isset( $objectRef->contact_id ) ) return;
+		if ( ! isset( $object_ref->contact_id ) ) {
+			return;
+		}
 
-		$cms_user = WCI()->helper->get_civicrm_ufmatch( $objectRef->contact_id, 'contact_id' );
+		$cms_user = WCI()->helper->get_civicrm_ufmatch( $object_ref->contact_id, 'contact_id' );
 
 		// abort if we don't have a WordPress user
-		if ( ! $cms_user ) return;
+		if ( ! $cms_user ) {
+			return;
+		}
 
 		// Proceed
-		$phone_type = array_search( $objectRef->location_type_id, WCI()->helper->mapped_location_types );
+		$phone_type = array_search( $object_ref->location_type_id, WCI()->helper->mapped_location_types );
 
 		// only billing_phone, there's no shipping_phone field
-		if( $phone_type == 'billing' )
-			update_user_meta( $cms_user['uf_id'], $phone_type . '_phone', $objectRef->phone );
+		if ( 'billing' === $phone_type ) {
+			update_user_meta( $cms_user['uf_id'], $phone_type . '_phone', $object_ref->phone );
+		}
 
 		/**
 		 * Broadcast that a Woocommerce phone has been updated for a user.
@@ -85,32 +97,38 @@ class Woocommerce_CiviCRM_Sync_Phone {
 	 * @param int $user_id The WP user id
 	 * @param string $load_address The address type 'shipping' | 'billing'
 	 */
-	public function sync_wp_user_woocommerce_phone( $user_id, $load_address ){
+	public function sync_wp_user_woocommerce_phone( $user_id, $load_address ) {
 
 		// abbort if sync is not enabled
-		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_phone' ) ) ) return;
+		if ( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_phone' ) ) ) {
+			return;
+		}
 
 		// abort if phone is not of type 'billing'
-		if( $load_address != 'billing' ) return;
+		if ( 'billing' !== $load_address ) {
+			return;
+		}
 
 		$civi_contact = WCI()->helper->get_civicrm_ufmatch( $user_id, 'uf_id' );
 
 		// abort if we don't have a CiviCRM contact
-		if ( ! $civi_contact ) return;
+		if ( ! $civi_contact ) {
+			return;
+		}
 
 		$mapped_location_types = WCI()->helper->mapped_location_types;
-		$civi_phone_location_type = $mapped_location_types[$load_address];
+		$civi_phone_location_type = $mapped_location_types[ $load_address ];
 
 		$customer = new WC_Customer( $user_id );
 
-		$edited_phone = array(
+		$edited_phone = [
 			'phone' => $customer->{'get_' . $load_address . '_phone'}(),
-		);
+		];
 
-		$params = array(
+		$params = [
 			'contact_id' => $civi_contact['contact_id'],
 			'location_type_id' => $civi_phone_location_type,
-		);
+		];
 
 		try {
 			$civi_phone = civicrm_api3( 'Phone', 'getsingle', $params );

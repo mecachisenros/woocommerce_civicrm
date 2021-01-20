@@ -5,7 +5,6 @@
  *
  * @since 2.1
  */
-
 class Woocommerce_CiviCRM_Sync {
 
 	/**
@@ -66,10 +65,10 @@ class Woocommerce_CiviCRM_Sync {
 	 */
 	public function setup_objects() {
 		// init address sync
-		$this->address = new Woocommerce_CiviCRM_Sync_Address;
+		$this->address = new Woocommerce_CiviCRM_Sync_Address();
 		// init phone sync
-		$this->phone = new Woocommerce_CiviCRM_Sync_Phone;
+		$this->phone = new Woocommerce_CiviCRM_Sync_Phone();
 		// init email sync
-		$this->email = new Woocommerce_CiviCRM_Sync_Email;
+		$this->email = new Woocommerce_CiviCRM_Sync_Email();
 	}
 }

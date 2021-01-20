@@ -17,6 +17,7 @@ if ( ! defined( 'WPINC' ) ) die;
 /**
  * Woocommerce CiviCRM class
  * A class that encapsulates this plugin's functionality
+ *
  * @since 2.0
  */
 class Woocommerce_CiviCRM {
@@ -61,6 +62,7 @@ class Woocommerce_CiviCRM {
 	 * The Manager management object.
 	 *
 	 * Encapsulates the Woocommerce CiviCRM functionality
+	 *
 	 * @since 2.0
 	 * @access private
 	 * @var object $manager The plugin functionality management object
@@ -71,6 +73,7 @@ class Woocommerce_CiviCRM {
 	 * The Sync management object.
 	 *
 	 * Encapsulates the Woocommerce and CiviCRM synchrinzation objects.
+	 *
 	 * @since 2.0
 	 * @access private
 	 * @var object $sync The Sync management object
@@ -81,6 +84,7 @@ class Woocommerce_CiviCRM {
 	 * The Helper management object.
 	 *
 	 * Encapsulates the Helper management object.
+	 *
 	 * @since 2.0
 	 * @access private
 	 * @var object $helper The Helper management object
@@ -119,22 +123,22 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.1
 	 */
-	function __construct() {
+	public function __construct() {
 		// Makes sure the plugin is defined before trying to use it
 		if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
-			require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+			require_once ABSPATH . '/wp-admin/includes/plugin.php';
 		}
-		$plugin_name = basename(__DIR__).'/'.basename(__FILE__);
+		$plugin_name = basename( __DIR__ ) . '/' . basename( __FILE__ );
 		$this->is_network_installed = is_plugin_active_for_network( $plugin_name );
 
-		add_action( 'admin_init', array( $this, 'check_dependencies' ), 10 );
+		add_action( 'admin_init', [ $this, 'check_dependencies' ], 10 );
 		$this->define_constants();
 		$this->include_files();
 		$this->plugin = plugin_basename( __FILE__ );
 		// init plugin
-		add_action( 'plugins_loaded', array( $this, 'init' ), 10 );
+		add_action( 'plugins_loaded', [ $this, 'init' ], 10 );
 		// clear cache on activation
-		add_action( 'woocommerce_civicrm_activated', array( $this, 'schedule_clear_civi_cache' ) );
+		add_action( 'woocommerce_civicrm_activated', [ $this, 'schedule_clear_civi_cache' ] );
 	}
 
 
@@ -148,7 +152,7 @@ class Woocommerce_CiviCRM {
 
 		if ( ! isset( self::$instance ) ) {
 			// instantiate
-			self::$instance = new Woocommerce_CiviCRM;
+			self::$instance = new Woocommerce_CiviCRM();
 
 			/**
 			 * Broadcast to other plugins that this plugin is loaded.
@@ -172,13 +176,20 @@ class Woocommerce_CiviCRM {
 		$this->register_hooks();
 		$this->enable_translation();
 
-		if ($this->is_network_installed) {
-			add_action('network_admin_menu', array( $this, 'network_admin_menu'));
+		if ( $this->is_network_installed ) {
+			add_action( 'network_admin_menu', [ $this, 'network_admin_menu' ] );
 		}
 	}
 
-	function network_admin_menu(){
-		add_submenu_page('settings.php', __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), __('Woocommerce CiviCRM settings', 'woocommerce-civicrm'), 'manage_network_options', 'woocommerce-civicrm-settings', array( $this->settings_tab, 'network_settings'));
+	public function network_admin_menu(){
+		add_submenu_page(
+			'settings.php',
+			__( 'Woocommerce CiviCRM settings', 'woocommerce-civicrm' ),
+			__( 'Woocommerce CiviCRM settings', 'woocommerce-civicrm' ),
+			'manage_network_options',
+			'woocommerce-civicrm-settings',
+			[ $this->settings_tab, 'network_settings' ]
+		);
 	}
 
 	/**
@@ -198,20 +209,22 @@ class Woocommerce_CiviCRM {
 	 * @since 2.1
 	 */
 	public function boot_civi() {
-		if(!function_exists('civi_wp'))
+		if ( ! function_exists( 'civi_wp' ) ) {
 			return;
+		}
 		return civi_wp()->initialize();
 	}
 
 	/**
 	 * Check plugin dependencies.
+	 *
 	 * @since 2.0
 	 * @return bool True if dependencies exist, false otherwise
 	 */
 	public function check_dependencies() {
 
 		// Bail if Woocommerce is not available
-		if ( !is_multisite() && ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ){
+		if ( ! is_multisite() && ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 			$this->display_woocommerce_required_notice();
 		}
 		// Bail if CiviCRM is not available
@@ -253,8 +266,6 @@ class Woocommerce_CiviCRM {
 		// Include POS functionality class
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/class-woocommerce-civicrm-pos.php';
 
-
-
 	}
 
 	/**
@@ -264,25 +275,26 @@ class Woocommerce_CiviCRM {
 	 */
 	public function setup_objects() {
 		// init orders tab
-		$this->orders_tab = new Woocommerce_CiviCRM_Orders_Contact_Tab;
+		$this->orders_tab = new Woocommerce_CiviCRM_Orders_Contact_Tab();
 		// init helper instance
-		$this->helper = new Woocommerce_CiviCRM_Helper;
+		$this->helper = new Woocommerce_CiviCRM_Helper();
 		// init settings page
-		$this->settings_tab = new Woocommerce_CiviCRM_Settings_Tab;
+		$this->settings_tab = new Woocommerce_CiviCRM_Settings_Tab();
 		// init manager
-		$this->manager = new Woocommerce_CiviCRM_Manager;
+		$this->manager = new Woocommerce_CiviCRM_Manager();
 		// init states replacement
-		$this->states_replacement = new Woocommerce_CiviCRM_States;
+		$this->states_replacement = new Woocommerce_CiviCRM_States();
 		// init sync manager
-		$this->sync = new Woocommerce_CiviCRM_Sync;
+		$this->sync = new Woocommerce_CiviCRM_Sync();
 		// init products
-		$this->products = new Woocommerce_CiviCRM_Products;
+		$this->products = new Woocommerce_CiviCRM_Products();
 		// init orders
-		$this->products = new Woocommerce_CiviCRM_Orders;
+		$this->products = new Woocommerce_CiviCRM_Orders();
 		// init POS
-		$this->pos = new Woocommerce_CiviCRM_POS;
+		$this->pos = new Woocommerce_CiviCRM_POS();
 
 	}
+
 	/**
 	 * Register hooks.
 	 *
@@ -290,7 +302,7 @@ class Woocommerce_CiviCRM {
 	 */
 	private function register_hooks() {
 		// add settings link to plugin listing page
-		add_filter( 'plugin_action_links', array( $this, 'add_action_links' ), 10, 2 );
+		add_filter( 'plugin_action_links', [ $this, 'add_action_links' ], 10, 2 );
 	}
 
 	/**
@@ -324,16 +336,17 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.1.1
 	 */
-	public function schedule_clear_civi_cache(){
-		add_action( 'plugins_loaded', array( $this, 'clear_civi_cache' ), 10 );
+	public function schedule_clear_civi_cache() {
+		add_action( 'plugins_loaded', [ $this, 'clear_civi_cache' ], 10 );
 	}
+
 	/**
 	 * Clear CiviCRM cache after plugin activation.
 	 *
 	 * @since 2.1
 	 */
 	public function clear_civi_cache() {
-		CRM_Core_Config::singleton()->cleanup( 1, FALSE);
+		CRM_Core_Config::singleton()->cleanup( 1, FALSE );
 		CRM_Core_Config::clearDBCache();
 		CRM_Utils_System::flushCache();
 	}
@@ -347,7 +360,7 @@ class Woocommerce_CiviCRM {
 	 * @return $links
 	 */
 	public function add_action_links( $links, $file ) {
-		if( $file == plugin_basename( __FILE__ ) ){
+		if ( plugin_basename( __FILE__ ) === $file ) {
 			$links[] = '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=woocommerce_civicrm' ) . '">' . __( 'Settings', 'woocommerce-civicrm') . '</a>';
 		}
 		return $links;
@@ -358,7 +371,7 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.0
 	 */
-	public function display_woocommerce_required_notice(){
+	public function display_woocommerce_required_notice() {
 		deactivate_plugins( $this->plugin );
 		wp_die( '<h1>Ooops</h1><p><strong>Woocommerce CiviCRM integration</strong> requires <strong>Woocommerce</strong> plugin installed and activated.<br/> This plugin has been deactivated! Please activate <strong>Woocommerce</strong> and try again.<br/><br/>Back to the WordPress <a href="' . get_admin_url( null, 'plugins.php' ) . '">plugins page</a>.</p>' );
 	}
@@ -368,7 +381,7 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.0
 	 */
-	public function display_civicrm_required_notice(){
+	public function display_civicrm_required_notice() {
 		deactivate_plugins( $this->plugin );
 		wp_die( '<h1>Ooops</h1><p><strong>Woocommerce CiviCRM Integration</strong> requires <strong>CiviCRM</strong> plugin installed and activated.<br/> This plugin has been deactivated! Please activate <strong>CiviCRM</strong> and try again.<br/><br/>Back to the WordPress <a href="' . get_admin_url( null, 'plugins.php' ) . '">plugins page</a>.</p>' );
 	}
@@ -378,7 +391,7 @@ class Woocommerce_CiviCRM {
 	 *
 	 * @since 2.0
 	 */
-	public function display_civicrm_initialised_notice(){
+	public function display_civicrm_initialised_notice() {
 		deactivate_plugins( $this->plugin );
 		wp_die( '<h1>Ooops</h1><p><strong>CiviCRM</strong> could not be initialized.<br/> <strong>Woocommerce CiviCRM</strong> integration has been deactivated!<br/><br/>Back to the WordPress <a href="' . get_admin_url( null, 'plugins.php' ) . '">plugins page</a>.</p>' );
 	}
@@ -397,4 +410,4 @@ function WCI() {
 
 WCI();
 
-register_activation_hook( __FILE__, array( WCI(), 'activate' ) );
+register_activation_hook( __FILE__, [ WCI(), 'activate' ] );

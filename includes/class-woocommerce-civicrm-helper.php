@@ -30,9 +30,7 @@ class Woocommerce_CiviCRM_Helper {
 	public $membership_types;
 
 	/**
-	 * optionvalue_membership_signup.
-	 *
-	 * integer Value
+	 * Optionvalue_membership_signup.
 	 *
 	 * @since 2.0
 	 * @access public
@@ -132,29 +130,20 @@ class Woocommerce_CiviCRM_Helper {
 	 * Get CiviCRM contact_id.
 	 *
 	 * @since 2.0
-	 * @param object $order The order object
-	 * @return int $cid The contact_id
+	 * @param object $order The order object.
+	 * @return int $cid The contact_id.
 	 */
 	public function civicrm_get_cid( $order ) {
 		$email = '';
-		if ( is_user_logged_in() && ! is_admin() ) { // if user is logged in but not in the admin (not a manual order)
+		if ( is_user_logged_in() && ! is_admin() ) { // If user is logged in but not in the admin (not a manual order).
 			$current_user = wp_get_current_user();
-			//$match = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-			// $current_user,
-			// $current_user->ID,
 			$email = $current_user->user_email;
-			// 'WordPress', FALSE, 'Individual'
-			// );
-
-			// if ( is_object( $match ) ) {
-			// return $match->contact_id;
-			// }
 		} else {
-		if ( filter_input( INPUT_POST, 'customer_user', FILTER_VALIDATE_INT ) ) { // if there was a fiel customer user in form (manual order)
-			$cu_id = filter_input( INPUT_POST, 'customer_user', FILTER_VALIDATE_INT );
+			if ( filter_input( INPUT_POST, 'customer_user', FILTER_VALIDATE_INT ) ) { // if there was a fiel customer user in form (manual order).
+				$cu_id = filter_input( INPUT_POST, 'customer_user', FILTER_VALIDATE_INT );
 
-			$user_info = get_userdata( $cu_id );
-			$email = $user_info->user_email;
+				$user_info = get_userdata( $cu_id );
+				$email = $user_info->user_email;
 
 			} else {
 				$email = $order->get_billing_email();
@@ -162,8 +151,8 @@ class Woocommerce_CiviCRM_Helper {
 		}
 
 		$wp_user_id = $order->get_user_id();
-		// backend order should not use the logged in user's contact
-		if ( ! is_admin() && $wp_user_id != 0 ) {
+		// Backend order should not use the logged in user's contact.
+		if ( ! is_admin() && 0 !== $wp_user_id ) {
 			try {
 				$uf_match = civicrm_api3(
 					'UFMatch',
@@ -173,7 +162,7 @@ class Woocommerce_CiviCRM_Helper {
 						'uf_id' => $wp_user_id,
 					]
 				);
-				if ( $uf_match['count'] == 1 ) {
+				if ( 1 === $uf_match['count'] ) {
 					return $uf_match['values'][0]['contact_id'];
 				}
 			} catch ( CiviCRM_API3_Exception $e ) {
@@ -218,9 +207,9 @@ class Woocommerce_CiviCRM_Helper {
 	 * Get UFMatch for contact_id or WP user_id.
 	 *
 	 * @since 2.0
-	 * @param int $id The CiviCRM contact_id or WP user_id
-	 * @param string $property 'contact_id' | 'uf_id'
-	 * @return array $uf_match The UFMatch
+	 * @param int $id The CiviCRM contact_id or WP user_id.
+	 * @param string $property 'contact_id' | 'uf_id'.
+	 * @return array $uf_match The UFMatch.
 	 */
 	public function get_civicrm_ufmatch( $id, $property ) {
 
@@ -241,7 +230,7 @@ class Woocommerce_CiviCRM_Helper {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
-		if ( isset( $uf_match ) && is_array( $uf_match ) && ! $uf_match['is_error'] ) {
+		if ( ! empty( $uf_match['is_error'] ) ) {
 			return $uf_match;
 		}
 	}
@@ -250,7 +239,7 @@ class Woocommerce_CiviCRM_Helper {
 	 * Function to get CiviCRM country ID for Woocommerce country ISO Code.
 	 *
 	 * @since 2.0
-	 * @param string $woocommeerce_country WooCommerce country ISO code
+	 * @param string $woocommerce_country WooCommerce country ISO code.
 	 * @return int $id CiviCRM country_id
 	 */
 	public function get_civi_country_id( $woocommerce_country ) {
@@ -280,8 +269,8 @@ class Woocommerce_CiviCRM_Helper {
 	 * Function to get CiviCRM country ISO Code for country_id.
 	 *
 	 * @since 2.0
-	 * @param string $country_id CiviCRM country_id
-	 * @return int $iso_code CiviCRM country ISO Code
+	 * @param string $country_id CiviCRM country_id.
+	 * @return int $iso_code CiviCRM country ISO Code.
 	 */
 	public function get_civi_country_iso_code( $country_id ) {
 
@@ -310,9 +299,9 @@ class Woocommerce_CiviCRM_Helper {
 	 * Function to get CiviCRM state_province_id.
 	 *
 	 * @since 2.0
-	 * @param string $woocommerce_state Woocommerce state
-	 * @param int $country_id CiviCRM country_id
-	 * @return int $id CiviCRM state_province_id
+	 * @param string $woocommerce_state Woocommerce state.
+	 * @param int $country_id CiviCRM country_id.
+	 * @return int $id CiviCRM state_province_id.
 	 */
 	public function get_civi_state_province_id( $woocommerce_state, $country_id ) {
 
@@ -325,11 +314,11 @@ class Woocommerce_CiviCRM_Helper {
 		}
 
 		foreach ( $this->civicrm_states as $state_id => $state ) {
-			if ( $state['country_id'] == $country_id && $state['abbreviation'] == $woocommerce_state ) {
+			if ( $state['country_id'] === $country_id && $state['abbreviation'] === $woocommerce_state ) {
 				return $state['id'];
 			}
 
-			if ( $state['country_id'] == $country_id && $state['name'] == $woocommerce_state ) {
+			if ( $state['country_id'] === $country_id && $state['name'] === $woocommerce_state ) {
 				return $state['id'];
 			}
 		}
@@ -339,8 +328,8 @@ class Woocommerce_CiviCRM_Helper {
 	 * Function to get CiviCRM State/Province name or abbreviation.
 	 *
 	 * @since 2.0
-	 * @param int $state_province_id CiviCRM state id
-	 * @return string $name CiviCRM State/Province name or abbreviation
+	 * @param int $state_province_id CiviCRM state id.
+	 * @return string $name CiviCRM State/Province name or abbreviation.
 	 */
 	public function get_civi_state_province_name( $state_province_id ) {
 
@@ -370,8 +359,8 @@ class Woocommerce_CiviCRM_Helper {
 	 * Function to get Woocommerece CiviCRM address map.
 	 *
 	 * @since 2.0
-	 * @param  string $address_type Woocommerce address type 'billing' || 'shipping'
-	 * @return array $mapped_address The address maps
+	 * @param  string $address_type Woocommerce address type 'billing' || 'shipping'.
+	 * @return array $mapped_address The address maps.
 	 */
 	public function get_mapped_address( $address_type ) {
 
@@ -398,7 +387,8 @@ class Woocommerce_CiviCRM_Helper {
 	/**
 	 * Get CiviCRM states.
 	 *
-	 * Build multidimentional array of CiviCRM states | array( 'state_id' => array( 'name', 'id', 'abbreviation', 'country_id' ) )
+	 * Build multidimentional array of CiviCRM states | array( 'state_id' => array( 'name', 'id', 'abbreviation', 'country_id' ) ).
+	 *
 	 * @since 2.0
 	 */
 	private function get_civicrm_states() {
@@ -416,7 +406,7 @@ class Woocommerce_CiviCRM_Helper {
 				'id' => $dao->id,
 				'name' => $dao->name,
 				'abbreviation' => $dao->abbreviation,
-				'country_id' => $dao->country_id
+				'country_id' => $dao->country_id,
 			];
 		}
 
@@ -426,32 +416,37 @@ class Woocommerce_CiviCRM_Helper {
 	/**
 	 * Get CiviCRM campaigns.
 	 *
-	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) )
+	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) ).
 	 *
 	 * @since 2.2
 	 */
 	private function get_campaigns() {
 
-		if ( ! empty( $this->civicrm_campaigns ) ) return $this->civicrm_campaigns;
+		if ( ! empty( $this->civicrm_campaigns ) ) {
+			return $this->civicrm_campaigns;
+		}
 
 		$params = [
 			'sequential' => 1,
-			'return' => ['id', 'name'],
+			'return' => [ 'id', 'name' ],
 			'is_active' => 1,
-			'status_id' => ['NOT IN' => ['Completed', 'Cancelled']],
-			'options' => ['sort' => 'name', 'limit' => 0],
+			'status_id' => [ 'NOT IN' => [ 'Completed', 'Cancelled' ] ],
+			'options' => [
+				'sort' => 'name',
+				'limit' => 0,
+			],
 		];
 
 		/**
 		 * Filter Campaigns params before calling the Civi's API.
 		 *
 		 * @since 2.2
-		 * @param array $params The params to be passsed to the API
+		 * @param array $params The params to be passsed to the API.
 		 */
 		$campaigns_result = civicrm_api3( 'Campaign', 'get', apply_filters( 'woocommerce_civicrm_campaigns_params', $params ) );
 
 		$civicrm_campaigns = [
-			__( 'None', 'woocommerce-civicrm' )
+			__( 'None', 'woocommerce-civicrm' ),
 		];
 		foreach ( $campaigns_result['values'] as $key => $value ) {
 			$civicrm_campaigns[ $value['id'] ] = $value['name'];
@@ -462,7 +457,7 @@ class Woocommerce_CiviCRM_Helper {
 	/**
 	 * Get CiviCRM all campaigns with status.
 	 *
-	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) )
+	 * Build multidimentional array of CiviCRM campaigns | array( 'campaign_id' => array( 'name', 'id', 'parent_id' ) ).
 	 *
 	 * @since 2.2
 	 */
@@ -477,10 +472,10 @@ class Woocommerce_CiviCRM_Helper {
 		}
 		$params = [
 			'sequential' => 1,
-			'return' => ['id', 'name', 'status_id'],
+			'return' => [ 'id', 'name', 'status_id' ],
 			'options' => [
 				'sort' => 'status_id ASC , created_date DESC , name ASC',
-				'limit' => 0
+				'limit' => 0,
 			],
 		];
 
@@ -493,7 +488,7 @@ class Woocommerce_CiviCRM_Helper {
 		$all_campaigns_result = civicrm_api3( 'Campaign', 'get', apply_filters( 'woocommerce_civicrm_campaigns_params', $params ) );
 
 		$all_campaigns = [
-			__( 'None', 'woocommerce-civicrm' )
+			__( 'None', 'woocommerce-civicrm' ),
 		];
 
 		foreach ( $all_campaigns_result['values'] as $key => $value ) {
@@ -513,7 +508,7 @@ class Woocommerce_CiviCRM_Helper {
 	/**
 	 * Get CiviCRM all campaigns with status.
 	 *
-	 * Build multidimentional array of CiviCRM campaigns | array( 'status_id' => array( 'name', 'id', 'parent_id' ) )
+	 * Build multidimentional array of CiviCRM campaigns | array( 'status_id' => array( 'name', 'id', 'parent_id' ) ).
 	 *
 	 * @since 2.2
 	 */
@@ -538,7 +533,7 @@ class Woocommerce_CiviCRM_Helper {
 		$civicrm_campaigns_status = [];
 		$status_result = civicrm_api3( 'OptionValue', 'get', apply_filters( 'woocommerce_civicrm_status_params', $params ) );
 
-		if ( $status_result['is_error']==0 && $status_result['count'] > 0 ) {
+		if ( 0 === $status_result['is_error'] && $status_result['count'] > 0 ) {
 
 			foreach ( $status_result['values'] as $key => $value ) {
 				$civicrm_campaigns_status[ $value['value'] ] = $value['label'];
@@ -568,7 +563,7 @@ class Woocommerce_CiviCRM_Helper {
 			'woocommerce_civicrm_mapped_location_types',
 			[
 				'billing' => get_option( 'woocommerce_civicrm_billing_location_type_id' ),
-				'shipping' => get_option( 'woocommerce_civicrm_shipping_location_type_id' )
+				'shipping' => get_option( 'woocommerce_civicrm_shipping_location_type_id' ),
 			]
 		);
 	}
@@ -670,7 +665,7 @@ class Woocommerce_CiviCRM_Helper {
 			'get',
 			[
 				'sequential' => 1,
-				'return' => ['value'],
+				'return' => [ 'value' ],
 				'name' => 'Membership Signup',
 			]
 		);
@@ -680,7 +675,7 @@ class Woocommerce_CiviCRM_Helper {
 	/**
 	 * Function to check whether a value is (string) 'yes'.
 	 *
-	 * @param string $value
+	 * @param string $value The value to check.
 	 * @return bool true | false
 	 */
 	public function check_yes_no_value( $value ) {
@@ -690,7 +685,7 @@ class Woocommerce_CiviCRM_Helper {
 	/**
 	 * Get WordPress sites on a multisite Installation
 	 *
-	 * @return array $sites [$site_id: $site_name]
+	 * @return array $sites [$site_id: $site_name].
 	 */
 	public function get_sites() {
 		$sites = [];

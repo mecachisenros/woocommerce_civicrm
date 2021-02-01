@@ -22,9 +22,9 @@ class Woocommerce_CiviCRM_Sync_Email {
 	 * @since 0.2
 	 */
 	public function register_hooks() {
-		// Sync Woocommerce and Civicrm email for contact/user
+		// Sync Woocommerce and Civicrm email for contact/user.
 		add_action( 'civicrm_post', [ $this, 'sync_civi_contact_email' ], 10, 4 );
-		// Sync Woocommerce and Civicrm email for user/contact
+		// Sync Woocommerce and Civicrm email for user/contact.
 		add_action( 'woocommerce_customer_save_address', [ $this, 'sync_wp_user_woocommerce_email' ], 10, 2 );
 	}
 
@@ -32,16 +32,17 @@ class Woocommerce_CiviCRM_Sync_Email {
 	 * Sync Civicrm email for contact->user.
 	 *
 	 * Fires when a Civi contact's email is edited.
+	 *
 	 * @since 2.0
-	 * @param string $op The operation being performed
-	 * @param string $object_name The entity name
-	 * @param int $object_id The entity id
-	 * @param object $object_ref The entity object
+	 * @param string $op The operation being performed.
+	 * @param string $object_name The entity name.
+	 * @param int $object_id The entity id.
+	 * @param object $object_ref The entity object.
 	 */
 	public function sync_civi_contact_email( $op, $object_name, $object_id, $object_ref ) {
 
-		// abbort if sync is not enabled
-		if( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_email' ) ) ) {
+		// Abort if sync is not enabled.
+		if ( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_email' ) ) ) {
 			return;
 		}
 
@@ -53,27 +54,27 @@ class Woocommerce_CiviCRM_Sync_Email {
 			return;
 		}
 
-		// Abort if the email being edited is not one of the mapped ones
+		// Abort if the email being edited is not one of the mapped ones.
 		if ( ! in_array( $object_ref->location_type_id, WCI()->helper->mapped_location_types ) ) {
 			return;
 		}
 
-		// abort if we don't have a contact_id
+		// Abort if we don't have a contact_id.
 		if ( ! isset( $object_ref->contact_id ) ) {
 			return;
 		}
 
 		$cms_user = WCI()->helper->get_civicrm_ufmatch( $object_ref->contact_id, 'contact_id' );
 
-		// abort if we don't have a WordPress user
+		// Abort if we don't have a WordPress user.
 		if ( ! $cms_user ) {
 			return;
 		}
 
-		// Proceed
+		// Proceed.
 		$email_type = array_search( $object_ref->location_type_id, WCI()->helper->mapped_location_types );
 
-		// only billing_email, there's no shipping_email field
+		// Only billing_email, there's no shipping_email field.
 		if ( 'billing' === $email_type ) {
 			update_user_meta( $cms_user['uf_id'], $email_type . '_email', $object_ref->email );
 		}
@@ -82,8 +83,8 @@ class Woocommerce_CiviCRM_Sync_Email {
 		 * Broadcast that a Woocommerce email has been updated for a user.
 		 *
 		 * @since 2.0
-		 * @param int $user_id The WordPress user_id
-		 * @param string $email_type The Woocommerce email type 'billing' || 'shipping'
+		 * @param int $user_id The WordPress user_id.
+		 * @param string $email_type The Woocommerce email type 'billing' || 'shipping'.
 		 */
 		do_action( 'woocommerce_civicrm_wc_email_updated', $cms_user['uf_id'], $email_type );
 
@@ -93,25 +94,26 @@ class Woocommerce_CiviCRM_Sync_Email {
 	 * Sync Woocommerce email for user->contact.
 	 *
 	 * Fires when Woocomerce email is edited.
+	 *
 	 * @since 2.0
-	 * @param int $user_id The WP user_id
-	 * @param string $load_address The address type 'shipping' | 'billing'
+	 * @param int $user_id The WP user_id.
+	 * @param string $load_address The address type 'shipping' | 'billing'.
 	 */
 	public function sync_wp_user_woocommerce_email( $user_id, $load_address ) {
 
-		// abbort if sync is not enabled
+		// Abort if sync is not enabled.
 		if ( ! WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_sync_contact_email' ) ) ) {
 			return;
 		}
 
-		// abort if email is not of type 'billing'
-		if ( $load_address != 'billing' ) {
+		// Abort if email is not of type 'billing'.
+		if ( 'billing' !== $load_address ) {
 			return;
 		}
 
 		$civi_contact = WCI()->helper->get_civicrm_ufmatch( $user_id, 'uf_id' );
 
-		// abort if we don't have a CiviCRM contact
+		// Abort if we don't have a CiviCRM contact.
 		if ( ! $civi_contact ) {
 			return;
 		}

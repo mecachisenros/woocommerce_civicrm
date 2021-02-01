@@ -17,13 +17,14 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	}
 
 	/**
-	 * Checks if Woocommerce is activated on another blog
+	 * Checks if Woocommerce is activated on another blog.
 	 *
 	 * @since 2.2
 	 */
 	private function is_remote_wc() {
-		if ( false === WCI()->is_network_installed )
+		if ( false === WCI()->is_network_installed ) {
 			return false;
+		}
 
 		$option = 'woocommerce_civicrm_network_settings';
 		$options = get_site_option( $option );
@@ -40,7 +41,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	}
 
 	/**
-	 * Moves to main woocommerce site if multisite installation
+	 * Moves to main woocommerce site if multisite installation.
 	 *
 	 * @since 2.2
 	 */
@@ -55,7 +56,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	}
 
 	/**
-	 * Moves to current site if multisite installation
+	 * Moves to current site if multisite installation.
 	 *
 	 * @since 2.2
 	 */
@@ -73,13 +74,13 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * @since 0.2
 	 */
 	public function register_hooks() {
-		// register custom php directory
+		// Register custom php directory.
 		add_action( 'civicrm_config', [ $this, 'register_custom_php_directory' ], 10, 1 );
-		// register custom template directory
+		// Register custom template directory.
 		add_action( 'civicrm_config', [ $this, 'register_custom_template_directory' ], 10, 1 );
-		// register menu callback
+		// Register menu callback.
 		add_filter( 'civicrm_xmlMenu', [ $this, 'register_callback' ], 10, 1 );
-		// Add Civicrm settings tab
+		// Add Civicrm settings tab.
 		add_filter( 'civicrm_tabset', [ $this, 'add_orders_contact_tab' ], 10, 3 );
 	}
 
@@ -87,12 +88,13 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Register php directory.
 	 *
 	 * @since 2.0
-	 * @param object $config The CiviCRM config object
+	 * @param object $config The CiviCRM config object.
 	 */
 	public function register_custom_php_directory( &$config ) {
 		$this->fix_site();
 		$custom_path = WOOCOMMERCE_CIVICRM_PATH . 'custom_php';
 		$include_path = $custom_path . PATH_SEPARATOR . get_include_path();
+		// phpcs:ignore
 		set_include_path( $include_path );
 		$this->unfix_site();
 	}
@@ -101,13 +103,14 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Register template directory.
 	 *
 	 * @since 2.0
-	 * @param object $config The CiviCRM config object
+	 * @param object $config The CiviCRM config object.
 	 */
 	public function register_custom_template_directory( &$config ) {
 		$this->fix_site();
 		$custom_path = WOOCOMMERCE_CIVICRM_PATH . 'custom_tpl';
 		$template = CRM_Core_Smarty::singleton()->addTemplateDir( $custom_path );
 		$include_template_path = $custom_path . PATH_SEPARATOR . get_include_path();
+		// phpcs:ignore
 		set_include_path( $include_template_path );
 		$this->unfix_site();
 	}
@@ -116,7 +119,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Register XML file.
 	 *
 	 * @since 2.0
-	 * @param array $files The array for files used to build the menu
+	 * @param array $files The array for files used to build the menu.
 	 */
 	public function register_callback( &$files ) {
 		$this->fix_site();
@@ -128,20 +131,21 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Add CiviCRM tab to the settings page.
 	 *
 	 * @since 2.0
-	 * @uses 'woocommerce_settings_tabs_array' filter
-	 * @param array $setting_tabs The setting tabs array
-	 * @return array $setting_tabs The setting tabs array
+	 * @uses 'woocommerce_settings_tabs_array' filter.
+	 * @param string $tabset_name The name of the screen or visual element.
+	 * @param array $tabs The array of tabs.
+	 * @param string|array $context Extra data about the screen.
 	 */
 	public function add_orders_contact_tab( $tabset_name, &$tabs, $context ) {
 
-		// bail if not on contact summary screen
-		if ( $tabset_name != 'civicrm/contact/view' ) {
+		// Bail if not on contact summary screen.
+		if ( 'civicrm/contact/view' !== $tabset_name ) {
 			return;
 		}
 
 		$cid = $context['contact_id'];
 
-		// bail if contact has no orders and hide order is enabled
+		// Bail if contact has no orders and hide order is enabled.
 		if (
 			WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_hide_orders_tab_for_non_customers', false ) )
 			&& ! $this->count_orders( $cid )
@@ -149,14 +153,14 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			return;
 		}
 
-		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&cid=$cid&no_redirect=1");
+		$url = CRM_Utils_System::url( 'civicrm/contact/view/purchases', "reset=1&cid=$cid&no_redirect=1" );
 
 		$tabs[] = [
 			'id' => 'woocommerce-orders',
 			'url' => $url,
 			'title' => __( 'Woocommerce Orders', 'woocommerce-civicrm' ),
 			'count' => $this->count_orders( $cid ),
-			'weight' => 99
+			'weight' => 99,
 		];
 	}
 
@@ -164,8 +168,8 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Get Customer raw orders.
 	 *
 	 * @since 2.2
-	 * @param int $cid The Contact id
-	 * @return array $orders The raw orders
+	 * @param int $cid The Contact id.
+	 * @return array $orders The raw orders.
 	 */
 	private function _get_orders( $cid ) {
 		$this->fix_site();
@@ -200,10 +204,10 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 				'woocommerce_my_account_my_orders_query',
 				[
 					'numberposts' => -1,
-					'meta_key'    => $uid ? '_customer_user' : '_billing_email',
-					'meta_value'  => $uid ? $uid : $contact['email'],
+					'meta_key'    => $uid ? '_customer_user' : '_billing_email', // phpcs:ignore
+					'meta_value'  => $uid ? $uid : $contact['email'], // phpcs:ignore
 					'post_type'   => 'shop_order',
-					'post_status' => array_keys( $order_statuses )
+					'post_status' => array_keys( $order_statuses ),
 				]
 			)
 		);
@@ -216,8 +220,8 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Get Customer orders count.
 	 *
 	 * @since 2.2
-	 * @param int $cid The Contact id
-	 * @return int $orders_count The number of orders
+	 * @param int $cid The Contact id.
+	 * @return int $orders_count The number of orders.
 	 */
 	public function count_orders( $cid ) {
 		return count( $this->_get_orders( $cid ) );
@@ -227,8 +231,8 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 	 * Get Customer orders.
 	 *
 	 * @since 2.1
-	 * @param int $cid The Contact id
-	 * @return array $orders The orders
+	 * @param int $cid The Contact id.
+	 * @return array $orders The orders.
 	 */
 	public function get_orders( $cid ) {
 		$customer_orders = $this->_get_orders( $cid );
@@ -237,16 +241,14 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 
 		// If woocommerce is in another blog, ftech the order remotely
 		// FIXME: for now, Partial datas
-		// TODO: Fetch real datas
+		// TODO: Fetch real datas.
 		if ( $this->is_remote_wc() ) {
 			$this->fix_site();
 			$site_url = get_site_url();
 			foreach ( $customer_orders as $customer_order ) {
 				$order = $customer_order;
-				// $item_count = $order->get_item_count();
-				// $total = $order->get_total();
 				$orders[ $customer_order->ID ]['order_number'] = $order->ID;
-				$orders[ $customer_order->ID ]['order_date'] = date_i18n( $date_format , strtotime( $order->post_date ) );
+				$orders[ $customer_order->ID ]['order_date'] = date_i18n( $date_format, strtotime( $order->post_date ) );
 				$orders[ $customer_order->ID ]['order_billing_name'] = get_post_meta( $order->ID, '_billing_first_name', true ) . ' ' . get_post_meta( $order->ID, '_billing_last_name', true );
 				$orders[ $customer_order->ID ]['order_shipping_name'] = get_post_meta( $order->ID, '_shipping_first_name', true ) . ' ' . get_post_meta( $order->ID, '_shipping_last_name', true );
 				$orders[ $customer_order->ID ]['item_count'] = '--';
@@ -260,12 +262,10 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			$this->unfix_site();
 		}
 
-		// Else continue the main way
+		// Else continue the main way.
 		$site_url = get_site_url();
 		foreach ( $customer_orders as $customer_order ) {
 			$order = new WC_Order( $customer_order );
-			//$order->populate( $customer_order );
-			//$status = get_term_by( 'slug', $order->get_status(), 'shop_order_status' );
 			$item_count = $order->get_item_count();
 			$total = $order->get_total();
 			$orders[ $customer_order->ID ]['order_number'] = $order->get_order_number();

@@ -19,12 +19,13 @@ class Woocommerce_CiviCRM_States {
 	/**
 	 * CiviCRM Countries.
 	 *
-	 * Array holding CiviCRM country list in the form of array( 'country_id' => 'is_code' )
+	 * Array holding CiviCRM country list in the form of array( 'country_id' => 'is_code' ).
+	 *
 	 * @since 2.0
 	 * @access public
-	 * @var array $countries The CiviCRM countries
+	 * @var array $countries The CiviCRM countries/
 	 */
-	public $civicrm_countries = array();
+	public $civicrm_countries = [];
 
 
 	/**
@@ -42,7 +43,7 @@ class Woocommerce_CiviCRM_States {
 	 * @since 0.2
 	 */
 	public function register_hooks() {
-		// Add Civicrm settings tab
+		// Add Civicrm settings tab.
 		add_filter( 'woocommerce_states', [ $this, 'replace_woocommerce_states' ], 10, 1 );
 		$this->inited();
 	}
@@ -53,7 +54,9 @@ class Woocommerce_CiviCRM_States {
 	 * @since 2.0
 	 */
 	public function inited() {
-		if ( ! WCI()->boot_civi() ) return;
+		if ( ! WCI()->boot_civi() ) {
+			return;
+		}
 		$this->replace = WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_replace_woocommerce_states' ) );
 		$this->civicrm_countries = $this->get_civicrm_countries();
 	}
@@ -62,12 +65,12 @@ class Woocommerce_CiviCRM_States {
 	 * Function to replace Woocommerce state/counties list with CiviCRM's list.
 	 *
 	 * @since 2.0
-	 * @uses 'woocommerce_states' filter
-	 * @param array $states The Woocommerce state/counties
-	 * @return array $states The modifies states/counties
+	 * @uses 'woocommerce_states' filter.
+	 * @param array $states The Woocommerce state/counties.
+	 * @return array $states The modifies states/counties.
 	 */
 	public function replace_woocommerce_states( $states ) {
-		// abort if replace is not enabled
+		// Abort if replace is not enabled.
 		if ( ! $this->replace ) {
 			return $states;
 		}
@@ -87,12 +90,18 @@ class Woocommerce_CiviCRM_States {
 	 * @return array $civicrm_countries The CiviCRM country list
 	 */
 	public function get_civicrm_countries() {
-		if ( ! empty( $this->civicrm_countries ) ) return $this->civicrm_countries;
+		if ( ! empty( $this->civicrm_countries ) ) {
+			return $this->civicrm_countries;
+		}
 
-		$countries = civicrm_api3( 'Country', 'get', [
-			'sequential' => 1,
-			'options' => ['limit' => 0],
-		] );
+		$countries = civicrm_api3(
+			'Country',
+			'get',
+			[
+				'sequential' => 1,
+				'options' => [ 'limit' => 0 ],
+			]
+		);
 
 		$civicrm_countries = [];
 		foreach ( $countries['values'] as $key => $country ) {

@@ -50,11 +50,11 @@ class Woocommerce_CiviCRM_Sync {
 	 * @since 0.1
 	 */
 	public function include_files() {
-		// Include Address Sync functionality class
+		// Include Address Sync functionality class.
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/sync/class-woocommerce-civicrm-sync-address.php';
-		// Include Phone Sync functionality class
+		// Include Phone Sync functionality class.
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/sync/class-woocommerce-civicrm-sync-phone.php';
-		// Include Email Sync functionality class
+		// Include Email Sync functionality class.
 		include WOOCOMMERCE_CIVICRM_PATH . 'includes/sync/class-woocommerce-civicrm-sync-email.php';
 	}
 
@@ -64,11 +64,11 @@ class Woocommerce_CiviCRM_Sync {
 	 * @since 2.1
 	 */
 	public function setup_objects() {
-		// init address sync
+		// Init address sync.
 		$this->address = new Woocommerce_CiviCRM_Sync_Address();
-		// init phone sync
+		// Init phone sync.
 		$this->phone = new Woocommerce_CiviCRM_Sync_Phone();
-		// init email sync
+		// Init email sync.
 		$this->email = new Woocommerce_CiviCRM_Sync_Email();
 	}
 }

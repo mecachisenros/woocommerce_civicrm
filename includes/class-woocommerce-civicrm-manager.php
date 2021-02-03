@@ -40,7 +40,7 @@ class Woocommerce_CiviCRM_Manager {
 	 */
 	public function get_invoice_id( $post_id ) {
 		$invoice_no = get_post_meta( $post_id, '_order_number', true );
-		$invoice_id = false !== $invoice_no ? $invoice_no : $post_id . '_woocommerce';
+		$invoice_id = ! empty( $invoice_no ) ? $invoice_no : $post_id . '_woocommerce';
 		return $invoice_id;
 	}
 
@@ -74,13 +74,6 @@ class Woocommerce_CiviCRM_Manager {
 			$this->action_order( $order_id, null, new WC_Order( $order_id ) );
 		}
 
-		$membership_id = get_post_meta( $order_id, '_civicrm_membership', true );
-		// In Front context, let action_order() make the stuff.
-		if ( '' === $membership_id && 'checkout' !== filter_input( INPUT_GET, 'wc-ajax' ) ) {
-			$order = new WC_Order( $order_id );
-			$this->check_membership( $order );
-		}
-
 	}
 
 	/**
@@ -106,11 +99,6 @@ class Woocommerce_CiviCRM_Manager {
 			return;
 		}
 
-		$membership_id = get_post_meta( $order_id, '_civicrm_membership', true );
-		// In Front context, let action_order() make the stuff.
-		if ( '' === $membership_id && 'checkout' !== filter_input( INPUT_GET, 'wc-ajax' ) ) {
-			$this->check_membership( $order );
-		}
 		$source = $this->generate_source( $order );
 		$this->update_source( $order_id, $source );
 		update_post_meta( $order_id, '_order_source', $source );
@@ -142,14 +130,6 @@ class Woocommerce_CiviCRM_Manager {
 			return;
 		}
 
-		$this->add_contribution( $cid, $order );
-		$membership_id = get_post_meta( $order_id, '_civicrm_membership', true );
-
-		// In Front context, let action_order() make the stuff.
-		if ( '' === $membership_id || '0' === $membership_id ) {
-			$this->check_membership( $order );
-		}
-
 		$params = [
 			'invoice_id' => $this->get_invoice_id( $order_id ),
 			'return' => [ 'id', 'financial_type_id', 'receive_date', 'total_amount', 'contact_id' ],
@@ -177,12 +157,12 @@ class Woocommerce_CiviCRM_Manager {
 		try {
 
 			$params = [
-				'contribution_status_id' => $this->map_contribution_status( $order->get_status() ),
+				'contribution_status_id' => $order->is_paid() ? 'Completed' : $this->map_contribution_status( $order->get_status() ),
 				'id' => $contribution['id'],
-				'financial_type_id' => $contribution['financial_type_id'],
-				'receive_date' => $contribution['receive_date'],
-				'total_amount' => $contribution['total_amount'],
-				'contact_id' => $contribution['contact_id'],
+				// 'financial_type_id' => $contribution['financial_type_id'],
+				// 'receive_date' => $contribution['receive_date'],
+				// 'total_amount' => $contribution['total_amount'],
+				// 'contact_id' => $contribution['contact_id'],
 			];
 			$result = civicrm_api3( 'Contribution', 'create', $params );
 		} catch ( CiviCRM_API3_Exception $e ) {
@@ -201,8 +181,6 @@ class Woocommerce_CiviCRM_Manager {
 	 * @param string $new_campaign_id The new campaign.
 	 */
 	public function update_campaign( $order_id, $old_campaign_id, $new_campaign_id ) {
-
-		$order = new WC_Order( $order_id );
 
 		$campaign_name = '';
 		if ( false !== $new_campaign_id ) {
@@ -511,34 +489,24 @@ class Woocommerce_CiviCRM_Manager {
 	 *
 	 * @since 2.0
 	 * @param int $cid The contact_id.
-	 * @param object $order The order object.
+	 * @param WC_Order $order The order object.
 	 */
-	public function add_contribution( $cid, &$order ) {
+	public function add_contribution( $cid, $order ) {
 
 		// Bail if order is 'free' (0 amount) and 0 amount setting is enabled.
 		if ( WCI()->helper->check_yes_no_value( get_option( 'woocommerce_civicrm_ignore_0_amount_orders', false ) ) && $order->get_total() === 0 ) {
 			return false;
 		}
 
-		$debug['cid'] = $cid;
 		$order_id = $order->get_id();
 		$order_date = $order->get_date_paid();
-		if ( ! $order_date ) {
-			return;
-		}
-		$contrib_id = get_post_meta( $order_id, '_woocommerce_civicrm_contribution_id', true );
-		if ( null !== $contrib_id && 0 !== $contrib_id && false !== $contrib_id ) {
-			return;
-		}
-		$order_paid_date = $order_date->date( 'Y-m-d H:i:s' );
+
+		$order_paid_date = ! empty( $order_date ) ? $order_date->date( 'Y-m-d H:i:s' ) : gmdate( 'Y-m-d H:i:s' );
 
 		$order_id = $order->get_id();
 		$txn_id = __( 'Woocommerce Order - ', 'woocommerce-civicrm' ) . $order_id;
 		$invoice_id = $this->get_invoice_id( $order_id );
 		$this->create_custom_contribution_fields();
-
-		$sales_tax_field_id = 'custom_' . get_option( 'woocommerce_civicrm_sales_tax_field_id' );
-		$shipping_cost_field_id = 'custom_' . get_option( 'woocommerce_civicrm_shipping_cost_field_id' );
 
 		// Ensure number format is Civi compliant.
 		$decimal_separator = '.';
@@ -590,31 +558,15 @@ class Woocommerce_CiviCRM_Manager {
 
 		$rounded_subtotal = number_format( $rounded_subtotal, 2, $decimal_separator, $thousand_separator );
 
-		$default_contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
-		$contribution_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type.
-		$campaign_name = '';
+		$default_financial_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
+		$default_financial_type_vat_id = get_option( 'woocommerce_civicrm_financial_type_vat_id' ); // Get the VAT Financial type.
+		$default_financial_type_shipping_id = get_option( 'woocommerce_civicrm_financial_type_shipping_id' ); // Get the VAT Financial type.
+
 		$woocommerce_civicrm_campaign_id = get_option( 'woocommerce_civicrm_campaign_id' ); // Get the global CiviCRM campaign ID.
 		$local_campaign_id = get_post_meta( $order->get_id(), '_woocommerce_civicrm_campaign_id', true );
-		if ( false !== $local_campaign_id ) {
+		if ( ! empty( $local_campaign_id ) ) {
 			$woocommerce_civicrm_campaign_id = $local_campaign_id; // Use the local CiviCRM campaign ID if possible.
 		}
-		if ( $woocommerce_civicrm_campaign_id ) {
-			$params = [
-				'sequential' => 1,
-				'return' => [ 'name' ],
-				'id' => $woocommerce_civicrm_campaign_id,
-				'options' => [ 'limit' => 1 ],
-			];
-			try {
-				$campaigns_result = civicrm_api3( 'Campaign', 'get', $params );
-				$campaign_name = isset( $campaigns_result['values'][0]['name'] ) ? $campaigns_result['values'][0]['name'] : '';
-			} catch ( CiviCRM_API3_Exception $e ) {
-				CRM_Core_Error::debug_log_message( __( 'Not able to fetch campaign', 'woocommerce-civicrm' ) );
-				return false;
-			}
-		}
-
-		$contribution_status_id = $this->map_contribution_status( $order->get_status() );
 
 		$items = $order->get_items();
 
@@ -622,46 +574,25 @@ class Woocommerce_CiviCRM_Manager {
 		$source = $this->generate_source( $order );
 		$params = [
 			'contact_id' => $cid,
-			// Need to be set in admin page.
-			'financial_type_id' => $default_contribution_type_id,
+			'financial_type_id' => $default_financial_type_id,
 			'payment_instrument_id' => $payment_instrument,
 			'trxn_id' => $txn_id,
 			'invoice_id' => $invoice_id,
 			'source' => $source,
 			'receive_date' => $order_paid_date,
-			// phpcs:ignore
-			// 'contribution_status_id' => $contribution_status_id,
+			'contribution_status_id' => 'Pending',
 			'note' => $this->create_detail_string( $items ),
-			"$sales_tax_field_id" => $sales_tax,
-			"$shipping_cost_field_id" => $shipping_cost,
-			'campaign_id' => $campaign_name,
+			'campaign_id' => $woocommerce_civicrm_campaign_id,
+			'line_items' => [],
 		];
-
-		// The empty line items.
-		$params['line_items'] = [
-			[
-				'params' => [],
-				'line_item' => [],
-			],
-		];
-
-		// Line item for shipping.
-		if ( floatval( $shipping_cost ) > 0 ) {
-			$params['line_items'][0]['line_item'][] = [
-				'price_field_id' => '1',
-				'qty' => 1,
-				'line_total' => $shipping_cost,
-				'unit_price' => $shipping_cost,
-				'label' => 'Shipping',
-				'financial_type_id' => 8,
-			];
-		}
 
 		// If the order has VAT (Tax) use VAT Fnancial type.
 		if ( 0 !== $sales_tax ) {
 			// Need to be set in admin page.
-			$params['financial_type_id'] = $contribution_type_vat_id;
+			$params['financial_type_id'] = $default_financial_type_vat_id;
 		}
+
+		$default_contribution_amount_data = WCI()->helper->get_default_contribution_price_field_data();
 
 		/**
 		 * Add line items to CiviCRM contribution.
@@ -671,30 +602,92 @@ class Woocommerce_CiviCRM_Manager {
 		if ( count( $items ) ) {
 			$financial_types = [];
 			foreach ( $items as $item ) {
-				$custom_contribution_type = get_post_meta( $item['product_id'], '_civicrm_contribution_type', true );
-				if ( 'exclude' === $custom_contribution_type ) {
+
+				$product = $item->get_product();
+
+				$product_financial_type_id = empty( $product->get_meta( 'woocommerce_civicrm_financial_type_id' ) )
+					? get_post_meta( $item['product_id'], '_civicrm_contribution_type', true )
+					: $product->get_meta( 'woocommerce_civicrm_financial_type_id' );
+
+				if ( 'exclude' === $product_financial_type_id ) {
 					continue;
 				}
 
-				if ( ! $custom_contribution_type ) {
-					$custom_contribution_type = $default_contribution_type_id;
+				if ( empty( $product_financial_type_id ) ) {
+					$product_financial_type_id = $default_financial_type_id;
 				}
 				if ( 0 === $item['qty'] ) {
 					$item['qty'] = 1;
 				}
-				$params['line_items'][0]['line_item'][] = [
-					'price_field_id' => '1',
+
+				$line_item = [
+					'price_field_id' => $default_contribution_amount_data['price_field']['id'],
 					'qty' => $item['qty'],
 					'line_total' => number_format( $item['line_total'], 2, $decimal_separator, $thousand_separator ),
 					'unit_price' => number_format( $item['line_total'] / $item['qty'], 2, $decimal_separator, $thousand_separator ),
 					'label' => $item['name'],
-					'financial_type_id' => $custom_contribution_type,
+					'financial_type_id' => $product_financial_type_id,
 				];
-				$financial_types[ $custom_contribution_type ] = $custom_contribution_type;
+
+				// Get membership type id from product meta.
+				$product_membership_type_id = $product->get_meta( 'woocommerce_civicrm_membership_type_id' );
+
+				// FIXME
+				// Decide whether we want to override
+				// the financial type with the one from
+				// the membership type instead of product/default.
+
+				// Add line item membership params if applicable.
+				if ( ! empty( $product_membership_type_id ) ) {
+
+					$line_item = array_merge(
+						$line_item,
+						[
+							'entity_table' => 'civicrm_membership',
+							'membership_type_id' => $product_membership_type_id,
+						]
+					);
+
+					$line_item_params = [
+						'membership_type_id' => $product_membership_type_id,
+						'contact_id' => $cid,
+					];
+
+				}
+
+				$params['line_items'][ $item->get_id() ] = isset( $line_item_params )
+					? [
+						'line_item' => [ $line_item ],
+						'params' => $line_item_params,
+					]
+					: [ 'line_item' => [ $line_item ] ];
+
+				$financial_types[ $product_financial_type_id ] = $product_financial_type_id;
+
 			}
+
 			if ( 1 === count( $financial_types ) ) {
-				$params['financial_type_id'] = $custom_contribution_type;
+				$params['financial_type_id'] = $product_financial_type_id;
 			}
+		}
+
+		// Line item for shipping,
+		// shouldn't it be added to it's corresponding
+		// product/line_item (i.e. order an order can have
+		// both shippable and downloadable products)?
+		if ( floatval( $shipping_cost ) > 0 ) {
+			$params['line_items'][0] = [
+				'line_item' => [
+					[
+						'price_field_id' => $default_contribution_amount_data['price_field']['id'],
+						'qty' => 1,
+						'line_total' => $shipping_cost,
+						'unit_price' => $shipping_cost,
+						'label' => 'Shipping',
+						'financial_type_id' => $default_financial_type_shipping_id,
+					]
+				],
+			];
 		}
 
 		// Flush UTM cookies.
@@ -739,7 +732,6 @@ class Woocommerce_CiviCRM_Manager {
 			CRM_Core_Error::debug_log_message( $e->getMessage() );
 		}
 
-		$order->add_order_note( __( 'CiviCRM Contribution could not be created', 'woocommerce-civicrm' ) );
 		return false;
 	}
 
@@ -1155,164 +1147,6 @@ class Woocommerce_CiviCRM_Manager {
 		setcookie( 'woocommerce_civicrm_utm_campaign_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'woocommerce_civicrm_utm_source_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
 		setcookie( 'woocommerce_civicrm_utm_medium_' . COOKIEHASH, ' ', $past, COOKIEPATH, COOKIE_DOMAIN );
-	}
-
-	/**
-	 * Check if the order contains a Membership Due item and create a Membership if needed.
-	 *
-	 * @param WC_Order $order The order.
-	 * @param int|null $cid The contact id.
-	 * @return void
-	 */
-	private function check_membership( $order, $cid = null ) {
-		if ( ! $cid ) {
-			if ( ! function_exists( 'WCI' ) ) {
-				return;
-			}
-
-			$cid = WCI()->helper->civicrm_get_cid( $order );
-		}
-		if ( ! $cid ) {
-			return;
-		}
-		$order_date = $order->get_date_paid();
-
-		if ( null === $order_date ) {
-			return;
-		}
-		$order_id = $order->get_id();
-		$items = $order->get_items();
-		$membership_id = 0;
-
-		$membership_types = WCI()->helper->membership_types;
-
-		foreach ( $items as $item ) {
-
-			$custom_contribution_type = get_post_meta( $item['product_id'], '_civicrm_contribution_type', true );
-			$membership_type_id = false;
-			$start_date = false;
-			$end_date = false;
-			$order_timestamp = strtotime( $order_date );
-
-			if ( isset( $membership_types['by_financial_type_id'][ $custom_contribution_type ] ) ) {
-
-				$item_membership_type = $membership_types['by_financial_type_id'][ $custom_contribution_type ];
-				$membership_type_name = $item_membership_type['name'];
-				$duration_unit = apply_filters( 'woocommerce_civicrm_membership_duration_unit', $item_membership_type['duration_unit'], $item );
-				$duration_interval = apply_filters( 'woocommerce_civicrm_membership_duration_interval', $item_membership_type['duration_interval'], $item );
-				$start_date = apply_filters( 'woocommerce_civicrm_membership_start_date', $order_date, $item_membership_type['id'], $order );
-				if ( 'fixed' === $item_membership_type['period_type'] ) {
-					$current_year = gmdate( 'Y', $order_timestamp );
-
-					$fixed_period_start_day = $item_membership_type['fixed_period_start_day'];
-					$fixed_period_rollover_day = $item_membership_type['fixed_period_rollover_day'];
-
-					$current_year_period_start_timestamp = strtotime( $current_year . '-' . substr( $fixed_period_start_day, 0, -2 ) . '-' . substr( $fixed_period_start_day, -2 ) );
-					$current_year_period_rollover_timestamp = strtotime( $current_year . '-' . substr( $fixed_period_rollover_day, 0, -2 ) . '-' . substr( $fixed_period_rollover_day, -2 ) );
-
-					if ( $current_year_period_start_timestamp < $order_timestamp ) { // the order is completed after the start date of this year.
-						if ( $current_year_period_start_timestamp < $current_year_period_rollover_timestamp && $current_year_period_rollover_timestamp < $order_timestamp ) { // If the rollover is after the start date and before the order.
-							$start_date = gmdate( 'Y-m-d', strtotime( '+1 year', $current_year_period_start_timestamp ) ); // start next year.
-						} else {
-							$start_date = gmdate( 'Y-m-d', $current_year_period_start_timestamp ); // start this year.
-						}
-					} else { // the order is completed before the start date of this year.
-						if ( $current_year_period_rollover_timestamp < $current_year_period_start_timestamp && $current_year_period_rollover_timestamp < $order_timestamp ) { // if the order is between rollover and this year start in this order.
-							$start_date = gmdate( 'Y-m-d', $current_year_period_start_timestamp ); // start this year (which is next period).
-						} else {
-							$start_date = gmdate( 'Y-m-d', strtotime( '-1 year', $current_year_period_start_timestamp ) ); // start this period (which started last year).
-						}
-					}
-				}
-
-				// What if there is already a running membership ? TODO
-				// joined date ? first membership ... TODO.
-				$end_date = gmdate( 'Y-m-d', strtotime( '+' . $duration_interval . ' ' . $duration_unit, strtotime( $start_date ) ) );
-			} else {
-				continue;
-			}
-
-			if ( ! $membership_type_name || ! $start_date || ! $end_date ) {
-				continue;
-			}
-
-			// If Contribution Type is of type MemberShip
-			// create Membership and Membership Payment
-			// also add an Order Note.
-
-			$params = [
-				'membership_type_id' => $membership_type_name,
-				'contact_id' => $cid,
-				'join_date' => $start_date,
-				'start_date' => $start_date,
-				'end_date' => $end_date,
-				'campaign_id' => get_post_meta( $order_id, '_woocommerce_civicrm_campaign_id', true ),
-				'source' => get_post_meta( $order_id, '_order_source', true ),
-				'status_id' => 'Current',
-			];
-			$result = civicrm_api3( 'Membership', 'create', apply_filters( 'woocommerce_civicrm_membership_create_params', $params, $item, $order ) );
-			if ( $result && $result['id'] ) {
-				global $wpdb;
-				global $db_name;
-				$membership_id = $result['id'];
-				$activity_type_id = WCI()->helper->optionvalue_membership_signup;
-				/**
-				 * WTF??
-				 * This is wrong!
-				 * FIXME
-				 */
-				$query = sprintf( 'UPDATE `%4$s`.`civicrm_%1$s` SET `activity_date_time` = "%2$s" WHERE `%4$s`.`civicrm_%1$s`.`source_record_id` = %3$d AND `%4$s`.`civicrm_%1$s`.`activity_type_id` = %5$d ', 'activity', $start_date, $membership_id, $db_name, $activity_type_id );
-				$results = $wpdb->query( $query );
-				if ( $wpdb->last_error ) {
-					CRM_Core_Error::debug_log_message( $target . ' creation date not updated.', $wpdb->last_error );
-				}
-				$order->add_order_note(
-					sprintf(
-						/* translators: %s contact summary membership screen link */
-						__( 'Membership %s has been created in CiviCRM', 'woocommerce-civicrm' ), // FIXME helios???
-						'<a href="'
-						. add_query_arg(
-							[
-								'page' => 'CiviCRM',
-								'q' => 'civicrm/contact/view/membership',
-								'reset' => '1',
-								'id' => $membership_id,
-								'cid' => $cid,
-								'action' => 'view',
-								'context' => 'dashboard',
-								'selectedChild' => 'member'
-							],
-							admin_url( 'admin.php' )
-						)
-						. '">' . $membership_id . '</a>'
-					)
-				);
-
-				do_action( 'woocommerce_civicrm_new_membership_created', $params, $result['id'], $order );
-
-				$params = [
-					'invoice_id' => $this->get_invoice_id( $order_id ),
-					'return' => 'id',
-				];
-
-				try {
-					$contribution = civicrm_api3( 'Contribution', 'getsingle', $params );
-					civicrm_api3(
-						'MembershipPayment',
-						'create',
-						[
-							'membership_id' => $membership_id,
-							'contribution_id' => $contribution['contribution_id'],
-						]
-					);
-				} catch ( CiviCRM_API3_Exception $e ) {
-					CRM_Core_Error::debug_log_message( 'Not able to find contribution' );
-				}
-				break;
-			}
-		}
-
-		update_post_meta( $order_id, '_civicrm_membership', $membership_id );
 	}
 
 }

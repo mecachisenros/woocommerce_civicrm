@@ -701,4 +701,146 @@ class Woocommerce_CiviCRM_Helper {
 		}
 		return $sites;
 	}
+
+	/**
+	 * Retrieves the default contribution amount data,
+	 * price set, price_field, and price field value.
+	 *
+	 * @since 2.4
+	 *
+	 * @return array $default_contribution_amount_data The default contribution amount data.
+	 */
+	public function get_default_contribution_price_field_data() {
+
+		try {
+			$price_set = civicrm_api3(
+				'PriceSet',
+				'getsingle',
+				[
+					'name' => 'default_contribution_amount',
+					'is_reserved' => true,
+					'api.PriceField.getsingle' => [
+						'price_set_id' => "\$value.id",
+						'options' => [
+							'limit' => 1,
+							'sort' => 'id ASC',
+						],
+					],
+				]
+			);
+		} catch ( CiviCRM_API3_Exception $e ) {
+			CRM_Core_Error::debug_log_message( __( 'Not able to retrieve default price set', 'woocommerce-civicrm' ) );
+			CRM_Core_Error::debug_log_message( $e->getMessage() );
+			return null;
+		}
+
+		$price_field = $price_set['api.PriceField.getsingle'];
+		unset( $price_set['api.PriceField.getsingle'] );
+
+		$default_contribution_amount_data = [
+			'price_set' => $price_set,
+			'price_field' => $price_field,
+		];
+
+		return $default_contribution_amount_data;
+
+	}
+
+	/**
+	 * Retrieves the formatted financial types options.
+	 *
+	 * @since 2.4
+	 *
+	 * @return array $financial_types The financial types.
+	 */
+	public function get_financial_types_options() {
+
+		$default_financial_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
+
+		$options = [
+			sprintf(
+				/* translators: %s: financial type */
+				'-- ' . __( 'Default (%s)', 'woocommerce-civicrm' ),
+				$this->financial_types[ $default_financial_type_id ] ?? __( 'unset', 'woocommerce-civicrm' )
+			),
+		]
+		+ $this->financial_types +
+		[
+			'exclude' => '-- ' . __( 'Exclude', 'woocommerce-civicrm' ),
+		];
+
+		return $options;
+
+	}
+
+	/**
+	 * Retrieves the membership types options array.
+	 *
+	 * @since 2.4
+	 *
+	 * @return array $membership_types_options The membership types options.
+	 */
+	public function get_membership_types_options() {
+
+		try {
+			$membership_types = civicrm_api3(
+				'MembershipType',
+				'get',
+				[
+					'is_active' => true,
+					'options.limit' => 0,
+				]
+			);
+		} catch ( CiviCRM_API3_Exception $e ) {
+			CRM_Core_Error::debug_log_message( __( 'Not able to retrieve memebrship types.', 'woocommerce-civicrm' ) );
+			CRM_Core_Error::debug_log_message( $e->getMessage() );
+			return [];
+		}
+
+		if ( empty( $membership_types['count'] ) ) {
+			return [];
+		}
+
+		$membership_types_options = [
+			0 => '',
+		];
+
+		$membership_types_options = array_reduce(
+			$membership_types['values'],
+			function( $list, $membership_type ) {
+
+				$list[ $membership_type['id'] ] = $membership_type['name'];
+
+				return $list;
+
+			},
+			$membership_types_options
+		);
+
+		return $membership_types_options;
+
+	}
+
+	/**
+	 * Retrieves a membership type by its id.
+	 *
+	 * @since 2.4
+	 *
+	 * @param int $id The membership type id.
+	 * @return array|null $membership_type The membership type or null.
+	 */
+	public function get_membership_type( int $id ) {
+		try {
+			return civicrm_api3(
+				'MembershipType',
+				'gesingle',
+				[
+					'id' => $id,
+				]
+			);
+		} catch ( CiviCRM_API3_Exception $e ) {
+			return null;
+		}
+	}
+
 }

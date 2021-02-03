@@ -208,22 +208,28 @@ class Woocommerce_CiviCRM_Settings_Tab {
 				'id' => 'woocommerce_civicrm_section_title',
 			],
 			'woocommerce_civicrm_financial_type_id' => [
-				'name' => __( 'Contribution Type', 'woocommerce-civicrm' ),
+				'name' => __( 'Financial Type', 'woocommerce-civicrm' ),
 				'type' => 'select',
 				'options' => WCI()->helper->financial_types,
 				'id'   => 'woocommerce_civicrm_financial_type_id',
+			],
+			'woocommerce_civicrm_financial_type_vat_id' => [
+				'name' => __( 'TAX/VAT Financial Type', 'woocommerce-civicrm' ),
+				'type' => 'select',
+				'options' => WCI()->helper->financial_types,
+				'id'   => 'woocommerce_civicrm_financial_type_vat_id',
+			],
+			'woocommerce_civicrm_financial_type_shipping_id' => [
+				'name' => __( 'Shipping Financial Type', 'woocommerce-civicrm' ),
+				'type' => 'select',
+				'options' => WCI()->helper->financial_types,
+				'id'   => 'woocommerce_civicrm_financial_type_shipping_id',
 			],
 			'woocommerce_civicrm_campaign_id' => [
 				'name' => __( 'Default campaign', 'woocommerce-civicrm' ),
 				'type' => 'select',
 				'options' => WCI()->helper->campaigns,
 				'id'   => 'woocommerce_civicrm_campaign_id',
-			],
-			'woocommerce_civicrm_financial_type_vat_id' => [
-				'name' => __( 'Contribution Type VAT (Tax)', 'woocommerce-civicrm' ),
-				'type' => 'select',
-				'options' => WCI()->helper->financial_types,
-				'id'   => 'woocommerce_civicrm_financial_type_vat_id',
 			],
 			'woocommerce_civicrm_billing_location_type_id' => [
 				'name' => __( 'Billing Location Type', 'woocommerce-civicrm' ),

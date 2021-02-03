@@ -26,8 +26,13 @@ class Woocommerce_CiviCRM_Products {
 	 * @return void
 	 */
 	public function register_hooks() {
-		add_action( 'woocommerce_product_options_general_product_data', [ $this, 'contribution_fields' ] );
-		add_action( 'woocommerce_process_product_meta', [ $this, 'product_save' ] );
+
+		// Add civicrm product settings tab.
+		add_filter( 'woocommerce_product_data_tabs', [ $this, 'add_civicrm_product_tab' ] );
+		// Add civicrm product panel template.
+		add_action( 'woocommerce_product_data_panels', [ $this, 'add_civicrm_product_panel' ] );
+		// Save civicrm product settings.
+		add_action( 'woocommerce_admin_process_product_object', [ $this, 'save_civicrm_product_settings' ] );
 
 		add_action( 'bulk_edit_custom_box', [ $this, 'add_contribution_to_quick_edit' ], 10, 2 );
 
@@ -36,6 +41,65 @@ class Woocommerce_CiviCRM_Products {
 		// Bulk / quick edit.
 		add_action( 'save_post', [ $this, 'bulk_and_quick_edit_hook' ], 10, 2 );
 		add_action( 'contributions_product_bulk_and_quick_edit', [ $this, 'bulk_and_quick_edit_save_post' ], 10, 2 );
+
+	}
+
+	/**
+	 * Adds a CiviCRM settings tab to the new/edit Product screen.
+	 *
+	 * @since 2.4
+	 *
+	 * @uses 'woocommerce_product_data_tabs' filter.
+	 *
+	 * @param array $tabs The product tabs.
+	 * @return array $tabs The modified product tabs.
+	 */
+	public function add_civicrm_product_tab( $tabs ) {
+
+		$tabs['woocommerece_civicrm'] = [
+			'label' => __( 'CiviCRM Settings', 'woocommerce-civicrm' ),
+			'target'   => 'woocommerece_civicrm',
+		];
+
+		return $tabs;
+
+	}
+
+	/**
+	 * Includes the CiviCRM settings panel to the new/edit Product screen.
+	 *
+	 * @since 2.4
+	 *
+	 * @uses 'woocommerce_product_data_panels' action.
+	 */
+	public function add_civicrm_product_panel() {
+
+		include dirname( __FILE__ ) . '/templates/html-product-data-civicrm-settings.php';
+
+	}
+
+	/**
+	 * Adds the the CiviCRM product settings
+	 * as meta before product is saved.
+	 *
+	 * @since 2.4
+	 *
+	 * @uses 'woocommerce_admin_process_product_object' action.
+	 *
+	 * @param WC_Product $product The product object.
+	 * @return void
+	 */
+	public function save_civicrm_product_settings( $product ) {
+
+		if ( isset( $_POST['woocommerce_civicrm_financial_type_id'] ) ) {
+			$financial_type_id = sanitize_key( $_POST['woocommerce_civicrm_financial_type_id'] );
+			$product->add_meta_data( 'woocommerce_civicrm_financial_type_id', $financial_type_id, true );
+		}
+
+		if ( isset( $_POST['woocommerce_civicrm_membership_type_id'] ) ) {
+			$membership_type_id = sanitize_key( $_POST['woocommerce_civicrm_membership_type_id'] );
+			$product->add_meta_data( 'woocommerce_civicrm_membership_type_id', $membership_type_id, true );
+		}
 
 	}
 
@@ -65,43 +129,6 @@ class Woocommerce_CiviCRM_Products {
 		}
 	}
 
-	/**
-	 * Contribution fields for products.
-	 *
-	 * @return void
-	 */
-	public function contribution_fields() {
-
-		echo '<div class="options_group">';
-
-		$default_contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
-
-		$contributions_types = WCI()->helper->financial_types;
-		$options = [
-			sprintf(
-				/* translators: %s: financial type */
-				'-- ' . __( 'Default (%s)', 'woocommerce-civicrm' ),
-				isset( $contributions_types[ $default_contribution_type_id ] ) ? $contributions_types[ $default_contribution_type_id ] : __( 'unset', 'woocommerce-civicrm' )
-			),
-		]
-		+ $contributions_types +
-		[
-			'exclude' => '-- ' . __( 'Exclude', 'woocommerce-civicrm' ),
-		];
-
-		// Contribution field.
-		woocommerce_wp_select(
-			[
-				'id' => '_civicrm_contribution_type',
-				'name' => 'civicrm_contribution_type',
-				'label' => __( 'Contribution type', 'woocommerce-civicrm' ),
-				'desc_tip' => 'true',
-				'description' => __( 'Custom contribution type for this product', 'woocommerce-civicrm' ),
-				'options' => $options,
-			]
-		);
-		echo '</div>';
-	}
 
 	/**
 	 * Contribution fields for products.
@@ -132,17 +159,6 @@ class Woocommerce_CiviCRM_Products {
 				</span>
 			</label>
 		</div>';
-	}
-
-	/**
-	 * Save.
-	 *
-	 * @param int $post_id The post id.
-	 * @return void
-	 */
-	public function product_save( $post_id ) {
-		$civicrm_contribution_type = sanitize_text_field( $_POST['civicrm_contribution_type'] );
-		update_post_meta( $post_id, '_civicrm_contribution_type', $civicrm_contribution_type );
 	}
 
 	/**

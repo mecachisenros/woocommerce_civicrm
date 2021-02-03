@@ -199,6 +199,11 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 				'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
 			]
 		);
+
+		if ( empty( $contact['email'] ) ) {
+			return [];
+		}
+
 		$customer_orders = get_posts(
 			apply_filters(
 				'woocommerce_my_account_my_orders_query',

@@ -200,7 +200,7 @@ class Woocommerce_CiviCRM_Orders_Contact_Tab {
 			]
 		);
 
-		if ( empty( $contact['email'] ) ) {
+		if ( ! $uid && empty( $contact['email'] ) ) {
 			return [];
 		}
 

@@ -581,7 +581,6 @@ class Woocommerce_CiviCRM_Manager {
 			'receive_date' => $order_paid_date,
 			'contribution_status_id' => 'Pending',
 			'note' => $this->create_detail_string( $items ),
-			'campaign_id' => $woocommerce_civicrm_campaign_id,
 			'line_items' => [],
 		];
 

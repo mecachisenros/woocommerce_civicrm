@@ -580,10 +580,11 @@ class Woocommerce_CiviCRM_Helper {
 			return $this->financial_types;
 		}
 
-		$params = [
-			'sequential' => 1,
-			'is_active' => 1,
-		];
+    $params = [
+      'sequential' => 1,
+      'is_active' => 1,
+      'options' => ['limit' => 0],
+    ];
 
 		/**
 		 * Filter Financial type params before calling the Civi's API.

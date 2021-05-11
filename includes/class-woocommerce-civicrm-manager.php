@@ -338,7 +338,7 @@ class Woocommerce_CiviCRM_Manager {
 		$ids = CRM_Dedupe_Finder::dupesByParams( $dedupe_params, $contact['contact_type'], 'Unsupervised' );
 
 		if ( $ids ) {
-			$cid = $ids['0'];
+			$contact['id'] = $cid = $ids['0'];
 			$action = 'update';
 		}
 
@@ -348,7 +348,8 @@ class Woocommerce_CiviCRM_Manager {
 			$contact['display_name'] = "{$fname} {$lname}";
 		}
 
-		if ( empty( $contact['contact_source'] ) ) {
+		// prevent updating source for an existing contact
+		if (empty($contact['contact_source']) && empty($contact['id'])) {
 			$contact['contact_source'] = __( 'Woocommerce purchase', 'woocommerce-civicrm' );
 		}
 

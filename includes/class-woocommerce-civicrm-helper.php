@@ -160,6 +160,7 @@ class Woocommerce_CiviCRM_Helper {
 					[
 						'sequential' => 1,
 						'uf_id' => $wp_user_id,
+						'domain_id' => CRM_Core_Config::domainID(),
 					]
 				);
 				if ( 1 === $uf_match['count'] ) {

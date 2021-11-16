@@ -112,7 +112,7 @@ class Woocommerce_CiviCRM_Products {
 	 */
 	public function columns_content( $column_name, $post_id ) {
 		if ( 'product_cat' === $column_name ) {
-			$contribution_type = get_post_meta( $post_id, '_civicrm_contribution_type', true );
+			$contribution_type = get_post_meta( $post_id, 'woocommerce_civicrm_financial_type_id', TRUE );
 			$default_contribution_type_id = get_option( 'woocommerce_civicrm_financial_type_id' );
 			$contributions_types = WCI()->helper->financial_types;
 			echo '<br>' . (

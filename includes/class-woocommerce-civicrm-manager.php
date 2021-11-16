@@ -608,7 +608,7 @@ class Woocommerce_CiviCRM_Manager {
 				$product = $item->get_product();
 
 				$product_financial_type_id = empty( $product->get_meta( 'woocommerce_civicrm_financial_type_id' ) )
-					? get_post_meta( $item['product_id'], '_civicrm_contribution_type', true )
+					? get_post_meta( $item['product_id'], 'woocommerce_civicrm_financial_type_id', TRUE )
 					: $product->get_meta( 'woocommerce_civicrm_financial_type_id' );
 
 				if ( 'exclude' === $product_financial_type_id ) {
